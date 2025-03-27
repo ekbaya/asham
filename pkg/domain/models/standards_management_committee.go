@@ -1,4 +1,4 @@
-package domain
+package models
 
 // StandardsManagementCommittee manages standards development
 type StandardsManagementCommittee struct {

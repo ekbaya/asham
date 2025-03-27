@@ -1,4 +1,4 @@
-package domain
+package models
 
 // TechnicalCommittee represents a standards development group
 type TechnicalCommittee struct {

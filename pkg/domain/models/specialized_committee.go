@@ -1,4 +1,4 @@
-package domain
+package models
 
 // SpecializedCommittee represents specific purpose committees
 type SpecializedCommittee struct {

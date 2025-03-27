@@ -1,4 +1,4 @@
-package domain
+package models
 
 // JointTechnicalCommittee for cross-organizational work
 type JointTechnicalCommittee struct {

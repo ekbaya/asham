@@ -1,4 +1,4 @@
-package domain
+package models
 
 // JointAdvisoryGroup represents the coordination group
 type JointAdvisoryGroup struct {

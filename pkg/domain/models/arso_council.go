@@ -1,4 +1,4 @@
-package domain
+package models
 
 // ARSOCouncil represents the executive organ of the organization
 type ARSOCouncil struct {
