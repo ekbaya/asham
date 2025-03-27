@@ -19,7 +19,25 @@ func (r *MemberRepository) CreateMember(member *models.Member) error {
 	return r.db.Create(member).Error
 }
 
-func (r *OrganizationRepository) GetMemberByEmail(email string) (*models.Member, error) {
+func (r *MemberRepository) GetMemberByID(id string) (*models.Member, error) {
+	var member models.Member
+	result := r.db.Preload("NationalStandardBody").First(&member, "id = ?", id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &member, nil
+}
+
+func (r *MemberRepository) GetAllMembers() (*[]models.Member, error) {
+	var members []models.Member
+	result := r.db.Find(&members)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &members, nil
+}
+
+func (r *MemberRepository) GetMemberByEmail(email string) (*models.Member, error) {
 	var member models.Member
 	result := r.db.Where("email = ?", email).First(&member)
 	if result.Error != nil {
@@ -31,7 +49,7 @@ func (r *OrganizationRepository) GetMemberByEmail(email string) (*models.Member,
 	return &member, nil
 }
 
-func (r *OrganizationRepository) EmailExists(email string) (bool, error) {
+func (r *MemberRepository) EmailExists(email string) (bool, error) {
 	var count int64
 	result := r.db.Model(&models.Member{}).Where("email = ?", email).Count(&count)
 	if result.Error != nil {

@@ -16,15 +16,26 @@ func NewOrganizationRepository(db *gorm.DB) *OrganizationRepository {
 	return &OrganizationRepository{db: db}
 }
 
+// Member states
+func (r *OrganizationRepository) CreateMemberState(state *models.MemberState) error {
+	return r.db.Create(state).Error
+}
+
+func (r *OrganizationRepository) FetchMemberStates() (*[]models.MemberState, error) {
+	var states []models.MemberState
+	err := r.db.Find(states).Error
+	return &states, err
+}
+
 // NSBs
-func (r *OrganizationRepository) CreateNSB(nsb models.NationalStandardBody) error {
+func (r *OrganizationRepository) CreateNSB(nsb *models.NationalStandardBody) error {
 	return r.db.Create(nsb).Error
 }
 
-func (r *OrganizationRepository) FetchNSBs() ([]models.NationalStandardBody, error) {
+func (r *OrganizationRepository) FetchNSBs() (*[]models.NationalStandardBody, error) {
 	var nsbs []models.NationalStandardBody
 	err := r.db.Find(nsbs).Error
-	return nsbs, err
+	return &nsbs, err
 }
 
 // Committee Methods
@@ -42,17 +53,17 @@ func (r *OrganizationRepository) UpdateCommittee(committee any) error {
 
 func (r *OrganizationRepository) DeleteCommittee(committeeType string, id string) error {
 	switch committeeType {
-	case "ARSOCouncil":
+	case string(models.ARSO_Council):
 		return r.db.Delete(&models.ARSOCouncil{}, "id = ?", id).Error
-	case "JointAdvisoryGroup":
+	case string(models.Joint_Advisory_Group):
 		return r.db.Delete(&models.JointAdvisoryGroup{}, "id = ?", id).Error
-	case "StandardsManagementCommittee":
+	case string(models.Standards_Management_Committee):
 		return r.db.Delete(&models.StandardsManagementCommittee{}, "id = ?", id).Error
-	case "TechnicalCommittee":
+	case string(models.Technical_Committee):
 		return r.db.Delete(&models.TechnicalCommittee{}, "id = ?", id).Error
-	case "SpecializedCommittee":
+	case string(models.Specialized_Committee):
 		return r.db.Delete(&models.SpecializedCommittee{}, "id = ?", id).Error
-	case "JointTechnicalCommittee":
+	case string(models.Joint_Technical_Committee):
 		return r.db.Delete(&models.JointTechnicalCommittee{}, "id = ?", id).Error
 	default:
 		return errors.New("unknown committee type")
@@ -86,17 +97,17 @@ func (r *OrganizationRepository) GetWorkingGroupByID(id string) (*models.Working
 }
 
 // Task Force Methods
-func (r *OrganizationRepository) CreateTaskForce(wg *models.TaskForce) error {
-	return r.db.Create(wg).Error
+func (r *OrganizationRepository) CreateTaskForce(tf *models.TaskForce) error {
+	return r.db.Create(tf).Error
 }
 
 func (r *OrganizationRepository) GetTaskForceByID(id string) (*models.TaskForce, error) {
-	var wg models.TaskForce
-	result := r.db.First(&wg, "id = ?", id)
+	var tf models.TaskForce
+	result := r.db.First(&tf, "id = ?", id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &wg, nil
+	return &tf, nil
 }
 
 // SubCommittee Methods
