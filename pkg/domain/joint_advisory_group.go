@@ -1,0 +1,9 @@
+package domain
+
+// JointAdvisoryGroup represents the coordination group
+type JointAdvisoryGroup struct {
+	Committee
+	RegionalEconomicCommunities []*Member
+	ObserverMembers             []*Member
+	ChairRotationPeriod         int // years
+}
