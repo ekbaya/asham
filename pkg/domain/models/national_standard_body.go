@@ -9,7 +9,7 @@ import (
 // NSB
 type NationalStandardBody struct {
 	ID            uuid.UUID    `json:"id"`
-	Name          string       `json:"name" binding:"required"`
+	Name          string       `json:"name" binding:"required" gorm:"unique"`
 	MemberStateID string       `json:"member_state_id" binding:"required"`
 	MemberState   *MemberState `json:"member_state"`
 	Members       *[]Member    `json:"members" `

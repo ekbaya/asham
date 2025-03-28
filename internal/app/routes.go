@@ -14,6 +14,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	authHandler := handlers.NewUsersHandler(*services.MemberService)
 	organizationHandler := handlers.NewOrganizationHandler(*services.OrganizationService)
+	projectHandler := handlers.NewProjectHandler(*services.ProjectService)
 
 	api := router.Group("/api")
 
@@ -53,6 +54,16 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.POST("/nsbs", organizationHandler.CreateNSB)
 		organization.GET("/nsbs", organizationHandler.FetchNSBs)
 		organization.POST("/committee", organizationHandler.CreateCommittee)
+		organization.GET("/committee/:type/:id", organizationHandler.GetCommitteeByID)
+		organization.PUT("/committee", organizationHandler.UpdateCommittee)
+		organization.DELETE("/committee/:type/:id", organizationHandler.DeleteCommittee)
+	}
+
+	// Project Route
+	projects := api.Group("projects")
+	projects.Use(middleware.AuthMiddleware())
+	{
+		projects.POST("/create", projectHandler.CreateProject)
 	}
 
 	return router, nil

@@ -43,8 +43,12 @@ func (r *OrganizationRepository) CreateCommittee(committee any) error {
 	return r.db.Create(committee).Error
 }
 
-func (r *OrganizationRepository) GetCommitteeByID(id string, committee any) error {
-	return r.db.First(committee, "id = ?", id).Error
+func (r *OrganizationRepository) GetCommitteeByID(id string, committee any) (any, error) {
+	err := r.db.First(committee, "id = ?", id).Error
+	if err != nil {
+		return nil, err
+	}
+	return committee, nil
 }
 
 func (r *OrganizationRepository) UpdateCommittee(committee any) error {

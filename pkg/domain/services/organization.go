@@ -25,7 +25,7 @@ func (service *OrganizationService) CreateCommittee(committee any) error {
 	return service.repo.CreateCommittee(committee)
 }
 
-func (service *OrganizationService) GetCommitteeByID(id string, committee any) error {
+func (service *OrganizationService) GetCommitteeByID(id string, committee any) (any, error) {
 	return service.repo.GetCommitteeByID(id, committee)
 }
 

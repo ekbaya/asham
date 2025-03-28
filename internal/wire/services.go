@@ -11,4 +11,6 @@ var ServiceSet = wire.NewSet(
 	services.NewOrganizationService,
 	repository.NewMemberRepository,
 	services.NewMemberService,
+	repository.NewProjectRepository,
+	services.NewProjectService,
 )

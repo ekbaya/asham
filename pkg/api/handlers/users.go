@@ -122,7 +122,6 @@ func (h *UsersHandler) GenerateRefreshToken(c *gin.Context) {
 }
 
 func (h *UsersHandler) Account(c *gin.Context) {
-	// Retrieve user_id from context
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
