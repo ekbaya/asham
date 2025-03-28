@@ -10,6 +10,7 @@ import (
 type WorkingGroup struct {
 	ID          uuid.UUID
 	Name        string
+	ConvenorId  uuid.UUID
 	Convenor    *Member
 	Experts     []*Member
 	ParentTC    *TechnicalCommittee

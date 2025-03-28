@@ -31,7 +31,7 @@ func NewApp(cfg *config.Config) (*App, error) {
 	}
 
 	// Seed database
-	//migrations.SeedDatabase(db)
+	migrations.SeedDatabase(db)
 
 	// Initialize services with db connection
 	services, err := wire.InitializeServices(db)

@@ -1,0 +1,137 @@
+package migrations
+
+import (
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/ekbaya/asham/pkg/domain/models"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
+
+type SeedData struct {
+	Stages []models.Stage
+}
+
+func GetDefaultSeedData() SeedData {
+	return SeedData{
+		Stages: []models.Stage{
+			{
+				ID:           uuid.New(),
+				Number:       0,
+				Name:         "Preliminary stage",
+				DocumentName: "Preliminary Work Item",
+				Abbreviation: "PWI",
+				CreatedAt:    time.Now(),
+			},
+			{
+				ID:           uuid.New(),
+				Number:       1,
+				Name:         "Proposal stage",
+				DocumentName: "New Work Item Proposal",
+				Abbreviation: "NWIP",
+				CreatedAt:    time.Now(),
+				Timeframe: &models.Timeframe{
+					Standard:    &models.Duration{Min: 3 * 30 * 24 * time.Hour, Max: 5 * 30 * 24 * time.Hour}, // 3 to 5 months
+					IS:          &models.Duration{Min: 30 * 24 * time.Hour},                                   // 1 month
+					Emergency:   &models.Duration{Min: 21 * 24 * time.Hour},                                   // 21 days
+					Description: "Standard: 3 - 5 months; IS: 1 month; Emergency: 21 days",
+				},
+			},
+			{
+				ID:           uuid.New(),
+				Number:       2,
+				Name:         "Preparatory stage",
+				DocumentName: "Working Draft(s)",
+				Abbreviation: "WD",
+				CreatedAt:    time.Now(),
+				Timeframe: &models.Timeframe{
+					Standard:    &models.Duration{Min: 2 * 30 * 24 * time.Hour}, // 2 months
+					Description: "Standard: 2 months",
+				},
+			},
+			{
+				ID:           uuid.New(),
+				Number:       3,
+				Name:         "Committee stage",
+				DocumentName: "Committee Draft(s)",
+				Abbreviation: "CD",
+				CreatedAt:    time.Now(),
+				Timeframe: &models.Timeframe{
+					Standard:    &models.Duration{Min: 6 * 30 * 24 * time.Hour},
+					Emergency:   &models.Duration{Min: 15 * 24 * time.Hour}, // 15 days
+					Description: "Standard: 6 months, Emergency: 15 days",
+				},
+			},
+			{
+				ID:           uuid.New(),
+				Number:       4,
+				Name:         "Enquiry stage",
+				DocumentName: "Draft African Standard",
+				Abbreviation: "DARS",
+				CreatedAt:    time.Now(),
+				Timeframe: &models.Timeframe{
+					Standard:    &models.Duration{Min: 4 * 30 * 24 * time.Hour}, // 4 months
+					IS:          &models.Duration{Min: 2 * 30 * 24 * time.Hour}, // 2 months
+					Emergency:   &models.Duration{Min: 30 * 24 * time.Hour},     // 30 days
+					Description: "Standard: 4 months; IS: 2 month; Emergency: 30 days",
+				},
+			},
+			{
+				ID:           uuid.New(),
+				Number:       5,
+				Name:         "Ballot stage",
+				DocumentName: "Final Draft African Standard",
+				Abbreviation: "FDARS",
+				CreatedAt:    time.Now(),
+				Timeframe: &models.Timeframe{
+					Standard:    &models.Duration{Min: 30 * 24 * time.Hour}, // 1 months
+					IS:          &models.Duration{Min: 30 * 24 * time.Hour}, // 1 months
+					Emergency:   &models.Duration{Min: 6 * 24 * time.Hour},  // 6 days
+					Description: "Standard: 1 month; IS: 1 month; Emergency: 6 days",
+				},
+			},
+			{
+				ID:           uuid.New(),
+				Number:       6,
+				Name:         "Approval stage",
+				DocumentName: "Final Draft African Standard",
+				Abbreviation: "FDARS",
+				CreatedAt:    time.Now(),
+				Timeframe: &models.Timeframe{
+					Standard:    &models.Duration{Min: 3 * 30 * 24 * time.Hour}, // 3 months
+					IS:          &models.Duration{Min: 3 * 30 * 24 * time.Hour}, // 3 months
+					Emergency:   &models.Duration{Min: 15 * 24 * time.Hour},     // 15 days
+					Description: "Standard: 3 month; IS: 3 month; Emergency: 15 days",
+				},
+			},
+		},
+	}
+}
+
+func SeedDatabase(db *gorm.DB) error {
+	seedData := GetDefaultSeedData()
+
+	if err := seedStages(db, seedData.Stages); err != nil {
+		return fmt.Errorf("failed to seed stages: %w", err)
+	}
+
+	return nil
+}
+
+func seedStages(db *gorm.DB, stageList []models.Stage) error {
+	var count int64
+	if err := db.Model(&models.Stage{}).Count(&count).Error; err != nil {
+		return fmt.Errorf("failed to check stages: %w", err)
+	}
+
+	if count == 0 {
+		if err := db.Create(&stageList).Error; err != nil {
+			return fmt.Errorf("failed to create stages: %w", err)
+		}
+		log.Printf("Created %d stages", len(stageList))
+	}
+
+	return nil
+}

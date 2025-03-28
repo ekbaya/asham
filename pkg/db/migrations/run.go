@@ -19,6 +19,7 @@ func RunMigrations(db *gorm.DB) error {
 		&models.SubCommittee{},
 		&models.SpecializedCommittee{},
 		&models.JointTechnicalCommittee{},
+		&models.Stage{},
 		&models.Project{},
 	)
 }
