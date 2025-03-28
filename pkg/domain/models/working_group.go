@@ -12,7 +12,8 @@ type WorkingGroup struct {
 	Name        string
 	ConvenorId  uuid.UUID
 	Convenor    *Member
-	Experts     []*Member
+	Experts     []*Member `json:"experts" gorm:"many2many:working_group_experts;"`
+	ParentTCID  uuid.UUID
 	ParentTC    *TechnicalCommittee
 	Task        string
 	CreatedAt   time.Time

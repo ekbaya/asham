@@ -5,8 +5,8 @@ type TechnicalCommittee struct {
 	Committee
 	Scope          string
 	WorkProgram    string
-	WorkingGroups  []*WorkingGroup
-	SubCommittees  []*SubCommittee
+	WorkingGroups  []*WorkingGroup `gorm:"foreignKey:ParentTCID"`
+	SubCommittees  []*SubCommittee `gorm:"foreignKey:ParentTCID"`
 	MinimumMembers int
-	CurrentMembers []*Member
+	CurrentMembers []*Member `gorm:"many2many:current_members;"`
 }

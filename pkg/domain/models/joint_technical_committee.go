@@ -1,9 +1,11 @@
 package models
 
+import "github.com/lib/pq"
+
 // JointTechnicalCommittee for cross-organizational work
 type JointTechnicalCommittee struct {
 	Committee
-	CollaboratingOrganizations []string
-	JointMembers               []*Member
-	Scope                      string
+	CollaboratingOrganizations pq.StringArray `json:"collaborating_organizations" gorm:"type:text[]"`
+	JointMembers               []*Member      `gorm:"many2many:joint_members;"`
+	Scope                      string         `json:"scope"`
 }

@@ -1,11 +1,17 @@
 package migrations
 
 import (
+	"fmt"
+
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"gorm.io/gorm"
 )
 
 func RunMigrations(db *gorm.DB) error {
+	// Ensure UUID extension is created
+	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error; err != nil {
+		return fmt.Errorf("failed to create uuid-ossp extension: %w", err)
+	}
 	return db.AutoMigrate(
 		&models.MemberState{},
 		&models.NationalStandardBody{},
@@ -19,6 +25,8 @@ func RunMigrations(db *gorm.DB) error {
 		&models.SubCommittee{},
 		&models.SpecializedCommittee{},
 		&models.JointTechnicalCommittee{},
+		&models.ProjectDuration{},
+		&models.Timeframe{},
 		&models.Stage{},
 		&models.Project{},
 	)

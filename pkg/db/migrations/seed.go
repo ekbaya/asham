@@ -33,9 +33,10 @@ func GetDefaultSeedData() SeedData {
 				Abbreviation: "NWIP",
 				CreatedAt:    time.Now(),
 				Timeframe: &models.Timeframe{
-					Standard:    &models.Duration{Min: 3 * 30 * 24 * time.Hour, Max: 5 * 30 * 24 * time.Hour}, // 3 to 5 months
-					IS:          &models.Duration{Min: 30 * 24 * time.Hour},                                   // 1 month
-					Emergency:   &models.Duration{Min: 21 * 24 * time.Hour},                                   // 21 days
+					ID:          uuid.New(),
+					Standard:    &models.ProjectDuration{ID: uuid.New(), Min: 3 * 30, Max: 5 * 30}, // 3 to 5 months
+					IS:          &models.ProjectDuration{ID: uuid.New(), Min: 30},                  // 1 month
+					Emergency:   &models.ProjectDuration{ID: uuid.New(), Min: 21},                  // 21 days
 					Description: "Standard: 3 - 5 months; IS: 1 month; Emergency: 21 days",
 				},
 			},
@@ -47,7 +48,8 @@ func GetDefaultSeedData() SeedData {
 				Abbreviation: "WD",
 				CreatedAt:    time.Now(),
 				Timeframe: &models.Timeframe{
-					Standard:    &models.Duration{Min: 2 * 30 * 24 * time.Hour}, // 2 months
+					ID:          uuid.New(),
+					Standard:    &models.ProjectDuration{ID: uuid.New(), Min: 2 * 30}, // 2 months
 					Description: "Standard: 2 months",
 				},
 			},
@@ -59,8 +61,9 @@ func GetDefaultSeedData() SeedData {
 				Abbreviation: "CD",
 				CreatedAt:    time.Now(),
 				Timeframe: &models.Timeframe{
-					Standard:    &models.Duration{Min: 6 * 30 * 24 * time.Hour},
-					Emergency:   &models.Duration{Min: 15 * 24 * time.Hour}, // 15 days
+					ID:          uuid.New(),
+					Standard:    &models.ProjectDuration{ID: uuid.New(), Min: 6 * 30},
+					Emergency:   &models.ProjectDuration{ID: uuid.New(), Min: 15}, // 15 days
 					Description: "Standard: 6 months, Emergency: 15 days",
 				},
 			},
@@ -72,9 +75,10 @@ func GetDefaultSeedData() SeedData {
 				Abbreviation: "DARS",
 				CreatedAt:    time.Now(),
 				Timeframe: &models.Timeframe{
-					Standard:    &models.Duration{Min: 4 * 30 * 24 * time.Hour}, // 4 months
-					IS:          &models.Duration{Min: 2 * 30 * 24 * time.Hour}, // 2 months
-					Emergency:   &models.Duration{Min: 30 * 24 * time.Hour},     // 30 days
+					ID:          uuid.New(),
+					Standard:    &models.ProjectDuration{ID: uuid.New(), Min: 4 * 30}, // 4 months
+					IS:          &models.ProjectDuration{ID: uuid.New(), Min: 2 * 30}, // 2 months
+					Emergency:   &models.ProjectDuration{ID: uuid.New(), Min: 30},     // 30 days
 					Description: "Standard: 4 months; IS: 2 month; Emergency: 30 days",
 				},
 			},
@@ -86,9 +90,10 @@ func GetDefaultSeedData() SeedData {
 				Abbreviation: "FDARS",
 				CreatedAt:    time.Now(),
 				Timeframe: &models.Timeframe{
-					Standard:    &models.Duration{Min: 30 * 24 * time.Hour}, // 1 months
-					IS:          &models.Duration{Min: 30 * 24 * time.Hour}, // 1 months
-					Emergency:   &models.Duration{Min: 6 * 24 * time.Hour},  // 6 days
+					ID:          uuid.New(),
+					Standard:    &models.ProjectDuration{ID: uuid.New(), Min: 30}, // 1 months
+					IS:          &models.ProjectDuration{ID: uuid.New(), Min: 30}, // 1 months
+					Emergency:   &models.ProjectDuration{ID: uuid.New(), Min: 6},  // 6 days
 					Description: "Standard: 1 month; IS: 1 month; Emergency: 6 days",
 				},
 			},
@@ -100,9 +105,10 @@ func GetDefaultSeedData() SeedData {
 				Abbreviation: "FDARS",
 				CreatedAt:    time.Now(),
 				Timeframe: &models.Timeframe{
-					Standard:    &models.Duration{Min: 3 * 30 * 24 * time.Hour}, // 3 months
-					IS:          &models.Duration{Min: 3 * 30 * 24 * time.Hour}, // 3 months
-					Emergency:   &models.Duration{Min: 15 * 24 * time.Hour},     // 15 days
+					ID:          uuid.New(),
+					Standard:    &models.ProjectDuration{ID: uuid.New(), Min: 3 * 30}, // 3 months
+					IS:          &models.ProjectDuration{ID: uuid.New(), Min: 3 * 30}, // 3 months
+					Emergency:   &models.ProjectDuration{ID: uuid.New(), Min: 15},     // 15 days
 					Description: "Standard: 3 month; IS: 3 month; Emergency: 15 days",
 				},
 			},
@@ -127,10 +133,42 @@ func seedStages(db *gorm.DB, stageList []models.Stage) error {
 	}
 
 	if count == 0 {
-		if err := db.Create(&stageList).Error; err != nil {
-			return fmt.Errorf("failed to create stages: %w", err)
-		}
-		log.Printf("Created %d stages", len(stageList))
+		// Create stages with their associated timeframes and ProjectDurations in a transaction
+		return db.Transaction(func(tx *gorm.DB) error {
+			for _, stage := range stageList {
+				// First, create any non-nil ProjectDurations
+				if stage.Timeframe != nil {
+					if stage.Timeframe.Standard != nil {
+						if err := tx.Create(stage.Timeframe.Standard).Error; err != nil {
+							return fmt.Errorf("failed to create standard ProjectDuration: %w", err)
+						}
+					}
+					if stage.Timeframe.IS != nil {
+						if err := tx.Create(stage.Timeframe.IS).Error; err != nil {
+							return fmt.Errorf("failed to create IS ProjectDuration: %w", err)
+						}
+					}
+					if stage.Timeframe.Emergency != nil {
+						if err := tx.Create(stage.Timeframe.Emergency).Error; err != nil {
+							return fmt.Errorf("failed to create emergency ProjectDuration: %w", err)
+						}
+					}
+
+					// Then create the timeframe
+					if err := tx.Create(stage.Timeframe).Error; err != nil {
+						return fmt.Errorf("failed to create timeframe: %w", err)
+					}
+				}
+
+				// Finally, create the stage
+				if err := tx.Create(&stage).Error; err != nil {
+					return fmt.Errorf("failed to create stage: %w", err)
+				}
+			}
+
+			log.Printf("Created %d stages", len(stageList))
+			return nil
+		})
 	}
 
 	return nil

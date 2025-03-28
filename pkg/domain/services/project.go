@@ -33,9 +33,9 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 func generateProjectReference(project *models.Project) string {
 	currentYear := time.Now().Year()
 
-	if project.PartNo > 0 && project.ParentTC != nil {
+	if project.PartNo > 0 && project.TechnicalCommittee != nil {
 		// New Working Drafts: WD/TC NN/XXX/YYYY
-		return fmt.Sprintf("WD/TC %d/%d/%d", project.ParentTC.Code, project.Number, currentYear)
+		return fmt.Sprintf("WD/TC %d/%d/%d", project.TechnicalCommittee.Code, project.Number, currentYear)
 	}
 
 	// Revisions: WD/XXX:YYYY

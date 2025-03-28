@@ -10,8 +10,10 @@ import (
 type TaskForce struct {
 	ID                  uuid.UUID
 	Name                string
+	ConvenorId          uuid.UUID
 	Convenor            *Member
-	NationalDeligations []*Member
+	NationalDeligations []*Member `gorm:"many2many:national_deligations;"`
+	ParentTCID          uuid.UUID
 	ParentTC            *TechnicalCommittee
 	Task                string
 	CreatedAt           time.Time
