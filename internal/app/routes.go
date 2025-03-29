@@ -115,7 +115,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		acceptance.PUT("/submission", acceptanceHandler.UpdateNSBResponse)
 		acceptance.DELETE("/submission/:id", acceptanceHandler.DeleteNSBResponse)
 
-		// Compilation of NWIP Submissions from various NSBs
+		// Compilation of Submissions from various NSBs
 		acceptance.GET("/submission/compilation/list", acceptanceHandler.GetAcceptances)
 		acceptance.GET("/submission/compilation/:id", acceptanceHandler.GetAcceptance)
 		acceptance.GET("/submission/compilation/project/:id", acceptanceHandler.GetAcceptanceByProjectID)
