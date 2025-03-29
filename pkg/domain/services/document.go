@@ -18,6 +18,7 @@ func NewDocumentService(repo *repository.DocumentRepository) *DocumentService {
 
 func (service *DocumentService) Create(doc *models.Document) error {
 	doc.ID = uuid.New()
+	doc.CreatedAt = time.Now()
 	return service.repo.Create(doc)
 }
 

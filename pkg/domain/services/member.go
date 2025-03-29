@@ -2,10 +2,12 @@ package services
 
 import (
 	"errors"
+	"time"
 
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/ekbaya/asham/pkg/utilities"
+	"github.com/google/uuid"
 )
 
 type MemberService struct {
@@ -25,6 +27,8 @@ func (service *MemberService) CreateMember(member *models.Member) error {
 
 	// Create user
 	member.HashedPassword = hashedPassword
+	member.ID = uuid.New()
+	member.CreatedAt = time.Now()
 	return service.repo.CreateMember(member)
 }
 
