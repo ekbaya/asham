@@ -14,6 +14,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	authHandler := handlers.NewUsersHandler(*services.MemberService)
 	organizationHandler := handlers.NewOrganizationHandler(*services.OrganizationService)
+	documentHandler := handlers.NewDocumentHandler(*services.DocumentService)
 	projectHandler := handlers.NewProjectHandler(*services.ProjectService)
 
 	api := router.Group("/api")
@@ -57,6 +58,24 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.GET("/committee/:type/:id", organizationHandler.GetCommitteeByID)
 		organization.PUT("/committee", organizationHandler.UpdateCommittee)
 		organization.DELETE("/committee/:type/:id", organizationHandler.DeleteCommittee)
+	}
+
+	// documents Route
+	document := api.Group("documents")
+	document.Use(middleware.AuthMiddleware())
+	{
+		document.POST("/", documentHandler.CreateDocument)
+		document.GET("/:id", documentHandler.GetDocumentByID)
+		document.POST("/reference/:reference", documentHandler.GetDocumentByReference)
+		document.GET("/title/:title", documentHandler.GetDocumentByTitle)
+		document.PUT("/", documentHandler.UpdateDocument)
+		document.PUT("/partial", documentHandler.UpdateDocumentPartial)
+		document.PUT("/fileUrl/:id", documentHandler.UpdateFileURL)
+		document.DELETE("/:id", documentHandler.DeleteDocument)
+		document.GET("/list", documentHandler.ListDocuments)
+		document.GET("/search", documentHandler.SearchDocuments)
+		document.GET("/date", documentHandler.GetDocumentsByDateRange)
+		document.GET("/count", documentHandler.CountDocuments)
 	}
 
 	// Project Route
