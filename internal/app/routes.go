@@ -17,6 +17,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	documentHandler := handlers.NewDocumentHandler(*services.DocumentService)
 	projectHandler := handlers.NewProjectHandler(*services.ProjectService)
 	proposalHandler := handlers.NewProposalHandler(services.ProposalService, services.DocumentService, services.ProjectService)
+	acceptanceHandler := handlers.NewAcceptanceHandler(*services.AcceptanceService)
 
 	api := router.Group("/api")
 
@@ -102,6 +103,28 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		proposal.POST("/reference/:id", proposalHandler.AddReferencedStandard)
 		proposal.DELETE("/reference/:id/:documentId", proposalHandler.RemoveReferencedStandard)
 		proposal.POST("/transfer/:id", proposalHandler.TransferProposal)
+	}
+
+	// acceptance Route
+	acceptance := api.Group("acceptance")
+	acceptance.Use(middleware.AuthMiddleware())
+	{
+		acceptance.POST("/submission", acceptanceHandler.CreateNSBResponse)
+		acceptance.GET("/submission/:id", acceptanceHandler.GetNSBResponse)
+		acceptance.GET("/submission/project/:id", acceptanceHandler.GetNSBResponsesByProjectID)
+		acceptance.PUT("/submission", acceptanceHandler.UpdateNSBResponse)
+		acceptance.DELETE("/submission/:id", acceptanceHandler.DeleteNSBResponse)
+
+		// Compilation of NWIP Submissions from various NSBs
+		acceptance.GET("/submission/compilation/list", acceptanceHandler.GetAcceptances)
+		acceptance.GET("/submission/compilation/:id", acceptanceHandler.GetAcceptance)
+		acceptance.GET("/submission/compilation/project/:id", acceptanceHandler.GetAcceptanceByProjectID)
+		acceptance.PUT("/submission/compilation", acceptanceHandler.UpdateAcceptance)
+		acceptance.GET("/submission/compilation/:id/responses", acceptanceHandler.GetAcceptanceWithResponses)
+		acceptance.GET("/submission/compilation/:id/count-by-type", acceptanceHandler.CountNSBResponsesByType)
+		acceptance.GET("/submission/compilation/:id/calculate-stats", acceptanceHandler.CalculateNSBResponseStats)
+		acceptance.POST("/submission/compilation/approve", acceptanceHandler.SetNSBResponseacceptanceApproval)
+		acceptance.GET("/submission/compilation/:id/results", acceptanceHandler.GetAcceptanceResults)
 	}
 
 	return router, nil
