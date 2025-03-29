@@ -9,6 +9,7 @@ import (
 // Member represents a member state in the organization
 type Member struct {
 	ID                     uuid.UUID             `json:"id"`
+	Phone                  string                `json:"phone" binding:"required" example:"+1234567890"`
 	Email                  string                `json:"email" gorm:"index;unique" binding:"required"`
 	FirstName              string                `json:"first_name" binding:"required"`
 	LastName               string                `json:"last_name" binding:"required"`

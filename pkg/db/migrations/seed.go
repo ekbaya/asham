@@ -6,16 +6,24 @@ import (
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
+	"github.com/ekbaya/asham/pkg/utilities"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type SeedData struct {
-	Stages []models.Stage
+	AdminUser models.Member
+	Stages    []models.Stage
 }
 
 func GetDefaultSeedData() SeedData {
 	return SeedData{
+		AdminUser: models.Member{
+			FirstName: "ARSO",
+			LastName:  "ARSO",
+			Phone:     "254712345678",
+			Email:     "support@arso.com",
+		},
 		Stages: []models.Stage{
 			{
 				ID:           uuid.New(),
@@ -119,8 +127,42 @@ func GetDefaultSeedData() SeedData {
 func SeedDatabase(db *gorm.DB) error {
 	seedData := GetDefaultSeedData()
 
+	if err := seedAdminUser(db, &seedData.AdminUser); err != nil {
+		db.Rollback()
+		return fmt.Errorf("failed to seed admin user: %w", err)
+	}
+
 	if err := seedStages(db, seedData.Stages); err != nil {
 		return fmt.Errorf("failed to seed stages: %w", err)
+	}
+
+	return nil
+}
+
+func seedAdminUser(db *gorm.DB, adminData *models.Member) error {
+	// Generate a single user ID that will be used consistently
+	userID := uuid.New()
+	log.Printf("Generated user ID: %s", userID)
+
+	// Hash password
+	hashedPassword, err := utilities.HashPassword("secret")
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	// Prepare user data
+	adminUser := models.Member{
+		ID:             userID,
+		FirstName:      adminData.FirstName,
+		LastName:       adminData.LastName,
+		Phone:          adminData.Phone,
+		Email:          adminData.Email,
+		HashedPassword: hashedPassword,
+	}
+
+	if err := db.Create(&adminUser).Error; err != nil {
+		log.Printf("Error creating user: %v", err)
+		return err
 	}
 
 	return nil
