@@ -147,11 +147,11 @@ func (r *DocumentRepository) GetDocumentsCreatedBetween(startDate, endDate time.
 	return docs, err
 }
 
-// Exists checks if a document exists by reference or title
-func (r *DocumentRepository) Exists(reference string, title string) (bool, error) {
+// Exists checks if a document exists by id or reference or title
+func (r *DocumentRepository) Exists(id uuid.UUID, reference string, title string) (bool, error) {
 	var count int64
 	err := r.db.Model(&models.Document{}).
-		Where("reference = ? OR title = ?", reference, title).
+		Where("id = ? OR reference = ? OR title = ?", id, reference, title).
 		Count(&count).Error
 	return count > 0, err
 }

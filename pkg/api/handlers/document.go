@@ -55,7 +55,7 @@ func (h *DocumentHandler) CreateDocument(c *gin.Context) {
 		return
 	}
 
-	exists, err := h.documentService.Exists(payload.Reference, payload.Title)
+	exists, err := h.documentService.Exists(uuid.Nil, payload.Reference, payload.Title)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return

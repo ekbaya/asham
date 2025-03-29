@@ -29,6 +29,10 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 	return service.repo.CreateProject(project)
 }
 
+func (service *ProjectService) Exists(projectID uuid.UUID) (bool, error) {
+	return service.repo.Exists(projectID)
+}
+
 /*
 	For new WDs, shall indicate WD/TC NN/XXX/YYYY, where NN is the TC code, XXX is the serial
 	number allocated to the Working Draft by the TC Secretariat and YYYY is the year of circulation.

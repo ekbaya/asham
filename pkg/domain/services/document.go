@@ -50,6 +50,10 @@ func (service *DocumentService) Delete(id uuid.UUID) error {
 	return service.repo.Delete(id)
 }
 
+func (service *DocumentService) Exists(id uuid.UUID, reference string, title string) (bool, error) {
+	return service.repo.Exists(id, reference, title)
+}
+
 func (service *DocumentService) List(limit, offset int) ([]models.Document, int64, error) {
 	return service.repo.List(limit, offset)
 }
@@ -60,10 +64,6 @@ func (service *DocumentService) Search(query string, limit, offset int) ([]model
 
 func (service *DocumentService) GetDocumentsCreatedBetween(startDate, endDate time.Time) ([]models.Document, error) {
 	return service.repo.GetDocumentsCreatedBetween(startDate, endDate)
-}
-
-func (service *DocumentService) Exists(reference string, title string) (bool, error) {
-	return service.repo.Exists(reference, title)
 }
 
 func (service *DocumentService) CountAll() (int64, error) {

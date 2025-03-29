@@ -16,6 +16,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	organizationHandler := handlers.NewOrganizationHandler(*services.OrganizationService)
 	documentHandler := handlers.NewDocumentHandler(*services.DocumentService)
 	projectHandler := handlers.NewProjectHandler(*services.ProjectService)
+	proposalHandler := handlers.NewProposalHandler(services.ProposalService, services.DocumentService, services.ProjectService)
 
 	api := router.Group("/api")
 
@@ -83,6 +84,24 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	projects.Use(middleware.AuthMiddleware())
 	{
 		projects.POST("/create", projectHandler.CreateProject)
+	}
+
+	// proposal Route
+	proposal := api.Group("proposals")
+	proposal.Use(middleware.AuthMiddleware())
+	{
+		proposal.POST("/", proposalHandler.CreateProposal)
+		proposal.GET("/:id", proposalHandler.GetProposal)
+		proposal.GET("/project/:projectId", proposalHandler.GetProposalByProject)
+		proposal.GET("/list", proposalHandler.ListProposals)
+		proposal.PUT("/", proposalHandler.UpdateProposal)
+		proposal.PUT("/partial", proposalHandler.UpdatePartialProposal)
+		proposal.DELETE("/:id", proposalHandler.DeleteProposal)
+		proposal.GET("/search", proposalHandler.SearchProposals)
+		proposal.GET("/creator/:memberId", proposalHandler.GetProposalsByCreator)
+		proposal.POST("/reference/:id", proposalHandler.AddReferencedStandard)
+		proposal.DELETE("/reference/:id/:documentId", proposalHandler.RemoveReferencedStandard)
+		proposal.POST("/transfer/:id", proposalHandler.TransferProposal)
 	}
 
 	return router, nil

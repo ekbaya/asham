@@ -48,6 +48,7 @@ type Project struct {
 	VisibleOnLibrary     bool                  `json:"visible_on_library" gorm:"default:true"`
 	PricePerPage         float64               `json:"price_per_page"`
 	IsEmergency          bool                  `json:"is_emergency" gorm:"default:false"`
+	Proposal             *Proposal             `json:"proposal"`
 	CreatedAt            time.Time             `json:"created_at"`
 	UpdatedAt            time.Time             `json:"updated_at"`
 }
