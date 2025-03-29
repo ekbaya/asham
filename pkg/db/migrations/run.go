@@ -30,5 +30,8 @@ func RunMigrations(db *gorm.DB) error {
 		&models.Timeframe{},
 		&models.Stage{},
 		&models.Project{},
+		&models.Proposal{},
+		&models.Acceptance{},
+		&models.NSBResponse{},
 	)
 }

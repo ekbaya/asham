@@ -49,6 +49,7 @@ type Project struct {
 	PricePerPage         float64               `json:"price_per_page"`
 	IsEmergency          bool                  `json:"is_emergency" gorm:"default:false"`
 	Proposal             *Proposal             `json:"proposal"`
+	Acceptance           *Acceptance           `json:"acceptance"`
 	CreatedAt            time.Time             `json:"created_at"`
 	UpdatedAt            time.Time             `json:"updated_at"`
 }

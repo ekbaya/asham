@@ -25,6 +25,8 @@ func InitializeServices(db *gorm.DB) (*services.ServiceContainer, error) {
 	documentService := services.NewDocumentService(documentRepository)
 	proposalRepository := repository.NewProposalRepository(db)
 	proposalService := services.NewProposalService(proposalRepository)
-	serviceContainer := services.NewServiceContainer(organizationService, memberService, projectService, documentService, proposalService)
+	acceptanceRepository := repository.NewAcceptanceRepository(db)
+	acceptanceService := services.NewAcceptanceService(acceptanceRepository)
+	serviceContainer := services.NewServiceContainer(organizationService, memberService, projectService, documentService, proposalService, acceptanceService)
 	return serviceContainer, nil
 }
