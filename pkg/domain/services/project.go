@@ -29,6 +29,15 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 	return service.repo.CreateProject(project)
 }
 
+/*
+	For new WDs, shall indicate WD/TC NN/XXX/YYYY, where NN is the TC code, XXX is the serial
+	number allocated to the Working Draft by the TC Secretariat and YYYY is the year of circulation.
+	For WDs on revision of the standard, shall indicate WD/XXX: YYYY where XXX is the ARS
+	number of the current standard and YYYY is the year of circulation. For example, when revising
+	ARS 461:2021 in 2024, the corresponding drafts shall be numbered as WD/461:2024. This kind
+	of numbering WDs applies also for various stages (CD, DARS and FDARS).
+*/
+
 // generateProjectReference generates the reference number for a project
 func generateProjectReference(project *models.Project) string {
 	currentYear := time.Now().Year()
