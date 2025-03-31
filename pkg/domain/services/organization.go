@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/models"
+	"github.com/google/uuid"
 )
 
 type OrganizationService struct {
@@ -39,6 +40,10 @@ func (service *OrganizationService) DeleteCommittee(committeeType string, id str
 
 func (service *OrganizationService) AddWorkingGroupToTechnicalCommittee(tc *models.TechnicalCommittee, wg *models.WorkingGroup) error {
 	return service.repo.AddWorkingGroupToTechnicalCommittee(tc, wg)
+}
+
+func (service *OrganizationService) GetCommitteeWorkingGroups(committeeID string) (*[]models.WorkingGroup, error) {
+	return service.repo.GetCommitteeWorkingGroups(committeeID)
 }
 
 func (service *OrganizationService) CompleteWorkingGroup(wg *models.WorkingGroup) error {
@@ -78,6 +83,7 @@ func (service *OrganizationService) GetSpecializedCommitteeByType(committeeType 
 }
 
 func (service *OrganizationService) CreateMemberState(state *models.MemberState) error {
+	state.ID = uuid.New()
 	return service.repo.CreateMemberState(state)
 }
 

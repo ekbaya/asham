@@ -64,6 +64,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.POST("/add_working_group_to_committee", organizationHandler.CreateWorkingGroup)
 		organization.POST("/working_groups", organizationHandler.CreateWorkingGroup)
 		organization.POST("/complete_working_group", organizationHandler.CompleteWorkingGroup)
+		organization.GET("/working_groups/tc/:id", organizationHandler.GetCommitteeWorkingGroups)
 		organization.GET("/working_groups/:id", organizationHandler.GetWorkingGroupByID)
 		organization.POST("/task_force", organizationHandler.CreateTaskForce)
 		organization.POST("/task_force/:id", organizationHandler.GetTaskForceByID)

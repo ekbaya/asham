@@ -350,6 +350,18 @@ func (h *OrganizationHandler) GetWorkingGroupByID(c *gin.Context) {
 	c.JSON(http.StatusOK, wg)
 }
 
+func (h *OrganizationHandler) GetCommitteeWorkingGroups(c *gin.Context) {
+	id := c.Param("id")
+
+	wg, err := h.organizationService.GetCommitteeWorkingGroups(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Working Group not found")
+		return
+	}
+
+	c.JSON(http.StatusOK, wg)
+}
+
 func (h *OrganizationHandler) CreateTaskForce(c *gin.Context) {
 	var tf models.TaskForce
 	if err := c.ShouldBindJSON(&tf); err != nil {

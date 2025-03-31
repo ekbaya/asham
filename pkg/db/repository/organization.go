@@ -100,6 +100,12 @@ func (r *OrganizationRepository) GetWorkingGroupByID(id string) (*models.Working
 	return &wg, nil
 }
 
+func (r *OrganizationRepository) GetCommitteeWorkingGroups(committeeID string) (*[]models.WorkingGroup, error) {
+	var wgs []models.WorkingGroup
+	err := r.db.Where("parent_tc_id = ?", committeeID).Find(&wgs).Error
+	return &wgs, err
+}
+
 // Task Force Methods
 func (r *OrganizationRepository) CreateTaskForce(tf *models.TaskForce) error {
 	return r.db.Create(tf).Error
