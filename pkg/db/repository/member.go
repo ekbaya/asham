@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"errors"
-
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"gorm.io/gorm"
 )
@@ -39,14 +37,8 @@ func (r *MemberRepository) GetAllMembers() (*[]models.Member, error) {
 
 func (r *MemberRepository) GetMemberByEmail(email string) (*models.Member, error) {
 	var member models.Member
-	result := r.db.Where("email = ?", email).First(&member)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, result.Error
-	}
-	return &member, nil
+	err := r.db.Where("email = ?", email).First(&member).Error
+	return &member, err
 }
 
 func (r *MemberRepository) EmailExists(email string) (bool, error) {
