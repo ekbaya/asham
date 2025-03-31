@@ -23,7 +23,7 @@ func (r *OrganizationRepository) CreateMemberState(state *models.MemberState) er
 
 func (r *OrganizationRepository) FetchMemberStates() (*[]models.MemberState, error) {
 	var states []models.MemberState
-	err := r.db.Find(states).Error
+	err := r.db.Find(&states).Error
 	return &states, err
 }
 
@@ -34,7 +34,7 @@ func (r *OrganizationRepository) CreateNSB(nsb *models.NationalStandardBody) err
 
 func (r *OrganizationRepository) FetchNSBs() (*[]models.NationalStandardBody, error) {
 	var nsbs []models.NationalStandardBody
-	err := r.db.Find(nsbs).Error
+	err := r.db.Find(&nsbs).Error
 	return &nsbs, err
 }
 
@@ -52,7 +52,7 @@ func (r *OrganizationRepository) GetCommitteeByID(id string, committee any) (any
 }
 
 func (r *OrganizationRepository) UpdateCommittee(committee any) error {
-	return r.db.Save(committee).Error
+	return r.db.Save(&committee).Error
 }
 
 func (r *OrganizationRepository) DeleteCommittee(committeeType string, id string) error {
