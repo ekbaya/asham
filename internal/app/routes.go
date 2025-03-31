@@ -93,7 +93,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	// Project Route
 	projects := api.Group("projects")
-	//projects.Use(middleware.AuthMiddleware())
+	projects.Use(middleware.AuthMiddleware())
 	{
 		// Basic CRUD operations
 		projects.POST("/", projectHandler.CreateProject)
