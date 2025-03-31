@@ -34,14 +34,11 @@ func (service *MemberService) CreateMember(member *models.Member) error {
 }
 
 func (service *MemberService) Login(email, password string) (string, string, error) {
-	var user *models.Member
-	var err error
-
-	user, err = service.repo.GetMemberByEmail(email)
+	user, err := service.repo.GetMemberByEmail(email)
 
 	// Handle error if user is not found
 	if err != nil {
-		fmt.Print("User Not Found", err)
+		fmt.Print("User Not Found: ", err)
 		return "", "", errors.New("invalid credentials")
 	}
 

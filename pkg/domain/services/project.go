@@ -126,3 +126,7 @@ func (service *ProjectService) GetProjectsInStageForTooLong(stageID uuid.UUID, d
 func (service *ProjectService) GetRelatedProjects(projectID uuid.UUID) ([]models.Project, error) {
 	return service.repo.GetRelatedProjects(projectID)
 }
+
+func (service *ProjectService) FetchStages() (*[]models.Stage, error) {
+	return service.repo.FetchStages()
+}

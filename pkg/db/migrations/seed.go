@@ -128,7 +128,6 @@ func SeedDatabase(db *gorm.DB) error {
 	seedData := GetDefaultSeedData()
 
 	if err := seedAdminUser(db, &seedData.AdminUser); err != nil {
-		db.Rollback()
 		return fmt.Errorf("failed to seed admin user: %w", err)
 	}
 

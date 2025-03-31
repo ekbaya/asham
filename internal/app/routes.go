@@ -93,7 +93,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	// Project Route
 	projects := api.Group("projects")
-	projects.Use(middleware.AuthMiddleware())
+	//projects.Use(middleware.AuthMiddleware())
 	{
 		// Basic CRUD operations
 		projects.POST("/", projectHandler.CreateProject)
@@ -103,6 +103,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 		// Project listings and searches
 		projects.GET("/", projectHandler.FindProjects)
+		projects.GET("/stages", projectHandler.FindProjects)
 		projects.GET("/next-number", projectHandler.GetNextAvailableNumber)
 
 		// Project stage management

@@ -401,3 +401,9 @@ func (r *ProjectRepository) GetRelatedProjects(projectID uuid.UUID) ([]models.Pr
 
 	return relatedProjects, err
 }
+
+func (r *ProjectRepository) FetchStages() (*[]models.Stage, error) {
+	var stages []models.Stage
+	err := r.db.Find(stages).Error
+	return &stages, err
+}

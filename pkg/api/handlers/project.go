@@ -423,3 +423,13 @@ func (h *ProjectHandler) GetProjectStageHistory(c *gin.Context) {
 
 	utilities.Show(c, http.StatusOK, "stage_history", history)
 }
+
+func (h *ProjectHandler) FetchStages(c *gin.Context) {
+	stages, err := h.projectService.FetchStages()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.Show(c, http.StatusOK, "message", stages)
+}
