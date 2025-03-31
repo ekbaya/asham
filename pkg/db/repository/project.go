@@ -6,6 +6,7 @@ import (
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ProjectRepository struct {
@@ -404,6 +405,6 @@ func (r *ProjectRepository) GetRelatedProjects(projectID uuid.UUID) ([]models.Pr
 
 func (r *ProjectRepository) FetchStages() (*[]models.Stage, error) {
 	var stages []models.Stage
-	err := r.db.Find(stages).Error
+	err := r.db.Preload(clause.Associations).Find(&stages).Error
 	return &stages, err
 }
