@@ -160,7 +160,7 @@ func seedAdminUser(db *gorm.DB, adminData *models.Member) error {
 		HashedPassword: hashedPassword,
 	}
 
-	if err := db.Create(&adminUser).Error; err != nil {
+	if err := db.FirstOrCreate(&adminUser).Error; err != nil {
 		log.Printf("Error creating user: %v", err)
 		return err
 	}
