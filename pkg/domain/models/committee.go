@@ -11,9 +11,9 @@ type Committee struct {
 	ID            uuid.UUID `json:"id"`
 	Name          string    `json:"name"`
 	Code          int64     `json:"code"`
-	ChairpersonId uuid.UUID `json:"-"`
+	ChairpersonId uuid.UUID `json:"chairperson_id"`
 	Chairperson   *Member   `json:"chairperson"`
-	SecretaryId   uuid.UUID `json:"-"`
+	SecretaryId   uuid.UUID `json:"secretary_id"`
 	Secretary     *Member   `json:"Secretary"`
 	CreatedAt     time.Time `json:"created_at"`
 }
