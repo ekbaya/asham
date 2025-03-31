@@ -1,8 +1,6 @@
 package models
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 )
 
@@ -15,5 +13,4 @@ type Committee struct {
 	Chairperson   *Member   `json:"chairperson"`
 	SecretaryId   uuid.UUID `json:"secretary_id"`
 	Secretary     *Member   `json:"Secretary"`
-	CreatedAt     time.Time `json:"created_at"`
 }
