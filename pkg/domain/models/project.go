@@ -29,6 +29,8 @@ type ProjectStageHistory struct {
 
 type Project struct {
 	ID                   uuid.UUID             `json:"id"`
+	MemberID             *uuid.UUID            `json:"-"`
+	Member               *Member               `json:"creator"`
 	Number               int64                 `json:"number" binding:"required"`
 	PartNo               int64                 `json:"part_number"`
 	EditionNo            int64                 `json:"edition_number"`
@@ -50,6 +52,7 @@ type Project struct {
 	IsEmergency          bool                  `json:"is_emergency" gorm:"default:false"`
 	Proposal             *Proposal             `json:"proposal"`
 	Acceptance           *Acceptance           `json:"acceptance"`
+	Comments             []CommentObservation  `json:"comments,omitempty"`
 	CreatedAt            time.Time             `json:"created_at"`
 	UpdatedAt            time.Time             `json:"updated_at"`
 }

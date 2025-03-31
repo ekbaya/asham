@@ -9,9 +9,9 @@ var AllowedOrigins = []string{
 	"https://api.maziwasoko.co.ke",
 	"http://localhost",
 	"http://127.0.0.1",
-	"http://192.168.0.103",
-	"http://192.168.0.100:4001",
-	"http://localhost:4001",
+	"http://192.168.100.43",
+	"http://192.168.100.43:5173",
+	"http://localhost:5173",
 }
 
 var AllowedHeaders = []string{

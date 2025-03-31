@@ -39,6 +39,19 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		return
 	}
 
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userUUID, ok := userID.(*uuid.UUID)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	payload.MemberID = userUUID
+
 	err := h.projectService.CreateProject(&payload)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())

@@ -18,6 +18,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	projectHandler := handlers.NewProjectHandler(*services.ProjectService)
 	proposalHandler := handlers.NewProposalHandler(services.ProposalService, services.DocumentService, services.ProjectService)
 	acceptanceHandler := handlers.NewAcceptanceHandler(*services.AcceptanceService)
+	commentHandler := handlers.NewCommentHandler(*&services.CommentService)
 
 	api := router.Group("/api")
 
@@ -85,13 +86,13 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	projects.Use(middleware.AuthMiddleware())
 	{
 		// Basic CRUD operations
-		projects.POST("", projectHandler.CreateProject)
+		projects.POST("/", projectHandler.CreateProject)
 		projects.GET("/:id", projectHandler.GetProjectByID)
 		projects.PUT("/:id", projectHandler.UpdateProject)
 		projects.DELETE("/:id", projectHandler.DeleteProject)
 
 		// Project listings and searches
-		projects.GET("", projectHandler.FindProjects)
+		projects.GET("/", projectHandler.FindProjects)
 		projects.GET("/next-number", projectHandler.GetNextAvailableNumber)
 
 		// Project stage management
@@ -114,7 +115,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		projects.POST("/:id/revision", projectHandler.CreateProjectRevision)
 	}
 
-	// proposal Route
+	// Proposal Route
 	proposal := api.Group("proposals")
 	proposal.Use(middleware.AuthMiddleware())
 	{
@@ -132,7 +133,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		proposal.POST("/transfer/:id", proposalHandler.TransferProposal)
 	}
 
-	// acceptance Route
+	// Acceptance Route
 	acceptance := api.Group("acceptance")
 	acceptance.Use(middleware.AuthMiddleware())
 	{
@@ -152,6 +153,18 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		acceptance.GET("/submission/compilation/:id/calculate-stats", acceptanceHandler.CalculateNSBResponseStats)
 		acceptance.POST("/submission/compilation/approve", acceptanceHandler.SetNSBResponseacceptanceApproval)
 		acceptance.GET("/submission/compilation/:id/results", acceptanceHandler.GetAcceptanceResults)
+	}
+
+	// Comments and  Observations Route
+	comment := api.Group("comments")
+	comment.Use(middleware.AuthMiddleware())
+	{
+		comment.POST("/", commentHandler.CreateComment)
+		comment.GET("/:id", commentHandler.GetCommentByID)
+		comment.GET("/list", commentHandler.GetAllComments)
+		comment.PUT("/", commentHandler.UpdateComment)
+		comment.DELETE("/:id", commentHandler.DeleteComment)
+		comment.GET("/project/:id", commentHandler.GetCommentsByProjectID)
 	}
 
 	return router, nil

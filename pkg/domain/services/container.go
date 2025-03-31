@@ -7,6 +7,7 @@ type ServiceContainer struct {
 	DocumentService     *DocumentService
 	ProposalService     *ProposalService
 	AcceptanceService   *AcceptanceService
+	CommentService      *CommentService
 }
 
 func NewServiceContainer(
@@ -16,6 +17,7 @@ func NewServiceContainer(
 	documentService *DocumentService,
 	proposalService *ProposalService,
 	acceptanceService *AcceptanceService,
+	commentService *CommentService,
 ) *ServiceContainer {
 	return &ServiceContainer{
 		OrganizationService: organizationService,
@@ -24,5 +26,6 @@ func NewServiceContainer(
 		DocumentService:     documentService,
 		ProposalService:     proposalService,
 		AcceptanceService:   acceptanceService,
+		CommentService:      commentService,
 	}
 }
