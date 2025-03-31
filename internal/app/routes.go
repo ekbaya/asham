@@ -84,7 +84,34 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	projects := api.Group("projects")
 	projects.Use(middleware.AuthMiddleware())
 	{
-		projects.POST("/create", projectHandler.CreateProject)
+		// Basic CRUD operations
+		projects.POST("", projectHandler.CreateProject)
+		projects.GET("/:id", projectHandler.GetProjectByID)
+		projects.PUT("/:id", projectHandler.UpdateProject)
+		projects.DELETE("/:id", projectHandler.DeleteProject)
+
+		// Project listings and searches
+		projects.GET("", projectHandler.FindProjects)
+		projects.GET("/next-number", projectHandler.GetNextAvailableNumber)
+
+		// Project stage management
+		projects.GET("/:id/with-stage-history", projectHandler.GetProjectWithStageHistory)
+		projects.GET("/:id/stage-history", projectHandler.GetProjectStageHistory)
+		projects.PUT("/:id/stage", projectHandler.UpdateProjectStage)
+
+		// Project analytics
+		projects.GET("/by-timeframe", projectHandler.GetProjectsByTimeframe)
+		projects.GET("/count-by-type", projectHandler.GetProjectCountByType)
+		projects.GET("/stage-transitions", projectHandler.GetProjectsWithStageTransitions)
+		projects.GET("/approaching-deadline", projectHandler.GetProjectsApproachingDeadline)
+		projects.GET("/stage-delayed", projectHandler.GetProjectsInStageForTooLong)
+
+		// Project relationships
+		projects.GET("/by-reference-base", projectHandler.GetProjectsByReferenceBase)
+		projects.GET("/:id/related", projectHandler.GetRelatedProjects)
+
+		// Project versioning
+		projects.POST("/:id/revision", projectHandler.CreateProjectRevision)
 	}
 
 	// proposal Route
