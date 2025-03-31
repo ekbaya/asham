@@ -103,7 +103,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 		// Project listings and searches
 		projects.GET("/", projectHandler.FindProjects)
-		projects.GET("/stages", projectHandler.FindProjects)
+		projects.GET("/stages", projectHandler.FetchStages)
 		projects.GET("/next-number", projectHandler.GetNextAvailableNumber)
 
 		// Project stage management
