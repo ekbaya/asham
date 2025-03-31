@@ -279,3 +279,171 @@ func (h *OrganizationHandler) DeleteCommittee(c *gin.Context) {
 	}
 	c.JSON(http.StatusNoContent, "Committee deleted succussfuly")
 }
+
+func (h *OrganizationHandler) AddWorkingGroupToTechnicalCommittee(c *gin.Context) {
+	var payload struct {
+		TechnicalCommitteeID string              `json:"technicalCommitteeId" binding:"required"`
+		WorkingGroup         models.WorkingGroup `json:"workingGroup" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	tc, err := h.organizationService.GetCommitteeByID(payload.TechnicalCommitteeID, &models.TechnicalCommittee{})
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Technical Committee not found")
+		return
+	}
+
+	err = h.organizationService.AddWorkingGroupToTechnicalCommittee(tc.(*models.TechnicalCommittee), &payload.WorkingGroup)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Working Group added successfully")
+}
+
+func (h *OrganizationHandler) CompleteWorkingGroup(c *gin.Context) {
+	var wg models.WorkingGroup
+	if err := c.ShouldBindJSON(&wg); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.organizationService.CompleteWorkingGroup(&wg)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Working Group completed successfully")
+}
+
+func (h *OrganizationHandler) CreateWorkingGroup(c *gin.Context) {
+	var wg models.WorkingGroup
+	if err := c.ShouldBindJSON(&wg); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.organizationService.CreateWorkingGroup(&wg)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "Working Group created successfully")
+}
+
+func (h *OrganizationHandler) GetWorkingGroupByID(c *gin.Context) {
+	id := c.Param("id")
+
+	wg, err := h.organizationService.GetWorkingGroupByID(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Working Group not found")
+		return
+	}
+
+	c.JSON(http.StatusOK, wg)
+}
+
+func (h *OrganizationHandler) CreateTaskForce(c *gin.Context) {
+	var tf models.TaskForce
+	if err := c.ShouldBindJSON(&tf); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.organizationService.CreateTaskForce(&tf)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "Task Force created successfully")
+}
+
+func (h *OrganizationHandler) GetTaskForceByID(c *gin.Context) {
+	id := c.Param("id")
+
+	tf, err := h.organizationService.GetTaskForceByID(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Task Force not found")
+		return
+	}
+
+	c.JSON(http.StatusOK, tf)
+}
+
+func (h *OrganizationHandler) CreateSubCommittee(c *gin.Context) {
+	var sc models.SubCommittee
+	if err := c.ShouldBindJSON(&sc); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.organizationService.CreateSubCommittee(&sc)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "Sub-Committee created successfully")
+}
+
+func (h *OrganizationHandler) AddMemberToSubCommittee(c *gin.Context) {
+	var payload struct {
+		SubCommitteeID string        `json:"subCommitteeId" binding:"required"`
+		Member         models.Member `json:"member" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	sc, err := h.organizationService.GetCommitteeByID(payload.SubCommitteeID, &models.SubCommittee{})
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Sub-Committee not found")
+		return
+	}
+
+	err = h.organizationService.AddMemberToSubCommittee(sc.(*models.SubCommittee), &payload.Member)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Sub-Committee successfully")
+}
+
+func (h *OrganizationHandler) CreateSpecializedCommittee(c *gin.Context) {
+	var sc models.SpecializedCommittee
+	if err := c.ShouldBindJSON(&sc); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.organizationService.CreateSpecializedCommittee(&sc)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "Specialized Committee created successfully")
+}
+
+func (h *OrganizationHandler) GetSpecializedCommitteeByType(c *gin.Context) {
+	typeParam := c.Param("type")
+
+	sc, err := h.organizationService.GetSpecializedCommitteeByType(typeParam)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Specialized Committee not found")
+		return
+	}
+
+	c.JSON(http.StatusOK, sc)
+}
