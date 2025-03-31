@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/db/repository"
@@ -40,11 +41,13 @@ func (service *MemberService) Login(email, password string) (string, string, err
 
 	// Handle error if user is not found
 	if err != nil {
+		fmt.Print("User Not Found", err)
 		return "", "", errors.New("invalid credentials")
 	}
 
 	// Verify password
 	if !utilities.CheckPasswordHash(password, user.HashedPassword) {
+		fmt.Print("Wrong Username Or Password")
 		return "", "", errors.New("invalid credentials")
 	}
 
