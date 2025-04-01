@@ -167,7 +167,7 @@ func (h *ProposalHandler) CreateProposal(c *gin.Context) {
 	}
 
 	// Set creator ID from authenticated user
-	userID, exists := c.Get("userId")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		utilities.ShowMessage(c, http.StatusUnauthorized, "User not authenticated")
 		return
