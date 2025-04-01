@@ -170,11 +170,7 @@ func (r *ProjectRepository) GetNextAvailableNumber() (int64, error) {
 // GetProjectByID retrieves a project by its ID
 func (r *ProjectRepository) GetProjectByID(projectID uuid.UUID) (*models.Project, error) {
 	var project models.Project
-	err := r.db.Preload("Stage").
-		Preload("TechnicalCommittee").
-		Preload("WorkingGroup").
-		Preload("Proposal").
-		Preload("Acceptance").
+	err := r.db.Preload(clause.Associations).
 		First(&project, "id = ?", projectID).Error
 	return &project, err
 }
