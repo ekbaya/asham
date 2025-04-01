@@ -15,6 +15,7 @@ func NewOrganizationService(repo *repository.OrganizationRepository) *Organizati
 }
 
 func (service *OrganizationService) CreateNSB(nsb *models.NationalStandardBody) error {
+	nsb.ID = uuid.New()
 	return service.repo.CreateNSB(nsb)
 }
 
@@ -55,6 +56,7 @@ func (service *OrganizationService) CompleteWorkingGroup(wg *models.WorkingGroup
 }
 
 func (service *OrganizationService) CreateWorkingGroup(wg *models.WorkingGroup) error {
+	wg.ID = uuid.New()
 	return service.repo.CreateWorkingGroup(wg)
 }
 
@@ -63,6 +65,7 @@ func (service *OrganizationService) GetWorkingGroupByID(id string) (*models.Work
 }
 
 func (service *OrganizationService) CreateTaskForce(tf *models.TaskForce) error {
+	tf.ID = uuid.New()
 	return service.repo.CreateTaskForce(tf)
 }
 
@@ -71,6 +74,7 @@ func (service *OrganizationService) GetTaskForceByID(id string) (*models.TaskFor
 }
 
 func (service *OrganizationService) CreateSubCommittee(sc *models.SubCommittee) error {
+	sc.ID = uuid.New()
 	return service.repo.CreateSubCommittee(sc)
 }
 
@@ -79,6 +83,7 @@ func (service *OrganizationService) AddMemberToSubCommittee(sc *models.SubCommit
 }
 
 func (service *OrganizationService) CreateSpecializedCommittee(sc *models.SpecializedCommittee) error {
+	sc.ID = uuid.New()
 	return service.repo.CreateSpecializedCommittee(sc)
 }
 
