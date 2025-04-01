@@ -237,9 +237,8 @@ func (r *ProjectRepository) FindProjects(params map[string]interface{}, limit, o
 	}
 
 	// Get projects with pagination
-	err := query.Preload("Stage").
-		Preload("TechnicalCommittee").
-		Preload("WorkingGroup").
+	err := query.
+		Preload(clause.Associations).
 		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).
