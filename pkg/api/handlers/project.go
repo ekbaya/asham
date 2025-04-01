@@ -46,12 +46,12 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		return
 	}
 
-	userUUID, ok := userID.(uuid.UUID)
+	userIDStr, ok := userID.(*string)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
 		return
 	}
-	payload.MemberID = &userUUID
+	payload.MemberID = userIDStr
 
 	err := h.projectService.CreateProject(&payload)
 	if err != nil {

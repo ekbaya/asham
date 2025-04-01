@@ -17,8 +17,8 @@ const (
 // ProjectStageHistory tracks the history of stages a project has gone through
 type ProjectStageHistory struct {
 	ID        uuid.UUID  `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
-	ProjectID uuid.UUID  `json:"project_id" gorm:"type:uuid"`
-	StageID   uuid.UUID  `json:"stage_id" gorm:"type:uuid"`
+	ProjectID string     `json:"project_id" gorm:"type:uuid"`
+	StageID   string     `json:"stage_id" gorm:"type:uuid"`
 	Stage     *Stage     `json:"stage"`
 	StartedAt time.Time  `json:"started_at"`
 	EndedAt   *time.Time `json:"ended_at"` // Null until the project moves to a new stage
@@ -29,7 +29,7 @@ type ProjectStageHistory struct {
 
 type Project struct {
 	ID                   uuid.UUID             `json:"id"`
-	MemberID             *uuid.UUID            `json:"-"`
+	MemberID             *string               `json:"-"`
 	Member               *Member               `json:"creator"`
 	Number               int64                 `json:"number"`
 	PartNo               int64                 `json:"part_number"`
@@ -38,11 +38,11 @@ type Project struct {
 	ReferenceSuffix      string                `json:"reference_suffix"`
 	Title                string                `json:"title" binding:"required"`
 	Description          string                `json:"description" binding:"required"`
-	TechnicalCommitteeID uuid.UUID             `json:"technical_committee_id"`
+	TechnicalCommitteeID string                `json:"technical_committee_id"`
 	TechnicalCommittee   *TechnicalCommittee   `json:"committee"`
-	WorkingGroupID       uuid.UUID             `json:"working_group_id"`
+	WorkingGroupID       string                `json:"working_group_id"`
 	WorkingGroup         *WorkingGroup         `json:"working_group"`
-	StageID              *uuid.UUID            `json:"stage_id"`                // Current stage ID
+	StageID              *string               `json:"stage_id"`                // Current stage ID
 	Stage                *Stage                `json:"stage"`                   // Current stage
 	StageHistory         []ProjectStageHistory `json:"stage_history,omitempty"` // History of all stages
 	Timeframe            int                   `json:"time_frame"`              // Timeframe In Months

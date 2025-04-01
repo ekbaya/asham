@@ -23,7 +23,7 @@ func (r *ProjectRepository) CreateProject(project *models.Project) error {
 		now := time.Now()
 		stageHistory := models.ProjectStageHistory{
 			ID:        uuid.New(),
-			ProjectID: project.ID,
+			ProjectID: project.ID.String(),
 			StageID:   *project.StageID,
 			StartedAt: now,
 			CreatedAt: now,
@@ -65,8 +65,8 @@ func (r *ProjectRepository) UpdateProjectStage(projectID uuid.UUID, newStageID u
 	// Add new stage to history
 	stageHistory := models.ProjectStageHistory{
 		ID:        uuid.New(),
-		ProjectID: projectID,
-		StageID:   newStageID,
+		ProjectID: projectID.String(),
+		StageID:   newStageID.String(),
 		StartedAt: now,
 		Notes:     notes,
 		CreatedAt: now,
