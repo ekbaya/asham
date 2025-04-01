@@ -31,7 +31,7 @@ type Project struct {
 	ID                   uuid.UUID             `json:"id"`
 	MemberID             *uuid.UUID            `json:"-"`
 	Member               *Member               `json:"creator"`
-	Number               int64                 `json:"number" binding:"required"`
+	Number               int64                 `json:"number"`
 	PartNo               int64                 `json:"part_number"`
 	EditionNo            int64                 `json:"edition_number"`
 	Reference            string                `json:"reference"`
