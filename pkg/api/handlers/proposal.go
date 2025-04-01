@@ -41,18 +41,35 @@ func (h *ProposalHandler) CreateProposal(c *gin.Context) {
 		return
 	}
 
-	// Extract form data
+	// Create a new proposal and manually extract fields
 	var payload models.Proposal
 
-	// Bind form fields to proposal struct
-	if err := c.ShouldBind(&payload); err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if ok {
-			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
-			return
-		}
-		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+	// Extract basic string fields
+	payload.ProjectID = c.PostForm("project_id")
+	payload.FullTitle = c.PostForm("full_title")
+	payload.Scope = c.PostForm("scope")
+	payload.Justification = c.PostForm("justification")
+	payload.EstimatedTime = c.PostForm("estimated_time")
+	payload.ProposedDeadline = c.PostForm("proposed_deadline")
+	payload.ExistingIntlStandardDetails = c.PostForm("existing_intl_standard_details")
+	payload.ReasonIfNotSuitable = c.PostForm("reason_if_not_suitable")
+	payload.ExistingLegislation = c.PostForm("existing_legislation")
+	payload.LegislationStatus = c.PostForm("legislation_status")
+	payload.LegislationDetails = c.PostForm("legislation_details")
+	payload.ConflictWithPatents = c.PostForm("conflict_with_patents")
+	payload.PatentDetails = c.PostForm("patent_details")
+
+	// Extract boolean fields
+	payload.ExistingIntlStandard = c.PostForm("existing_intl_standard") == "true"
+	payload.SuitableForEndorsement = c.PostForm("suitable_for_endorsement") == "true"
+	payload.SuitableForReference = c.PostForm("suitable_for_reference") == "true"
+	payload.WillParticipateInWork = c.PostForm("will_participate_in_work") == "true"
+	payload.WillUndertakeSecretariat = c.PostForm("will_undertake_secretariat") == "true"
+	payload.WillUndertakePrepWork = c.PostForm("will_undertake_prep_work") == "true"
+
+	// Validate required fields
+	if payload.ProjectID == "" {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Project ID is required")
 		return
 	}
 
@@ -65,7 +82,7 @@ func (h *ProposalHandler) CreateProposal(c *gin.Context) {
 		// Generate a unique filename
 		filename := uuid.New().String() + filepath.Ext(header.Filename)
 
-		// Define upload path (adjust as needed for your application)
+		// Define upload path
 		uploadPath := "./uploads/" + filename
 
 		// Create uploads directory if it doesn't exist

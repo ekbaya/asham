@@ -7,16 +7,14 @@ import (
 )
 
 type Proposal struct {
-	ID             uuid.UUID             `json:"id"`
-	ProjectID      string                `json:"project_id" binding:"required"`
-	Project        *Project              `json:"-"`
-	CreatedByID    string                `json:"-"`
-	CreatedBy      *Member               `json:"created_by"`
-	ProposingNSBID *string               `json:"proposing_nsb_id" binding:"required"`
-	ProposingNSB   *NationalStandardBody `json:"proposing_nsb"`
-	FullTitle      string                `json:"full_title" example:"Milk Quality and Safety Standard"`
-	Scope          string                `json:"scope" example:"Defines requirements for milk quality"`
-	Justification  string                `json:"justification" example:"To enhance milk safety and market access"`
+	ID            uuid.UUID `json:"id"`
+	ProjectID     string    `json:"project_id" binding:"required"`
+	Project       *Project  `json:"-"`
+	CreatedByID   string    `json:"-"`
+	CreatedBy     *Member   `json:"created_by"`
+	FullTitle     string    `json:"full_title" example:"Milk Quality and Safety Standard"`
+	Scope         string    `json:"scope" example:"Defines requirements for milk quality"`
+	Justification string    `json:"justification" example:"To enhance milk safety and market access"`
 	// @Description Estimated time for technical project (section 4a)
 	EstimatedTime string `json:"estimated_time" example:"12 months"`
 	// @Description Proposed deadline for FDARS submission (section 4b)
