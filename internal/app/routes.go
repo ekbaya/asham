@@ -58,6 +58,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.POST("/nsbs", organizationHandler.CreateNSB)
 		organization.GET("/nsbs", organizationHandler.FetchNSBs)
 		organization.POST("/committee", organizationHandler.CreateCommittee)
+		organization.GET("/technical_committee", organizationHandler.FetchTechnicalCommittees)
 		organization.GET("/committee/:type/:id", organizationHandler.GetCommitteeByID)
 		organization.PUT("/committee", organizationHandler.UpdateCommittee)
 		organization.DELETE("/committee/:type/:id", organizationHandler.DeleteCommittee)

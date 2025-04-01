@@ -362,6 +362,15 @@ func (h *OrganizationHandler) GetCommitteeWorkingGroups(c *gin.Context) {
 	c.JSON(http.StatusOK, wg)
 }
 
+func (h *OrganizationHandler) FetchTechnicalCommittees(c *gin.Context) {
+	committees, err := h.organizationService.FetchTechnicalCommittees()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Committee not found")
+		return
+	}
+	c.JSON(http.StatusOK, committees)
+}
+
 func (h *OrganizationHandler) CreateTaskForce(c *gin.Context) {
 	var tf models.TaskForce
 	if err := c.ShouldBindJSON(&tf); err != nil {

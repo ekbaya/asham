@@ -46,6 +46,10 @@ func (service *OrganizationService) GetCommitteeWorkingGroups(committeeID string
 	return service.repo.GetCommitteeWorkingGroups(committeeID)
 }
 
+func (service *OrganizationService) FetchTechnicalCommittees() (*[]models.TechnicalCommittee, error) {
+	return service.repo.FetchTechnicalCommittees()
+}
+
 func (service *OrganizationService) CompleteWorkingGroup(wg *models.WorkingGroup) error {
 	return service.repo.CompleteWorkingGroup(wg)
 }

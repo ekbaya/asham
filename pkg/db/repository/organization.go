@@ -86,6 +86,12 @@ func (r *OrganizationRepository) CompleteWorkingGroup(wg *models.WorkingGroup) e
 	return r.db.Save(wg).Error
 }
 
+func (r *OrganizationRepository) FetchTechnicalCommittees() (*[]models.TechnicalCommittee, error) {
+	var committees []models.TechnicalCommittee
+	err := r.db.Find(&committees).Error
+	return &committees, err
+}
+
 // Working Group Methods
 func (r *OrganizationRepository) CreateWorkingGroup(wg *models.WorkingGroup) error {
 	return r.db.Create(wg).Error
