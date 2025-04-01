@@ -66,7 +66,7 @@ type NSBResponse struct {
 
 	// Response details
 	// @Description Name of the responding NSB
-	RespondingNSBID uuid.UUID             `json:"responding_nsb_id"`
+	RespondingNSBID string                `json:"responding_nsb_id"`
 	RespondingNSB   *NationalStandardBody `json:"responding_nsb"`
 
 	// @Description Name of the person providing the response

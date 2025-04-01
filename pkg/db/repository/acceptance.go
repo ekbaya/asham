@@ -41,8 +41,15 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 			}
 		}
 
+		var member models.Member
+		if err := tx.Where("id = ?", response.ResponderID).First(&member).Error; err != nil {
+			return err
+		}
+
 		// Attach NSBResponse to the existing acceptance
 		response.AcceptanceID = acceptance.ID
+		nsb := member.NationalStandardBodyID
+		response.RespondingNSBID = *nsb
 		if err := tx.Create(response).Error; err != nil {
 			return err
 		}

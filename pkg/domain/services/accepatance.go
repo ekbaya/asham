@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/models"
+	"github.com/google/uuid"
 )
 
 type AcceptanceService struct {
@@ -14,6 +15,7 @@ func NewAcceptanceService(repo *repository.AcceptanceRepository) *AcceptanceServ
 }
 
 func (service *AcceptanceService) CreateNSBResponse(response *models.NSBResponse) error {
+	response.ID = uuid.New()
 	return service.repo.CreateNSBResponse(response)
 }
 
