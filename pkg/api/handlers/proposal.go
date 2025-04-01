@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"os"
@@ -44,28 +45,78 @@ func (h *ProposalHandler) CreateProposal(c *gin.Context) {
 	// Create a new proposal and manually extract fields
 	var payload models.Proposal
 
-	// Extract basic string fields
-	payload.ProjectID = c.PostForm("project_id")
-	payload.FullTitle = c.PostForm("full_title")
-	payload.Scope = c.PostForm("scope")
-	payload.Justification = c.PostForm("justification")
-	payload.EstimatedTime = c.PostForm("estimated_time")
-	payload.ProposedDeadline = c.PostForm("proposed_deadline")
-	payload.ExistingIntlStandardDetails = c.PostForm("existing_intl_standard_details")
-	payload.ReasonIfNotSuitable = c.PostForm("reason_if_not_suitable")
-	payload.ExistingLegislation = c.PostForm("existing_legislation")
-	payload.LegislationStatus = c.PostForm("legislation_status")
-	payload.LegislationDetails = c.PostForm("legislation_details")
-	payload.ConflictWithPatents = c.PostForm("conflict_with_patents")
-	payload.PatentDetails = c.PostForm("patent_details")
+	// Extract basic string fields from multipart form
+	form := c.Request.MultipartForm
+	if form != nil && form.Value != nil {
+		// Extract string fields
+		if values, ok := form.Value["project_id"]; ok && len(values) > 0 {
+			payload.ProjectID = values[0]
+		}
+		if values, ok := form.Value["full_title"]; ok && len(values) > 0 {
+			payload.FullTitle = values[0]
+		}
+		if values, ok := form.Value["scope"]; ok && len(values) > 0 {
+			payload.Scope = values[0]
+		}
+		if values, ok := form.Value["justification"]; ok && len(values) > 0 {
+			payload.Justification = values[0]
+		}
+		if values, ok := form.Value["estimated_time"]; ok && len(values) > 0 {
+			payload.EstimatedTime = values[0]
+		}
+		if values, ok := form.Value["proposed_deadline"]; ok && len(values) > 0 {
+			payload.ProposedDeadline = values[0]
+		}
+		if values, ok := form.Value["existing_intl_standard_details"]; ok && len(values) > 0 {
+			payload.ExistingIntlStandardDetails = values[0]
+		}
+		if values, ok := form.Value["reason_if_not_suitable"]; ok && len(values) > 0 {
+			payload.ReasonIfNotSuitable = values[0]
+		}
+		if values, ok := form.Value["existing_legislation"]; ok && len(values) > 0 {
+			payload.ExistingLegislation = values[0]
+		}
+		if values, ok := form.Value["legislation_status"]; ok && len(values) > 0 {
+			payload.LegislationStatus = values[0]
+		}
+		if values, ok := form.Value["legislation_details"]; ok && len(values) > 0 {
+			payload.LegislationDetails = values[0]
+		}
+		if values, ok := form.Value["conflict_with_patents"]; ok && len(values) > 0 {
+			payload.ConflictWithPatents = values[0]
+		}
+		if values, ok := form.Value["patent_details"]; ok && len(values) > 0 {
+			payload.PatentDetails = values[0]
+		}
 
-	// Extract boolean fields
-	payload.ExistingIntlStandard = c.PostForm("existing_intl_standard") == "true"
-	payload.SuitableForEndorsement = c.PostForm("suitable_for_endorsement") == "true"
-	payload.SuitableForReference = c.PostForm("suitable_for_reference") == "true"
-	payload.WillParticipateInWork = c.PostForm("will_participate_in_work") == "true"
-	payload.WillUndertakeSecretariat = c.PostForm("will_undertake_secretariat") == "true"
-	payload.WillUndertakePrepWork = c.PostForm("will_undertake_prep_work") == "true"
+		// Extract boolean fields
+		if values, ok := form.Value["existing_intl_standard"]; ok && len(values) > 0 {
+			payload.ExistingIntlStandard = values[0] == "true"
+		}
+		if values, ok := form.Value["suitable_for_endorsement"]; ok && len(values) > 0 {
+			payload.SuitableForEndorsement = values[0] == "true"
+		}
+		if values, ok := form.Value["suitable_for_reference"]; ok && len(values) > 0 {
+			payload.SuitableForReference = values[0] == "true"
+		}
+		if values, ok := form.Value["will_participate_in_work"]; ok && len(values) > 0 {
+			payload.WillParticipateInWork = values[0] == "true"
+		}
+		if values, ok := form.Value["will_undertake_secretariat"]; ok && len(values) > 0 {
+			payload.WillUndertakeSecretariat = values[0] == "true"
+		}
+		if values, ok := form.Value["will_undertake_prep_work"]; ok && len(values) > 0 {
+			payload.WillUndertakePrepWork = values[0] == "true"
+		}
+
+		// Handle referenced standards (assuming they're coming as JSON array in a field)
+		if values, ok := form.Value["referenced_standards_json"]; ok && len(values) > 0 && values[0] != "" {
+			var references []models.Document
+			if err := json.Unmarshal([]byte(values[0]), &references); err == nil {
+				payload.ReferencedStandards = &references
+			}
+		}
+	}
 
 	// Validate required fields
 	if payload.ProjectID == "" {
@@ -74,41 +125,45 @@ func (h *ProposalHandler) CreateProposal(c *gin.Context) {
 	}
 
 	// Handle file upload for draft text attachment
-	file, header, err := c.Request.FormFile("draft_text_attachment")
-	if err == nil {
-		// File was uploaded
-		defer file.Close()
+	if form != nil && form.File != nil {
+		if fileHeaders, ok := form.File["draft_text_attachment"]; ok && len(fileHeaders) > 0 {
+			header := fileHeaders[0]
+			file, err := header.Open()
+			if err == nil {
+				defer file.Close()
 
-		// Generate a unique filename
-		filename := uuid.New().String() + filepath.Ext(header.Filename)
+				// Generate a unique filename
+				filename := uuid.New().String() + filepath.Ext(header.Filename)
 
-		// Define upload path
-		uploadPath := "./uploads/" + filename
+				// Define upload path
+				uploadPath := "./uploads/" + filename
 
-		// Create uploads directory if it doesn't exist
-		if err := os.MkdirAll("./uploads", 0755); err != nil {
-			utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create upload directory: "+err.Error())
-			return
+				// Create uploads directory if it doesn't exist
+				if err := os.MkdirAll("./uploads", 0755); err != nil {
+					utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create upload directory: "+err.Error())
+					return
+				}
+
+				// Create the destination file
+				out, err := os.Create(uploadPath)
+				if err != nil {
+					utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create file: "+err.Error())
+					return
+				}
+				defer out.Close()
+
+				// Copy the uploaded file to the destination file
+				_, err = io.Copy(out, file)
+				if err != nil {
+					utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to save file: "+err.Error())
+					return
+				}
+
+				// Set the file URL in the proposal
+				payload.DraftTextAttachmentURL = "/uploads/" + filename
+				payload.IsDraftTextAttached = true
+			}
 		}
-
-		// Create the destination file
-		out, err := os.Create(uploadPath)
-		if err != nil {
-			utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create file: "+err.Error())
-			return
-		}
-		defer out.Close()
-
-		// Copy the uploaded file to the destination file
-		_, err = io.Copy(out, file)
-		if err != nil {
-			utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to save file: "+err.Error())
-			return
-		}
-
-		// Set the file URL in the proposal
-		payload.DraftTextAttachmentURL = "/uploads/" + filename
-		payload.IsDraftTextAttached = true
 	}
 
 	// Set creator ID from authenticated user
@@ -117,7 +172,6 @@ func (h *ProposalHandler) CreateProposal(c *gin.Context) {
 		utilities.ShowMessage(c, http.StatusUnauthorized, "User not authenticated")
 		return
 	}
-
 	payload.CreatedByID = userID.(string)
 
 	// Validate project exists
