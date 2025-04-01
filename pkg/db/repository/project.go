@@ -155,7 +155,7 @@ func (r *ProjectRepository) FindProjectsByStageTimeline(stageID uuid.UUID, start
 	return projects, nil
 }
 
-func (r *ProjectRepository) Exists(projectID uuid.UUID) (bool, error) {
+func (r *ProjectRepository) Exists(projectID string) (bool, error) {
 	var count int64
 	err := r.db.Model(&models.Project{}).Where("id = ?", projectID).Count(&count).Error
 	return count > 0, err

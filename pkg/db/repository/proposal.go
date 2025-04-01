@@ -211,7 +211,7 @@ func (r *ProposalRepository) Search(query string, limit, offset int) ([]models.P
 }
 
 // Exists checks if a proposal already exists for a given project
-func (r *ProposalRepository) Exists(projectID uuid.UUID) (bool, error) {
+func (r *ProposalRepository) Exists(projectID string) (bool, error) {
 	var count int64
 	err := r.db.Model(&models.Proposal{}).Where("project_id = ?", projectID).Count(&count).Error
 	return count > 0, err
@@ -260,7 +260,7 @@ func (r *ProposalRepository) GetProposalCountByNSB() (map[uuid.UUID]int64, error
 
 // Transfer transfers a proposal from one project to another
 // This is a special operation that maintains the one-proposal-per-project constraint
-func (r *ProposalRepository) Transfer(proposalID uuid.UUID, newProjectID uuid.UUID) error {
+func (r *ProposalRepository) Transfer(proposalID uuid.UUID, newProjectID string) error {
 	// Start a transaction
 	tx := r.db.Begin()
 	if tx.Error != nil {

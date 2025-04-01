@@ -58,7 +58,7 @@ func (service *ProposalService) Search(query string, limit, offset int) ([]model
 	return service.repo.Search(query, limit, offset)
 }
 
-func (service *ProposalService) Exists(projectID uuid.UUID) (bool, error) {
+func (service *ProposalService) Exists(projectID string) (bool, error) {
 	return service.repo.Exists(projectID)
 }
 
@@ -74,6 +74,6 @@ func (service *ProposalService) GetProposalCountByNSB() (map[uuid.UUID]int64, er
 	return service.repo.GetProposalCountByNSB()
 }
 
-func (service *ProposalService) Transfer(proposalID uuid.UUID, newProjectID uuid.UUID) error {
+func (service *ProposalService) Transfer(proposalID uuid.UUID, newProjectID string) error {
 	return service.repo.Transfer(proposalID, newProjectID)
 }

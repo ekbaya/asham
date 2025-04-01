@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -32,8 +35,17 @@ func NewProposalHandler(
 }
 
 func (h *ProposalHandler) CreateProposal(c *gin.Context) {
+	// Parse multipart form with 10 MB max memory
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Failed to parse form: "+err.Error())
+		return
+	}
+
+	// Extract form data
 	var payload models.Proposal
-	if err := c.ShouldBindJSON(&payload); err != nil {
+
+	// Bind form fields to proposal struct
+	if err := c.ShouldBind(&payload); err != nil {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
@@ -44,18 +56,52 @@ func (h *ProposalHandler) CreateProposal(c *gin.Context) {
 		return
 	}
 
+	// Handle file upload for draft text attachment
+	file, header, err := c.Request.FormFile("draft_text_attachment")
+	if err == nil {
+		// File was uploaded
+		defer file.Close()
+
+		// Generate a unique filename
+		filename := uuid.New().String() + filepath.Ext(header.Filename)
+
+		// Define upload path (adjust as needed for your application)
+		uploadPath := "./uploads/" + filename
+
+		// Create uploads directory if it doesn't exist
+		if err := os.MkdirAll("./uploads", 0755); err != nil {
+			utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create upload directory: "+err.Error())
+			return
+		}
+
+		// Create the destination file
+		out, err := os.Create(uploadPath)
+		if err != nil {
+			utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create file: "+err.Error())
+			return
+		}
+		defer out.Close()
+
+		// Copy the uploaded file to the destination file
+		_, err = io.Copy(out, file)
+		if err != nil {
+			utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to save file: "+err.Error())
+			return
+		}
+
+		// Set the file URL in the proposal
+		payload.DraftTextAttachmentURL = "/uploads/" + filename
+		payload.IsDraftTextAttached = true
+	}
+
 	// Set creator ID from authenticated user
 	userID, exists := c.Get("userId")
 	if !exists {
 		utilities.ShowMessage(c, http.StatusUnauthorized, "User not authenticated")
 		return
 	}
-	creatorID, err := uuid.Parse(userID.(string))
-	if err != nil {
-		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid user ID")
-		return
-	}
-	payload.CreatedByID = creatorID
+
+	payload.CreatedByID = userID.(string)
 
 	// Validate project exists
 	projectExists, err := h.projectService.Exists(payload.ProjectID)
@@ -458,7 +504,7 @@ func (h *ProposalHandler) TransferProposal(c *gin.Context) {
 		return
 	}
 
-	newProjectID, err := uuid.Parse(payload.ProjectID)
+	newProjectID := payload.ProjectID
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid project ID format")
 		return

@@ -41,7 +41,7 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 	return service.repo.CreateProject(project)
 }
 
-func (service *ProjectService) Exists(projectID uuid.UUID) (bool, error) {
+func (service *ProjectService) Exists(projectID string) (bool, error) {
 	return service.repo.Exists(projectID)
 }
 

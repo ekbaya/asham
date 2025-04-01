@@ -8,11 +8,11 @@ import (
 
 type Proposal struct {
 	ID             uuid.UUID             `json:"id"`
-	ProjectID      uuid.UUID             `json:"project_id" binding:"required"`
+	ProjectID      string                `json:"project_id" binding:"required"`
 	Project        *Project              `json:"-"`
-	CreatedByID    uuid.UUID             `json:"-"`
+	CreatedByID    string                `json:"-"`
 	CreatedBy      *Member               `json:"created_by"`
-	ProposingNSBID uuid.UUID             `json:"proposing_nsb_id" binding:"required"`
+	ProposingNSBID *string               `json:"proposing_nsb_id" binding:"required"`
 	ProposingNSB   *NationalStandardBody `json:"proposing_nsb"`
 	FullTitle      string                `json:"full_title" example:"Milk Quality and Safety Standard"`
 	Scope          string                `json:"scope" example:"Defines requirements for milk quality"`
@@ -41,7 +41,8 @@ type Proposal struct {
 
 	// Draft text
 	// @Description Is draft text or outline attached? (section 5c)
-	IsDraftTextAttached bool `json:"is_draft_text_attached" example:"true"`
+	IsDraftTextAttached    bool   `json:"is_draft_text_attached" example:"true"`
+	DraftTextAttachmentURL string `json:"draft_url"`
 
 	// Legislation
 	// @Description Existing national legislation (section 6)
