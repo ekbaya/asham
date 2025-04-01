@@ -18,19 +18,17 @@ func NewProjectRepository(db *gorm.DB) *ProjectRepository {
 }
 
 func (r *ProjectRepository) CreateProject(project *models.Project) error {
-	// If project has a stage, create initial stage history entry
-	if project.StageID != nil {
-		now := time.Now()
-		stageHistory := models.ProjectStageHistory{
-			ID:        uuid.New(),
-			ProjectID: project.ID.String(),
-			StageID:   *project.StageID,
-			StartedAt: now,
-			CreatedAt: now,
-			UpdatedAt: now,
-		}
-		project.StageHistory = append(project.StageHistory, stageHistory)
+	// Create initial stage history entry
+	now := time.Now()
+	stageHistory := models.ProjectStageHistory{
+		ID:        uuid.New(),
+		ProjectID: project.ID.String(),
+		StageID:   project.StageID,
+		StartedAt: now,
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
+	project.StageHistory = append(project.StageHistory, stageHistory)
 
 	return r.db.Create(project).Error
 }
@@ -51,15 +49,12 @@ func (r *ProjectRepository) UpdateProjectStage(projectID uuid.UUID, newStageID u
 
 	now := time.Now()
 
-	// If there's a current stage, mark it as ended in the history
-	if project.StageID != nil {
-		// Find the current active stage history entry and mark it as ended
-		if err := tx.Model(&models.ProjectStageHistory{}).
-			Where("project_id = ? AND stage_id = ? AND ended_at IS NULL", projectID, *project.StageID).
-			Update("ended_at", now).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
+	// Find the current active stage history entry and mark it as ended
+	if err := tx.Model(&models.ProjectStageHistory{}).
+		Where("project_id = ? AND stage_id = ? AND ended_at IS NULL", projectID, project.StageID).
+		Update("ended_at", now).Error; err != nil {
+		tx.Rollback()
+		return err
 	}
 
 	// Add new stage to history
@@ -406,4 +401,10 @@ func (r *ProjectRepository) FetchStages() (*[]models.Stage, error) {
 	var stages []models.Stage
 	err := r.db.Preload(clause.Associations).Find(&stages).Error
 	return &stages, err
+}
+
+func (r *ProjectRepository) GetStageByNumber(number int16) (*models.Stage, error) {
+	var stage models.Stage
+	err := r.db.Where("number = ?", number).Preload(clause.Associations).First(&stage).Error
+	return &stage, err
 }

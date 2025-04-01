@@ -32,6 +32,11 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 	// Generate reference number
 	project.Reference = generateProjectReference(project)
 
+	stage, err := service.repo.GetStageByNumber(0)
+
+	// project is at stage 0
+	project.StageID = stage.ID.String()
+
 	// Save project in the repository
 	return service.repo.CreateProject(project)
 }

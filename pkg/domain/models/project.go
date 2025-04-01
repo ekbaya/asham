@@ -42,7 +42,7 @@ type Project struct {
 	TechnicalCommittee   *TechnicalCommittee   `json:"committee"`
 	WorkingGroupID       *string               `json:"working_group_id"`
 	WorkingGroup         *WorkingGroup         `json:"working_group"`
-	StageID              *string               `json:"stage_id"`                // Current stage ID
+	StageID              string                `json:"stage_id"`                // Current stage ID
 	Stage                *Stage                `json:"stage"`                   // Current stage
 	StageHistory         []ProjectStageHistory `json:"stage_history,omitempty"` // History of all stages
 	Timeframe            int                   `json:"time_frame"`              // Timeframe In Months
