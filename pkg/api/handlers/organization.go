@@ -9,6 +9,7 @@ import (
 	"github.com/ekbaya/asham/pkg/utilities"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 type OrganizationHandler struct {
@@ -111,6 +112,12 @@ func (h *OrganizationHandler) CreateCommittee(c *gin.Context) {
 		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid committee type")
 		return
 	}
+
+	// Generate a new UUID for the committee
+	newID := uuid.New().String()
+
+	// Add the ID to the committee data
+	payload.Committee["id"] = newID
 
 	// Map to the correct struct based on Type
 	var committee any
