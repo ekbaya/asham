@@ -68,6 +68,10 @@ func (service *ProjectService) UpdateProjectStage(projectID uuid.UUID, newStageI
 	return service.repo.UpdateProjectStage(projectID, newStageID, notes)
 }
 
+func (service *ProjectService) ApproveProject(projectID string, approved bool, comment, approvedBy string) error {
+	return service.repo.ApproveProject(projectID, approved, comment, approvedBy)
+}
+
 func (service *ProjectService) GetProjectWithStageHistory(projectID uuid.UUID) (*models.Project, error) {
 	return service.repo.GetProjectWithStageHistory(projectID)
 }

@@ -121,7 +121,7 @@ func (h *ProposalHandler) GetProposalByProject(c *gin.Context) {
 	proposal, err := h.proposalService.GetByProjectID(projectID)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			utilities.ShowMessage(c, http.StatusNotFound, "No proposal found for this project")
+			utilities.Show(c, http.StatusOK, "No proposal found for this project", proposal)
 			return
 		}
 		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to retrieve proposal: "+err.Error())

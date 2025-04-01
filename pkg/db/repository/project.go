@@ -179,6 +179,24 @@ func (r *ProjectRepository) UpdateProject(project *models.Project) error {
 	return r.db.Save(project).Error
 }
 
+func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comment, approvedBy string) error {
+	var project models.Project
+
+	// Retrieve the project by ID
+	err := r.db.First(&project, "id = ?", projectID).Error
+	if err != nil {
+		return err
+	}
+
+	// Update approval status and comment
+	project.PWIApproved = approved
+	project.PWIApprovalComment = comment
+	project.ApprovedByID = &approvedBy
+
+	// Save the changes
+	return r.db.Save(&project).Error
+}
+
 func (r *ProjectRepository) DeleteProject(projectID uuid.UUID) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		// Delete related stage history first

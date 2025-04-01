@@ -99,6 +99,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	{
 		// Basic CRUD operations
 		projects.POST("/", projectHandler.CreateProject)
+		projects.POST("/approve", projectHandler.ApproveProject)
 		projects.GET("/:id", projectHandler.GetProjectByID)
 		projects.PUT("/:id", projectHandler.UpdateProject)
 		projects.DELETE("/:id", projectHandler.DeleteProject)

@@ -52,6 +52,8 @@ type Project struct {
 	IsEmergency          bool                  `json:"is_emergency" gorm:"default:false"`
 	PWIApproved          bool                  `json:"pwi_approved" gorm:"default:false"`
 	PWIApprovalComment   string                `json:"pwi_approval_comment"`
+	ApprovedByID         *string               `json:"-"`
+	ApprovedBy           *Member               `json:"approved_by"`
 	Proposal             *Proposal             `json:"proposal"`
 	Acceptance           *Acceptance           `json:"acceptance"`
 	Comments             []CommentObservation  `json:"comments,omitempty"`
