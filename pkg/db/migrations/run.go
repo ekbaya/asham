@@ -33,5 +33,6 @@ func RunMigrations(db *gorm.DB) error {
 		&models.Proposal{},
 		&models.Acceptance{},
 		&models.NSBResponse{},
+		&models.CommentObservation{},
 	)
 }
