@@ -12,7 +12,8 @@ import (
 )
 
 type MemberService struct {
-	repo *repository.MemberRepository
+	repo         *repository.MemberRepository
+	emailService *EmailService
 }
 
 func NewMemberService(repo *repository.MemberRepository) *MemberService {
@@ -20,8 +21,14 @@ func NewMemberService(repo *repository.MemberRepository) *MemberService {
 }
 
 func (service *MemberService) CreateMember(member *models.Member) error {
+	// Generate a random password
+	clearPassword, err := utilities.GenerateRandomPassword(12)
+	if err != nil {
+		return errors.New("failed to generate password")
+	}
+
 	// Hash password
-	hashedPassword, err := utilities.HashPassword("secret")
+	hashedPassword, err := utilities.HashPassword(clearPassword)
 	if err != nil {
 		return errors.New("failed to hash password")
 	}
@@ -30,7 +37,14 @@ func (service *MemberService) CreateMember(member *models.Member) error {
 	member.HashedPassword = hashedPassword
 	member.ID = uuid.New()
 	member.CreatedAt = time.Now()
-	return service.repo.CreateMember(member)
+	service.repo.CreateMember(member)
+
+	// Send welcome email with password
+	err = service.emailService.SendWelcomeEmail(member.Email, member.FirstName, clearPassword)
+	if err != nil {
+		return errors.New("member created but failed to send email: " + err.Error())
+	}
+	return nil
 }
 
 func (service *MemberService) Login(email, password string) (string, string, error) {

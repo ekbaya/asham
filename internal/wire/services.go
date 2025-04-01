@@ -10,6 +10,7 @@ var ServiceSet = wire.NewSet(
 	repository.NewOrganizationRepository,
 	services.NewOrganizationService,
 	repository.NewMemberRepository,
+	GetEmailService(),
 	services.NewMemberService,
 	repository.NewProjectRepository,
 	services.NewProjectService,
@@ -22,3 +23,15 @@ var ServiceSet = wire.NewSet(
 	repository.NewCommentRepository,
 	services.NewCommentService,
 )
+
+func GetEmailService() *services.EmailService {
+	emailConfig := services.EmailConfig{
+		Host:     "smtp.example.com",
+		Port:     587,
+		Username: "your-username",
+		Password: "your-password",
+		From:     "noreply@yourservice.com",
+	}
+	emailService := services.NewEmailService(emailConfig)
+	return emailService
+}
