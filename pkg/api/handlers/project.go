@@ -46,12 +46,8 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		return
 	}
 
-	userIDStr, ok := userID.(*string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
-		return
-	}
-	payload.MemberID = userIDStr
+	userIDStr := userID.(string)
+	payload.MemberID = &userIDStr
 
 	err := h.projectService.CreateProject(&payload)
 	if err != nil {
