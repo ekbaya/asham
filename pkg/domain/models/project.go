@@ -50,6 +50,8 @@ type Project struct {
 	VisibleOnLibrary     bool                  `json:"visible_on_library" gorm:"default:true"`
 	PricePerPage         float64               `json:"price_per_page"`
 	IsEmergency          bool                  `json:"is_emergency" gorm:"default:false"`
+	PWIApproved          bool                  `json:"pwi_approved" gorm:"default:false"`
+	PWIApprovalComment   string                `json:"pwi_approval_comment"`
 	Proposal             *Proposal             `json:"proposal"`
 	Acceptance           *Acceptance           `json:"acceptance"`
 	Comments             []CommentObservation  `json:"comments,omitempty"`
