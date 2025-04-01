@@ -26,24 +26,105 @@ func NewProposalRepository(db *gorm.DB) *ProposalRepository {
 
 // Create adds a new proposal to the database, ensuring only one proposal exists per project
 func (r *ProposalRepository) Create(proposal *models.Proposal) error {
+	// Start a transaction
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	// Defer a rollback in case anything fails
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	// Check if a proposal already exists for this project
 	var count int64
-	if err := r.db.Model(&models.Proposal{}).Where("project_id = ?", proposal.ProjectID).Count(&count).Error; err != nil {
+	if err := tx.Model(&models.Proposal{}).Where("project_id = ?", proposal.ProjectID).Count(&count).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 
 	if count > 0 {
+		tx.Rollback()
 		return ErrProposalAlreadyExists
 	}
 
-	// Proceed with creation since no proposal exists for this project
+	// Prepare proposal data
 	if proposal.ID == uuid.Nil {
 		proposal.ID = uuid.New()
 	}
 	if proposal.CreatedAt.IsZero() {
 		proposal.CreatedAt = time.Now()
 	}
-	return r.db.Create(proposal).Error
+
+	// Find the initial stage (number = 1)
+	var stage models.Stage
+	if err := tx.Where("number = ?", 1).First(&stage).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Create the proposal first
+	if err := tx.Create(proposal).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Update the project stage
+	if err := r.updateProjectStageWithTx(tx, proposal.ProjectID, stage.ID.String(), "Proposal submitted"); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Commit the transaction
+	return tx.Commit().Error
+}
+
+// Helper method to update project stage within a transaction
+func (r *ProposalRepository) updateProjectStageWithTx(tx *gorm.DB, projectID string, newStageID string, notes string) error {
+	// Get current project
+	var project models.Project
+	if err := tx.Preload("StageHistory").First(&project, "id = ?", projectID).Error; err != nil {
+		return err
+	}
+
+	now := time.Now()
+
+	// Find the current active stage history entry and mark it as ended
+	if err := tx.Model(&models.ProjectStageHistory{}).
+		Where("project_id = ? AND stage_id = ? AND ended_at IS NULL", projectID, project.StageID).
+		Update("ended_at", now).Error; err != nil {
+		return err
+	}
+
+	// Add new stage to history
+	stageHistory := models.ProjectStageHistory{
+		ID:        uuid.New(),
+		ProjectID: projectID,
+		StageID:   newStageID,
+		StartedAt: now,
+		Notes:     notes,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	if err := tx.Create(&stageHistory).Error; err != nil {
+		return err
+	}
+
+	// Update current stage of the project
+	if err := tx.Model(&models.Project{}).
+		Where("id = ?", projectID).
+		Updates(map[string]interface{}{
+			"stage_id":   newStageID,
+			"updated_at": now,
+		}).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetByID retrieves a proposal by its ID with all associated entities
