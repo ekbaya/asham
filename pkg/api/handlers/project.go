@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -67,9 +68,14 @@ func (h *ProjectHandler) GetNextAvailableNumber(c *gin.Context) {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	// Format the number as a 3-digit string
+	formattedNumber := fmt.Sprintf("%03d", number)
+	formattedPrevious := fmt.Sprintf("%03d", number-1)
+
 	c.JSON(http.StatusOK, map[string]any{
-		"number":   number,
-		"previous": number - 1,
+		"number":   formattedNumber,
+		"previous": formattedPrevious,
 	})
 }
 
