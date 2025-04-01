@@ -7,8 +7,8 @@ import (
 // Committee is a base struct for different committees
 type Committee struct {
 	ID            uuid.UUID  `json:"id"`
-	Name          string     `json:"name"`
-	Code          int64      `json:"code"`
+	Name          string     `json:"name" binding:"required"`
+	Code          string     `json:"code" binding:"required"`
 	ChairpersonId *uuid.UUID `json:"chairperson_id"`
 	Chairperson   *Member    `json:"chairperson"`
 	SecretaryId   *uuid.UUID `json:"secretary_id"`
