@@ -7,6 +7,7 @@ import (
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var (
@@ -149,9 +150,9 @@ func (r *ProposalRepository) GetByID(id uuid.UUID) (*models.Proposal, error) {
 // Since there's only one proposal per project, this returns a single proposal or an error
 func (r *ProposalRepository) GetByProjectID(projectID uuid.UUID) (*models.Proposal, error) {
 	var proposal models.Proposal
-	err := r.db.Preload("CreatedBy").
-		Preload("ProposingNSB").
-		Preload("ReferencedStandards").
+	err := r.db.
+		Preload(clause.Associations).
+		Preload("CreatedBy.NationalStandardBody").
 		Where("project_id = ?", projectID).
 		First(&proposal).Error
 
