@@ -6,6 +6,7 @@ import (
 
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type OrganizationRepository struct {
@@ -90,6 +91,38 @@ func (r *OrganizationRepository) FetchTechnicalCommittees() (*[]models.Technical
 	var committees []models.TechnicalCommittee
 	err := r.db.Find(&committees).Error
 	return &committees, err
+}
+
+func (r *OrganizationRepository) SearchTechnicalCommittees(params map[string]interface{}) ([]models.TechnicalCommittee, error) {
+	var committees []models.TechnicalCommittee
+	var total int64
+
+	query := r.db.Model(&models.TechnicalCommittee{})
+
+	// Apply filters
+	if name, ok := params["name"].(string); ok && name != "" {
+		query = query.Where("name ILIKE ?", "%"+name+"%")
+	}
+
+	if code, ok := params["code"].(string); ok && code != "" {
+		query = query.Where("code ILIKE ?", "%"+code+"%")
+	}
+
+	if scope, ok := params["scope"].(string); ok && scope != "" {
+		query = query.Where("scope ILIKE ?", "%"+scope+"%")
+	}
+
+	// Get total count
+	if err := query.Count(&total).Error; err != nil {
+		return nil, err
+	}
+
+	// Get projects with pagination
+	err := query.
+		Preload(clause.Associations).
+		Find(&committees).Error
+
+	return committees, err
 }
 
 // Working Group Methods

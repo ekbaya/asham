@@ -23,6 +23,10 @@ func (service *OrganizationService) FetchNSBs() (*[]models.NationalStandardBody,
 	return service.repo.FetchNSBs()
 }
 
+func (service *OrganizationService) SearchTechnicalCommittees(params map[string]interface{}) ([]models.TechnicalCommittee, error) {
+	return service.repo.SearchTechnicalCommittees(params)
+}
+
 func (service *OrganizationService) CreateCommittee(committee any) error {
 	return service.repo.CreateCommittee(committee)
 }
