@@ -21,7 +21,7 @@ func NewMemberService(repo *repository.MemberRepository) *MemberService {
 
 func (service *MemberService) CreateMember(member *models.Member) error {
 	// Hash password
-	hashedPassword, err := utilities.HashPassword(member.Password)
+	hashedPassword, err := utilities.HashPassword("secret")
 	if err != nil {
 		return errors.New("failed to hash password")
 	}

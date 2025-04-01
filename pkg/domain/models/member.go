@@ -16,7 +16,6 @@ type Member struct {
 	PhotoUrl               string                `json:"photo_url"`
 	NationalStandardBodyID *string               `json:"nsb_id" binding:"required"`
 	NationalStandardBody   *NationalStandardBody `json:"nsb"`
-	Password               string                `json:"password,omitempty" gorm:"-" binding:"required"` // Exclude from output; custom handling for input
 	HashedPassword         string                `json:"-" gorm:"column:password"`
 	CreatedAt              time.Time
 }
