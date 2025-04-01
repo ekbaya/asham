@@ -38,9 +38,9 @@ type Project struct {
 	ReferenceSuffix      string                `json:"reference_suffix"`
 	Title                string                `json:"title" binding:"required"`
 	Description          string                `json:"description" binding:"required"`
-	TechnicalCommitteeID string                `json:"technical_committee_id"`
+	TechnicalCommitteeID *string               `json:"technical_committee_id"`
 	TechnicalCommittee   *TechnicalCommittee   `json:"committee"`
-	WorkingGroupID       string                `json:"working_group_id"`
+	WorkingGroupID       *string               `json:"working_group_id"`
 	WorkingGroup         *WorkingGroup         `json:"working_group"`
 	StageID              *string               `json:"stage_id"`                // Current stage ID
 	Stage                *Stage                `json:"stage"`                   // Current stage
