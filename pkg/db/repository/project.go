@@ -180,11 +180,16 @@ func (r *ProjectRepository) UpdateProject(project *models.Project) error {
 }
 
 func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comment, approvedBy string) error {
+	tx := r.db.Begin() // Start a transaction
+	if tx.Error != nil {
+		return tx.Error
+	}
+
 	var project models.Project
 
 	// Retrieve the project by ID
-	err := r.db.First(&project, "id = ?", projectID).Error
-	if err != nil {
+	if err := tx.First(&project, "id = ?", projectID).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -193,8 +198,32 @@ func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comm
 	project.PWIApprovalComment = comment
 	project.ApprovedByID = &approvedBy
 
-	// Save the changes
-	return r.db.Save(&project).Error
+	// Save the updated project
+	if err := tx.Save(&project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Update the current stage as "ended"
+	now := time.Now()
+
+	// Find the active stage and mark it as ended
+	if err := tx.Model(&models.ProjectStageHistory{}).
+		Where("project_id = ? AND stage_id = ? AND ended_at IS NULL", projectID, project.StageID).
+		Update("ended_at", now).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Update the project's current stage status
+	if err := tx.Model(&models.Project{}).
+		Where("id = ?", projectID).
+		Update("updated_at", now).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }
 
 func (r *ProjectRepository) DeleteProject(projectID uuid.UUID) error {
