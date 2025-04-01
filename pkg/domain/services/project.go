@@ -22,6 +22,13 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 	project.ID = uuid.New()
 	project.CreatedAt = time.Now()
 
+	number, err := service.repo.GetNextAvailableNumber()
+	if err != nil {
+		return err
+	}
+
+	project.Number = number + 1
+
 	// Generate reference number
 	project.Reference = generateProjectReference(project)
 
@@ -45,14 +52,7 @@ func (service *ProjectService) Exists(projectID uuid.UUID) (bool, error) {
 // generateProjectReference generates the reference number for a project
 func generateProjectReference(project *models.Project) string {
 	currentYear := time.Now().Year()
-
-	if project.PartNo > 0 && project.TechnicalCommittee != nil {
-		// New Working Drafts: WD/TC NN/XXX/YYYY
-		return fmt.Sprintf("WD/TC %d/%d/%d", project.TechnicalCommittee.Code, project.Number, currentYear)
-	}
-
-	// Revisions: WD/XXX:YYYY
-	return fmt.Sprintf("WD/%d:%d", project.Number, currentYear)
+	return fmt.Sprintf("PWI/%03d:%d", project.Number, currentYear)
 }
 
 func (service *ProjectService) GetNextAvailableNumber() (int64, error) {
