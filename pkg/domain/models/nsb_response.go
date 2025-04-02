@@ -44,12 +44,14 @@ type NSBResponse struct {
 	HasRelevantStandards bool `json:"has_relevant_standards"`
 
 	// @Description References to relevant standards
+	RelevantStandards     []string    `json:"relevant_standards,omitempty" gorm:"-"`
 	RelevantStandardsRefs *[]Document `json:"relevant_standards_refs,omitempty" gorm:"many2many:relevant_standards_refs;"`
 
 	// @Description Indicates if relevant regulations exist
 	HasRelevantRegulations bool `json:"has_relevant_regulations"`
 
 	// @Description References to relevant regulations
+	RelevantRegulations     []string    `json:"relevant_regulations,omitempty" gorm:"-"`
 	RelevantRegulationsRefs *[]Document `json:"relevant_regulations_refs,omitempty" gorm:"many2many:relevant_regulations_refs;"`
 
 	// Comments section

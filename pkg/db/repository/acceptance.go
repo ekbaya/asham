@@ -23,7 +23,7 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 		var acceptance models.Acceptance
 
 		// Check if Acceptance exists for the given project
-		if err := tx.Where("project_id = ?", response.Project).First(&acceptance).Error; err != nil {
+		if err := tx.Where("project_id = ?", response.ProjectID).First(&acceptance).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// Create a new Acceptance if it does not exist
 				acceptance = models.Acceptance{
@@ -50,6 +50,25 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 		nsb := member.NationalStandardBodyID
 		response.RespondingNSBID = *nsb
 		response.NationalTCSecretaryID = member.NationalStandardBody.NationalTCSecretaryID
+
+		// Process relevant standards from string IDs to Document associations
+		if len(response.RelevantStandards) > 0 {
+			var standardDocs []models.Document
+			if err := tx.Where("id IN ?", response.RelevantStandards).Find(&standardDocs).Error; err != nil {
+				return err
+			}
+			response.RelevantStandardsRefs = &standardDocs
+		}
+
+		// Process relevant regulations from string IDs to Document associations
+		if len(response.RelevantRegulations) > 0 {
+			var regulationDocs []models.Document
+			if err := tx.Where("id IN ?", response.RelevantRegulations).Find(&regulationDocs).Error; err != nil {
+				return err
+			}
+			response.RelevantRegulationsRefs = &regulationDocs
+		}
+
 		if err := tx.Create(response).Error; err != nil {
 			return err
 		}
