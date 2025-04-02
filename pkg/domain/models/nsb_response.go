@@ -50,7 +50,7 @@ type NSBResponse struct {
 	HasRelevantRegulations bool `json:"has_relevant_regulations"`
 
 	// @Description References to relevant regulations
-	RelevantRegulationsRefs string `json:"relevant_regulations_refs,omitempty"`
+	RelevantRegulationsRefs *[]Document `json:"relevant_regulations_refs,omitempty" gorm:"many2many:relevant_regulations_refs;"`
 
 	// Comments section
 	// @Description Additional comments from the NSB
