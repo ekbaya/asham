@@ -10,7 +10,7 @@ import (
 )
 
 // Helper method to update project stage within a transaction
-func UpdateProjectStageWithTx(tx *gorm.DB, projectID string, newStageID string, notes string) error {
+func UpdateProjectStageWithTx(tx *gorm.DB, projectID string, newStageID string, notes, currentDoc, newDoc string) error {
 	// Get current project
 	var project models.Project
 	if err := tx.Preload("StageHistory").First(&project, "id = ?", projectID).Error; err != nil {
@@ -42,7 +42,7 @@ func UpdateProjectStageWithTx(tx *gorm.DB, projectID string, newStageID string, 
 	}
 
 	// Change Ref to NWIP
-	reference := strings.Replace(project.Reference, "PWI", "NWIP", -1)
+	reference := strings.Replace(project.Reference, currentDoc, newDoc, -1)
 
 	// Update current stage of the project
 	if err := tx.Model(&models.Project{}).
