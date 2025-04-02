@@ -101,7 +101,7 @@ func (r *AcceptanceRepository) GetNSBResponse(id string) (*models.NSBResponse, e
 
 func (r *AcceptanceRepository) GetNSBResponsesByProjectID(projectID string) ([]models.NSBResponse, error) {
 	var NSBResponses []models.NSBResponse
-	if err := r.db.Where("project_id = ?", projectID).Order("created_at DESC").Find(&NSBResponses).Error; err != nil {
+	if err := r.db.Where("project_id = ?", projectID).Order("created_at DESC").Preload(clause.Associations).Find(&NSBResponses).Error; err != nil {
 		return nil, err
 	}
 	return NSBResponses, nil
