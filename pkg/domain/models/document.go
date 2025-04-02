@@ -8,7 +8,7 @@ import (
 
 type Document struct {
 	ID          uuid.UUID `json:"id"`
-	CreatedByID uuid.UUID `json:"-"`
+	CreatedByID string    `json:"-"`
 	CreatedBy   *Member   `json:"created_by"`
 	Title       string    `json:"title" gorm:"unique;index" binding:"required"`
 	Description string    `json:"description" binding:"required"`

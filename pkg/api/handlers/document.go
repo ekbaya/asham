@@ -35,7 +35,7 @@ func (h *DocumentHandler) CreateDocument(c *gin.Context) {
 
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		utilities.ShowMessage(c, http.StatusUnauthorized, "User not authenticated")
 		return
 	}
 
@@ -43,12 +43,8 @@ func (h *DocumentHandler) CreateDocument(c *gin.Context) {
 	payload.Title = c.PostForm("title")
 	payload.Reference = c.PostForm("reference")
 	payload.Description = c.PostForm("description")
-	uid, ok := userID.(uuid.UUID)
-	if !ok {
-		utilities.ShowMessage(c, http.StatusInternalServerError, "Invalid user ID format")
-		return
-	}
-	payload.CreatedByID = uid
+
+	payload.CreatedByID = userID.(string)
 
 	if payload.Title == "" || payload.Reference == "" {
 		utilities.ShowMessage(c, http.StatusBadRequest, "Title and reference are required fields")
