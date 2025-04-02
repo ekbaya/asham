@@ -27,10 +27,15 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 		return err
 	}
 
+	tc, err := service.repo.GetTCByID(project.TechnicalCommitteeID)
+	if err != nil {
+		return err
+	}
+
 	project.Number = number + 1
 
 	// Generate reference number
-	project.Reference = generateProjectReference(project)
+	project.Reference = generateProjectReference(project, tc.Code)
 
 	stage, err := service.repo.GetStageByNumber(0)
 
@@ -55,9 +60,9 @@ func (service *ProjectService) Exists(projectID string) (bool, error) {
 */
 
 // generateProjectReference generates the reference number for a project
-func generateProjectReference(project *models.Project) string {
+func generateProjectReference(project *models.Project, code string) string {
 	currentYear := time.Now().Year()
-	return fmt.Sprintf("PWI/%03d:%d", project.Number, currentYear)
+	return fmt.Sprintf("PWI/TC %s/%03d/%d", code, project.Number, currentYear)
 }
 
 func (service *ProjectService) GetNextAvailableNumber() (int64, error) {
