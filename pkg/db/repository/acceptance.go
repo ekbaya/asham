@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -235,6 +236,11 @@ func (r *AcceptanceRepository) SetAcceptanceApproval(id string, approved bool) e
 }
 
 func (r *AcceptanceRepository) GetAcceptanceResults(id string) (*models.AcceptanceResults, error) {
+	// Get Project Proposal
+	var proposal models.Proposal
+	if err := r.db.Where("project_id = ?", id).First(&proposal).Error; err != nil {
+		return nil, err
+	}
 	// Find the Acceptance by Project ID
 	var acceptance models.Acceptance
 	if err := r.db.Where("project_id = ?", id).Preload("Submissions").Preload("Submissions.RespondingNSB").First(&acceptance).Error; err != nil {
@@ -311,5 +317,69 @@ func (r *AcceptanceRepository) GetAcceptanceResults(id string) (*models.Acceptan
 	results.Totals.TotalResponses = len(*acceptance.Submissions)
 	results.Totals.ValidResponses = results.Totals.TotalResponses - results.Totals.AbstentionCount
 
+	criteriaMet, comment, err := checkIfCriteriaIsMet(proposal.ExistingIntlStandard, results.IndividualNSBResponses)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if criteria is met
+	results.CriterialMet = criteriaMet
+	results.CriterialComments = comment
+
 	return results, nil
+}
+
+func checkIfCriteriaIsMet(internationalStandard bool, responses []models.IndividualNSBResponse) (bool, string, error) {
+	// Count total P-members voting (excluding abstentions)
+	var totalVotingCount int
+	var participationCount int
+	var favorableVoteCount int
+
+	for _, response := range responses {
+		// Skip abstentions when counting total voting members
+		if response.Abstention {
+			continue
+		}
+
+		totalVotingCount++
+
+		// Count favorable votes (FeasibleYes)
+		if response.FeasibleYes {
+			favorableVoteCount++
+		}
+
+		// Count members willing to participate actively
+		if response.Participation {
+			participationCount++
+		}
+	}
+
+	// If there are no votes, return false
+	if totalVotingCount == 0 {
+		return false, "No valid votes received", nil
+	}
+
+	if internationalStandard {
+		// For international standards: 50% of P-members voting in favor
+		percentageInFavor := float64(favorableVoteCount) / float64(totalVotingCount) * 100
+
+		if percentageInFavor >= 50.0 {
+			return true, "Criteria met: At least 50% of P-members voted in favor", nil
+		} else {
+			return false, fmt.Sprintf("Criteria not met: Only %.1f%% of P-members voted in favor (minimum 50%% required)", percentageInFavor), nil
+		}
+	} else {
+		// For projects requiring preparatory/committee stages:
+		// Need at least 6 P-members voting and at least 3 members willing to participate actively
+
+		if totalVotingCount < 6 {
+			return false, fmt.Sprintf("Criteria not met: Only %d P-members voted (minimum 6 required)", totalVotingCount), nil
+		}
+
+		if participationCount < 3 {
+			return false, fmt.Sprintf("Criteria not met: Only %d members willing to participate actively (minimum 3 required)", participationCount), nil
+		}
+
+		return true, fmt.Sprintf("Criteria met: %d P-members voted and %d members willing to participate actively", totalVotingCount, participationCount), nil
+	}
 }

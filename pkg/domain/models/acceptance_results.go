@@ -6,6 +6,8 @@ type AcceptanceResults struct {
 	ProjectID              string                  `json:"project_id"`
 	IndividualNSBResponses []IndividualNSBResponse `json:"nsb_responses"`
 	Totals                 ResponseTotals          `json:"totals"`
+	CriterialMet           bool                    `json:"criteria_met"`
+	CriterialComments      string                  `json:"criteria_comments"`
 }
 
 // IndividualNSBResponse represents an individual NSB's response for the table
