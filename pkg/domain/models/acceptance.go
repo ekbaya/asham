@@ -81,7 +81,7 @@ type Acceptance struct {
 
 	// Documents to consider
 	// @Description Additional documents relevant to the proposal
-	DocumentsInConsidaration []string    `json:"documents_in_consideration"`
+	DocumentsInConsidaration []string    `json:"documents_in_consideration" gorm:"-"`
 	DocumentsToConsider      *[]Document `json:"documents_to_consider" gorm:"many2many:documents_to_consider;"`
 
 	// Development track selection
