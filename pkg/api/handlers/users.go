@@ -71,7 +71,7 @@ func (h *UsersHandler) Login(c *gin.Context) {
 	token, refreshToken, err := h.userService.Login(req.Username, req.Password)
 	if err != nil {
 		// Handle authentication errors (e.g., invalid credentials)
-		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		utilities.ShowMessage(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
