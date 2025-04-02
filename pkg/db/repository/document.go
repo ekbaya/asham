@@ -30,6 +30,47 @@ func (r *DocumentRepository) Create(doc *models.Document) error {
 	return r.db.Create(doc).Error
 }
 
+func (r *DocumentRepository) UpdateProjectDoc(projectId, docType, fileURL, member string) error {
+	tx := r.db.Begin() // Start a transaction
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var project models.Project
+	if err := tx.Where("id = ?", projectId).First(&project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	doc := models.Document{
+		ID:          uuid.New(),
+		Reference:   project.Reference,
+		Title:       project.Reference,
+		FileURL:     fileURL,
+		Description: docType,
+		CreatedByID: member,
+	}
+
+	if err := tx.Create(&doc).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if docType == "WD" {
+		docID := doc.ID.String()
+		project.WorkingDraftID = &docID
+	}
+
+	if err := tx.Save(&project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
 // GetByID retrieves a document by its ID
 func (r *DocumentRepository) GetByID(id uuid.UUID) (*models.Document, error) {
 	var doc models.Document

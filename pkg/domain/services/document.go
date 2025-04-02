@@ -22,6 +22,10 @@ func (service *DocumentService) Create(doc *models.Document) error {
 	return service.repo.Create(doc)
 }
 
+func (service *DocumentService) UpdateProjectDoc(project, docType, fileURL, member string) error {
+	return service.repo.UpdateProjectDoc(project, docType, fileURL, member)
+}
+
 func (service *DocumentService) GetByID(id uuid.UUID) (*models.Document, error) {
 	return service.repo.GetByID(id)
 }

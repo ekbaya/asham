@@ -56,6 +56,8 @@ type Project struct {
 	ApprovedBy           *Member               `json:"approved_by"`
 	Proposal             *Proposal             `json:"proposal"`
 	Acceptance           *Acceptance           `json:"acceptance"`
+	WorkingDraftID       *string               `json:"working_draft_id"`
+	WorkingDraft         *Document             `json:"orking_draft"`
 	Comments             []CommentObservation  `json:"comments,omitempty"`
 	CreatedAt            time.Time             `json:"created_at"`
 	UpdatedAt            time.Time             `json:"updated_at"`
