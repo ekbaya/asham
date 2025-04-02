@@ -68,7 +68,7 @@ type Acceptance struct {
 
 	// Draft status
 	// @Description Indicates the current drafting stage of the proposal
-	DraftStatus DraftStatus `json:"draft_status" gorm:"default:NONE" binding:"reuired"`
+	DraftStatus DraftStatus `json:"draft_status" gorm:"default:NONE" binding:"required"`
 
 	// Expected date for first draft
 	// @Description The anticipated date for the submission of the first draft, if applicable
