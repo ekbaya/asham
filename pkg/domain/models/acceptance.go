@@ -95,8 +95,8 @@ type Acceptance struct {
 
 	// Secretariat details
 	// @Description Information about the secretariat responsible for managing the project
-	TCSecretaryID uuid.UUID `json:"tc_secretary_id"`
-	TCSecretary   *Member   `json:"tc_secretary"`
+	TCSecretaryID *string `json:"tc_secretary_id"`
+	TCSecretary   *Member `json:"tc_secretary"`
 
 	// Additional information
 	// @Description Any other relevant information about the project

@@ -25,12 +25,19 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 		// Check if Acceptance exists for the given project
 		if err := tx.Where("project_id = ?", response.ProjectID).First(&acceptance).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
+				// Get Project
+				var project models.Project
+				if err := tx.Where("id = ?", response.ProjectID).Preload("TechnicalCommittee").First(&project).Error; err != nil {
+					return err
+				}
+
 				// Create a new Acceptance if it does not exist
 				acceptance = models.Acceptance{
-					ID:         uuid.New(),
-					ProjectID:  response.ProjectID,
-					IsApproved: false,
-					CreatedAt:  time.Now(),
+					ID:            uuid.New(),
+					ProjectID:     response.ProjectID,
+					IsApproved:    false,
+					CreatedAt:     time.Now(),
+					TCSecretaryID: project.TechnicalCommittee.SecretaryId,
 				}
 				if err := tx.Create(&acceptance).Error; err != nil {
 					return err
