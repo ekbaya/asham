@@ -235,9 +235,9 @@ func (r *AcceptanceRepository) SetAcceptanceApproval(id string, approved bool) e
 }
 
 func (r *AcceptanceRepository) GetAcceptanceResults(id string) (*models.AcceptanceResults, error) {
-	// Find the Acceptance by ID
+	// Find the Acceptance by Project ID
 	var acceptance models.Acceptance
-	if err := r.db.Preload("Submissions").Preload("Submissions.RespondingNSB").First(&acceptance, id).Error; err != nil {
+	if err := r.db.Where("project_id = ?", id).Preload("Submissions").Preload("Submissions.RespondingNSB").First(&acceptance).Error; err != nil {
 		return nil, err
 	}
 
