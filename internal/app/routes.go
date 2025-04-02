@@ -81,6 +81,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	document.Use(middleware.AuthMiddleware())
 	{
 		document.POST("/", documentHandler.CreateDocument)
+		document.POST("/upload", documentHandler.UploadDocument)
 		document.GET("/:id", documentHandler.GetDocumentByID)
 		document.POST("/reference/:reference", documentHandler.GetDocumentByReference)
 		document.GET("/title/:title", documentHandler.GetDocumentByTitle)
