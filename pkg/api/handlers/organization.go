@@ -477,29 +477,30 @@ func (h *OrganizationHandler) GetSpecializedCommitteeByType(c *gin.Context) {
 }
 
 func (h *OrganizationHandler) SearchTechnicalCommittees(c *gin.Context) {
-	// Parse query parameters
-	params := make(map[string]interface{})
+	// Get the keyword query parameter once
+	query := c.Query("keyword")
 
-	// String parameters
-	if name := c.Query("name"); name != "" {
-		params["name"] = name
+	// Early return if query is empty to avoid unnecessary service call
+	if query == "" {
+		c.JSON(http.StatusOK, gin.H{"committees": []any{}})
+		return
 	}
 
-	if code := c.Query("code"); code != "" {
-		params["code"] = code
+	// Create search parameters map with only needed fields
+	params := map[string]interface{}{
+		"name":  query,
+		"code":  query,
+		"scope": query,
 	}
 
-	if scope := c.Query("scope"); scope != "" {
-		params["scope"] = scope
-	}
-
-	projects, err := h.organizationService.SearchTechnicalCommittees(params)
+	// Call service to search technical committees
+	committees, err := h.organizationService.SearchTechnicalCommittees(params)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"committees": projects,
+		"committees": committees,
 	})
 }
