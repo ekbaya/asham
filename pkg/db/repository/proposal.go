@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -114,6 +115,9 @@ func (r *ProposalRepository) updateProjectStageWithTx(tx *gorm.DB, projectID str
 	if err := tx.Create(&stageHistory).Error; err != nil {
 		return err
 	}
+
+	// Change Ref to NWIP
+	project.Reference = strings.Replace(project.Reference, "PWI", "NWIP", -1)
 
 	// Update current stage of the project
 	if err := tx.Model(&models.Project{}).
