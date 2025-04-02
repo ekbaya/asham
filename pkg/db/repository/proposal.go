@@ -117,14 +117,15 @@ func (r *ProposalRepository) updateProjectStageWithTx(tx *gorm.DB, projectID str
 	}
 
 	// Change Ref to NWIP
-	project.Reference = strings.Replace(project.Reference, "PWI", "NWIP", -1)
+	reference := strings.Replace(project.Reference, "PWI", "NWIP", -1)
 
 	// Update current stage of the project
 	if err := tx.Model(&models.Project{}).
 		Where("id = ?", projectID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"stage_id":   newStageID,
 			"updated_at": now,
+			"reference":  reference,
 		}).Error; err != nil {
 		return err
 	}
