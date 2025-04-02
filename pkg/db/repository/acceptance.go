@@ -28,6 +28,7 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 				// Get Project
 				var project models.Project
 				if err := tx.Where("id = ?", response.ProjectID).Preload("TechnicalCommittee").First(&project).Error; err != nil {
+					tx.Rollback()
 					return err
 				}
 
@@ -40,15 +41,18 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 					TCSecretaryID: project.TechnicalCommittee.SecretaryId,
 				}
 				if err := tx.Create(&acceptance).Error; err != nil {
+					tx.Rollback()
 					return err
 				}
 			} else {
-				return err // Return unexpected errors
+				tx.Rollback()
+				return err
 			}
 		}
 
 		var member models.Member
 		if err := tx.Where("id = ?", response.ResponderID).First(&member).Error; err != nil {
+			tx.Rollback()
 			return err
 		}
 
@@ -62,6 +66,7 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 		if len(response.RelevantStandards) > 0 {
 			var standardDocs []models.Document
 			if err := tx.Where("id IN ?", response.RelevantStandards).Find(&standardDocs).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 			response.RelevantStandardsRefs = &standardDocs
@@ -71,14 +76,17 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 		if len(response.RelevantRegulations) > 0 {
 			var regulationDocs []models.Document
 			if err := tx.Where("id IN ?", response.RelevantRegulations).Find(&regulationDocs).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 			response.RelevantRegulationsRefs = &regulationDocs
 		}
 
 		if err := tx.Create(response).Error; err != nil {
+			tx.Rollback()
 			return err
 		}
+
 		return nil
 	})
 }
