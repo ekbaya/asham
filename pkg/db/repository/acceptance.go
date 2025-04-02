@@ -332,9 +332,8 @@ func (r *AcceptanceRepository) GetAcceptanceResults(id string) (*models.Acceptan
 func checkIfCriteriaIsMet(internationalStandard bool, responses []models.IndividualNSBResponse) (bool, string, error) {
 	// Count total P-members voting (excluding abstentions)
 	var totalVotingCount int
+	var participationCount int
 	var favorableVoteCount int
-	var favorableParticipationCount int // Participants who voted in favor
-	var generalParticipationCount int   // All participants regardless of vote
 
 	for _, response := range responses {
 		// Skip abstentions when counting total voting members
@@ -344,19 +343,14 @@ func checkIfCriteriaIsMet(internationalStandard bool, responses []models.Individ
 
 		totalVotingCount++
 
-		// Count members willing to participate actively
-		if response.Participation {
-			generalParticipationCount++
-
-			// Count participating members who also voted favorably
-			if response.FeasibleYes {
-				favorableParticipationCount++
-			}
-		}
-
 		// Count favorable votes (FeasibleYes)
 		if response.FeasibleYes {
 			favorableVoteCount++
+		}
+
+		// Count members willing to participate actively
+		if response.Participation {
+			participationCount++
 		}
 	}
 
@@ -366,20 +360,14 @@ func checkIfCriteriaIsMet(internationalStandard bool, responses []models.Individ
 	}
 
 	if internationalStandard {
-		// For international standards: MORE than 50% of P-members voting in favor
+		// For international standards: 50% of P-members voting in favor
 		percentageInFavor := float64(favorableVoteCount) / float64(totalVotingCount) * 100
 
-		// Check if more than 50% voted in favor
-		if percentageInFavor <= 50.0 {
-			return false, fmt.Sprintf("Criteria not met: Only %.1f%% of P-members voted in favor (more than 50%% required)", percentageInFavor), nil
+		if percentageInFavor > 50.0 {
+			return true, "Criteria met: At least 50% of P-members voted in favor", nil
+		} else {
+			return false, fmt.Sprintf("Criteria not met: Only %.1f%% of P-members voted in favor (minimum 50%% required)", percentageInFavor), nil
 		}
-
-		// Verify there are participants who voted in favor
-		if favorableParticipationCount == 0 {
-			return false, "Criteria not met: No members who voted in favor committed to participate", nil
-		}
-
-		return true, fmt.Sprintf("Criteria met: %.1f%% of P-members voted in favor with %d favorable members committed to participate", percentageInFavor, favorableParticipationCount), nil
 	} else {
 		// For projects requiring preparatory/committee stages:
 		// Need at least 6 P-members voting and at least 3 members willing to participate actively
@@ -388,10 +376,10 @@ func checkIfCriteriaIsMet(internationalStandard bool, responses []models.Individ
 			return false, fmt.Sprintf("Criteria not met: Only %d P-members voted (minimum 6 required)", totalVotingCount), nil
 		}
 
-		if generalParticipationCount < 3 {
-			return false, fmt.Sprintf("Criteria not met: Only %d members willing to participate actively (minimum 3 required)", generalParticipationCount), nil
+		if participationCount < 3 {
+			return false, fmt.Sprintf("Criteria not met: Only %d members willing to participate actively (minimum 3 required)", participationCount), nil
 		}
 
-		return true, fmt.Sprintf("Criteria met: %d P-members voted and %d members willing to participate actively", totalVotingCount, generalParticipationCount), nil
+		return true, fmt.Sprintf("Criteria met: %d P-members voted and %d members willing to participate actively", totalVotingCount, participationCount), nil
 	}
 }
