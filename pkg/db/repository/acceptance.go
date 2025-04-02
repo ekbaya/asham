@@ -260,7 +260,7 @@ func (r *AcceptanceRepository) SetAcceptanceApproval(results models.Acceptance) 
 		}
 
 		// Update the project stage
-		if err := UpdateProjectStageWithTx(tx, results.ProjectID, stage.ID.String(), "Proposal Accepted", "NWIP", "CD"); err != nil {
+		if err := UpdateProjectStageWithTx(tx, results.ProjectID, stage.ID.String(), "Proposal Accepted", "NWIP", "WD"); err != nil {
 			tx.Rollback()
 			return err
 		}
