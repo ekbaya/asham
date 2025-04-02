@@ -51,7 +51,7 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 		}
 
 		var member models.Member
-		if err := tx.Where("id = ?", response.ResponderID).First(&member).Error; err != nil {
+		if err := tx.Where("id = ?", response.ResponderID).Preload(clause.Associations).First(&member).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
