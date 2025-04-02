@@ -10,8 +10,8 @@ var ServiceSet = wire.NewSet(
 	repository.NewOrganizationRepository,
 	services.NewOrganizationService,
 	repository.NewMemberRepository,
-	GetEmailConfigurations,   // Provide email config
-	services.NewEmailService, // Add email service provider
+	GetEmailConfigurations,
+	services.NewEmailService,
 	services.NewMemberService,
 	repository.NewProjectRepository,
 	services.NewProjectService,

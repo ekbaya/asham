@@ -66,8 +66,8 @@ func (service *AcceptanceService) CalculateNSBResponseStats(projectID string) er
 	return service.repo.CalculateNSBResponseStats(projectID)
 }
 
-func (service *AcceptanceService) SetAcceptanceApproval(id string, approved bool) error {
-	return service.repo.SetAcceptanceApproval(id, approved)
+func (service *AcceptanceService) SetAcceptanceApproval(acceptance models.Acceptance) error {
+	return service.repo.SetAcceptanceApproval(acceptance)
 }
 
 func (service *AcceptanceService) GetAcceptanceResults(id string) (*models.AcceptanceResults, error) {

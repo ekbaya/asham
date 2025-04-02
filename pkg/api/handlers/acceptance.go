@@ -185,10 +185,7 @@ func (h *AcceptanceHandler) CalculateNSBResponseStats(c *gin.Context) {
 }
 
 func (h *AcceptanceHandler) SetNSBResponseacceptanceApproval(c *gin.Context) {
-	var payload struct {
-		Acceptance string `json:"acceptance" binding:"required"`
-		Approved   bool   `json:"approved" required:"oneof true false"`
-	}
+	var payload models.Acceptance
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
@@ -203,7 +200,17 @@ func (h *AcceptanceHandler) SetNSBResponseacceptanceApproval(c *gin.Context) {
 		return
 	}
 
-	err := h.AcceptanceService.SetAcceptanceApproval(payload.Acceptance, payload.Approved)
+	// Set creator ID from authenticated user
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utilities.ShowMessage(c, http.StatusUnauthorized, "User not authenticated")
+		return
+	}
+
+	userIDStr := userID.(string)
+	payload.TCSecretaryID = &userIDStr
+
+	err := h.AcceptanceService.SetAcceptanceApproval(payload)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
 		return

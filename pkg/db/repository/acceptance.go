@@ -218,21 +218,55 @@ func (r *AcceptanceRepository) CalculateNSBResponseStats(projectID string) error
 	return nil
 }
 
-func (r *AcceptanceRepository) SetAcceptanceApproval(id string, approved bool) error {
-	var acceptance models.Acceptance
-	if err := r.db.Where("id = ?", id).First(&acceptance).Error; err != nil {
-		return err
-	}
+func (r *AcceptanceRepository) SetAcceptanceApproval(results models.Acceptance) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var acceptance models.Acceptance
+		if err := tx.Where("project_id = ?", results.ProjectID).First(&acceptance).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 
-	acceptance.IsApproved = approved
-	if approved {
+		acceptance.IsApproved = true
+		acceptance.ApprovalCriteriaMet = true
 		now := time.Now()
 		acceptance.SMCApprovalDate = &now
-	} else {
-		acceptance.SMCApprovalDate = &time.Time{} // Zero value
-	}
 
-	return r.db.Save(&acceptance).Error
+		acceptance.DevelopmentTrack = results.DevelopmentTrack
+		acceptance.DraftStatus = results.DraftStatus
+		acceptance.IsPreliminaryWork = results.IsPreliminaryWork
+		acceptance.IsActiveWork = results.IsActiveWork
+		acceptance.TCSecretaryID = results.TCSecretaryID
+		acceptance.OtherInformation = results.OtherInformation
+		acceptance.DraftExpectedDate = results.DraftExpectedDate
+
+		if len(results.DocumentsInConsidaration) > 0 {
+			var documents []models.Document
+			if err := tx.Where("id IN (?)", results.DocumentsInConsidaration).Find(&documents).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+			acceptance.DocumentsToConsider = &documents
+		}
+
+		if err := tx.Save(&acceptance).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		var stage models.Stage
+		if err := tx.Where("number = ?", 2).First(&stage).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		// Update the project stage
+		if err := UpdateProjectStageWithTx(tx, results.ProjectID, stage.ID.String(), "Proposal Accepted"); err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		return nil
+	})
 }
 
 func (r *AcceptanceRepository) GetAcceptanceResults(id string) (*models.AcceptanceResults, error) {

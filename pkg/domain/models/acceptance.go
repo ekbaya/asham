@@ -68,7 +68,7 @@ type Acceptance struct {
 
 	// Draft status
 	// @Description Indicates the current drafting stage of the proposal
-	DraftStatus DraftStatus `json:"draft_status" gorm:"default:NONE"`
+	DraftStatus DraftStatus `json:"draft_status" gorm:"default:NONE" binding:"reuired"`
 
 	// Expected date for first draft
 	// @Description The anticipated date for the submission of the first draft, if applicable
@@ -81,7 +81,8 @@ type Acceptance struct {
 
 	// Documents to consider
 	// @Description Additional documents relevant to the proposal
-	DocumentsToConsider *[]Document `json:"documents_to_consider" gorm:"many2many:documents_to_consider;"`
+	DocumentsInConsidaration []string    `json:"documents_in_consideration"`
+	DocumentsToConsider      *[]Document `json:"documents_to_consider" gorm:"many2many:documents_to_consider;"`
 
 	// Development track selection
 	// @Description The selected development track determining the timeline for standardization
