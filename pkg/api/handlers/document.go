@@ -39,7 +39,7 @@ func (h *DocumentHandler) UploadDocument(c *gin.Context) {
 		return
 	}
 
-	project := c.PostForm("project_id")
+	project := c.PostForm("project")
 	docType := c.PostForm("type")
 
 	if project == "" || docType == "" {
