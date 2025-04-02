@@ -26,11 +26,11 @@ var ServiceSet = wire.NewSet(
 
 func GetEmailService() *services.EmailService {
 	emailConfig := services.EmailConfig{
-		Host:     "smtp.example.com",
+		Host:     "live.smtp.mailtrap.io",
 		Port:     587,
-		Username: "your-username",
-		Password: "your-password",
-		From:     "noreply@yourservice.com",
+		Username: "smtp@mailtrap.io",
+		Password: "61dc207f67686fdb2aadbe5bc179fa71",
+		From:     "no-reply@collectwave.com",
 	}
 	emailService := services.NewEmailService(emailConfig)
 	return emailService
