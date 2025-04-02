@@ -17,11 +17,11 @@ type EmailConfig struct {
 
 // EmailService handles sending emails
 type EmailService struct {
-	config EmailConfig
+	config *EmailConfig
 }
 
 // NewEmailService creates a new email service
-func NewEmailService(config EmailConfig) *EmailService {
+func NewEmailService(config *EmailConfig) *EmailService {
 	return &EmailService{
 		config: config,
 	}

@@ -10,7 +10,8 @@ var ServiceSet = wire.NewSet(
 	repository.NewOrganizationRepository,
 	services.NewOrganizationService,
 	repository.NewMemberRepository,
-	GetEmailService(),
+	GetEmailConfigurations,   // Provide email config
+	services.NewEmailService, // Add email service provider
 	services.NewMemberService,
 	repository.NewProjectRepository,
 	services.NewProjectService,
@@ -24,7 +25,7 @@ var ServiceSet = wire.NewSet(
 	services.NewCommentService,
 )
 
-func GetEmailService() *services.EmailService {
+func GetEmailConfigurations() *services.EmailConfig {
 	emailConfig := services.EmailConfig{
 		Host:     "live.smtp.mailtrap.io",
 		Port:     587,
@@ -32,6 +33,5 @@ func GetEmailService() *services.EmailService {
 		Password: "61dc207f67686fdb2aadbe5bc179fa71",
 		From:     "no-reply@collectwave.com",
 	}
-	emailService := services.NewEmailService(emailConfig)
-	return emailService
+	return &emailConfig
 }
