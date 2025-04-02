@@ -36,6 +36,14 @@ func (h *AcceptanceHandler) CreateNSBResponse(c *gin.Context) {
 		return
 	}
 
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utilities.ShowMessage(c, http.StatusUnauthorized, "User not authenticated")
+		return
+	}
+
+	payload.ResponderID = userID.(string)
+
 	err := h.AcceptanceService.CreateNSBResponse(&payload)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
@@ -55,12 +63,12 @@ func (h *AcceptanceHandler) GetNSBResponse(c *gin.Context) {
 }
 
 func (h *AcceptanceHandler) GetNSBResponsesByProjectID(c *gin.Context) {
-	forms, err := h.AcceptanceService.GetNSBResponsesByProjectID(c.Param("id"))
+	submissions, err := h.AcceptanceService.GetNSBResponsesByProjectID(c.Param("id"))
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, forms)
+	c.JSON(http.StatusOK, submissions)
 }
 
 func (h *AcceptanceHandler) UpdateNSBResponse(c *gin.Context) {

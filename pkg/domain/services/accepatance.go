@@ -1,6 +1,8 @@
 package services
 
 import (
+	"time"
+
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/google/uuid"
@@ -16,6 +18,7 @@ func NewAcceptanceService(repo *repository.AcceptanceRepository) *AcceptanceServ
 
 func (service *AcceptanceService) CreateNSBResponse(response *models.NSBResponse) error {
 	response.ID = uuid.New()
+	response.ResponseDate = time.Now()
 	return service.repo.CreateNSBResponse(response)
 }
 

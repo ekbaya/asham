@@ -31,13 +31,13 @@ const (
 
 type NSBResponse struct {
 	ID        uuid.UUID `json:"id"`
-	ProjectID uuid.UUID `json:"project_id" binding:"required"`
+	ProjectID string    `json:"project_id" binding:"required"`
 	Project   *Project  `json:"-"`
 
 	AcceptanceID uuid.UUID   `json:"-"`
 	Acceptance   *Acceptance `json:"-"`
 	// @Description Response provided by the NSB
-	Response Response `json:"response"`
+	Response Response `json:"response" binding:"required"`
 
 	// Relevant documents section
 	// @Description Indicates if relevant standards exist
@@ -61,8 +61,8 @@ type NSBResponse struct {
 	IsCommittedToParticipate bool `json:"is_committed_to_participate"`
 
 	// @Description Contact details for the NSB
-	NationalTCSecretaryID uuid.UUID `json:"national_tc_secretary_id"`
-	NationalTCSecretary   *Member   `json:"national_tc_secretary"`
+	NationalTCSecretaryID *string `json:"national_tc_secretary_id"`
+	NationalTCSecretary   *Member `json:"national_tc_secretary"`
 
 	// Response details
 	// @Description Name of the responding NSB
@@ -70,8 +70,8 @@ type NSBResponse struct {
 	RespondingNSB   *NationalStandardBody `json:"responding_nsb"`
 
 	// @Description Name of the person providing the response
-	ResponderID uuid.UUID `json:"responder_id"`
-	Responder   *Member   `json:"responder"`
+	ResponderID string  `json:"responder_id"`
+	Responder   *Member `json:"responder"`
 
 	// @Description Date of response submission
 	ResponseDate time.Time `json:"response_date"`

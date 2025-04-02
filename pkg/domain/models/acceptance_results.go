@@ -1,11 +1,9 @@
 package models
 
-import "github.com/google/uuid"
-
 // AcceptanceResults represents the aggregated results of a Acceptance
 type AcceptanceResults struct {
-	AcceptanceID           uuid.UUID               `json:"accepatance_id"`
-	ProjectID              uuid.UUID               `json:"project_id"`
+	AcceptanceID           string                  `json:"accepatance_id"`
+	ProjectID              string                  `json:"project_id"`
 	IndividualNSBResponses []IndividualNSBResponse `json:"nsb_responses"`
 	Totals                 ResponseTotals          `json:"totals"`
 }

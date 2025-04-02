@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -50,6 +49,7 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 		response.AcceptanceID = acceptance.ID
 		nsb := member.NationalStandardBodyID
 		response.RespondingNSBID = *nsb
+		response.NationalTCSecretaryID = member.NationalStandardBody.NationalTCSecretaryID
 		if err := tx.Create(response).Error; err != nil {
 			return err
 		}
@@ -201,21 +201,15 @@ func (r *AcceptanceRepository) SetAcceptanceApproval(id string, approved bool) e
 }
 
 func (r *AcceptanceRepository) GetAcceptanceResults(id string) (*models.AcceptanceResults, error) {
-	// Parse the UUID from string
-	acceptanceID, err := uuid.Parse(id)
-	if err != nil {
-		return nil, fmt.Errorf("invalid UUID format: %w", err)
-	}
-
 	// Find the Acceptance by ID
 	var acceptance models.Acceptance
-	if err := r.db.Preload("Submissions").Preload("Submissions.RespondingNSB").First(&acceptance, acceptanceID).Error; err != nil {
+	if err := r.db.Preload("Submissions").Preload("Submissions.RespondingNSB").First(&acceptance, id).Error; err != nil {
 		return nil, err
 	}
 
 	// Initialize results structure
 	results := &models.AcceptanceResults{
-		AcceptanceID:           acceptance.ID,
+		AcceptanceID:           id,
 		ProjectID:              acceptance.ProjectID,
 		IndividualNSBResponses: make([]models.IndividualNSBResponse, 0),
 		Totals:                 models.ResponseTotals{},

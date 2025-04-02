@@ -48,7 +48,7 @@ const (
 
 type Acceptance struct {
 	ID              uuid.UUID      `json:"id"`
-	ProjectID       uuid.UUID      `json:"project_id" binding:"required"`
+	ProjectID       string         `json:"project_id" binding:"required"`
 	Project         *Project       `json:"-"`
 	CirculationDate time.Time      `json:"circulation_date"`
 	ClosingDate     time.Time      `json:"closing_date"`
