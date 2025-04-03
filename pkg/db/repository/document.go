@@ -62,6 +62,10 @@ func (r *DocumentRepository) UpdateProjectDoc(projectId, docType, fileURL, membe
 		docID := doc.ID.String()
 		project.WorkingDraftID = &docID
 	}
+	if docType == "CD" {
+		docID := doc.ID.String()
+		project.CommitteeDraftID = &docID
+	}
 
 	if err := tx.Save(&project).Error; err != nil {
 		tx.Rollback()
@@ -202,4 +206,19 @@ func (r *DocumentRepository) CountAll() (int64, error) {
 	var count int64
 	err := r.db.Model(&models.Document{}).Count(&count).Error
 	return count, err
+}
+
+func (r *DocumentRepository) ProjectDocuments(projectId string) ([]models.Document, error) {
+	var project models.Project
+	var docs []models.Document
+	if err := r.db.Where("id = ?", projectId).Preload("WorkingDraft").Preload("CommitteeDraft").First(&project).Error; err != nil {
+		return docs, err
+	}
+	if project.WorkingDraftID != nil {
+		docs = append(docs, *project.WorkingDraft)
+	}
+	if project.CommitteeDraftID != nil {
+		docs = append(docs, *project.CommitteeDraft)
+	}
+	return docs, nil
 }

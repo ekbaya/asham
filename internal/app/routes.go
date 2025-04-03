@@ -90,6 +90,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		document.PUT("/fileUrl/:id", documentHandler.UpdateFileURL)
 		document.DELETE("/:id", documentHandler.DeleteDocument)
 		document.GET("/list", documentHandler.ListDocuments)
+		document.GET("/list/:projectId", documentHandler.ProjectDocuments)
 		document.GET("/search", documentHandler.SearchDocuments)
 		document.GET("/date", documentHandler.GetDocumentsByDateRange)
 		document.GET("/count", documentHandler.CountDocuments)

@@ -480,3 +480,13 @@ func (h *DocumentHandler) CountDocuments(c *gin.Context) {
 
 	utilities.Show(c, http.StatusOK, "count", count)
 }
+
+func (h *DocumentHandler) ProjectDocuments(c *gin.Context) {
+	docs, err := h.documentService.ProjectDocuments(c.Param("projectId"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.Show(c, http.StatusOK, "docs", docs)
+}

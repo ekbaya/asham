@@ -73,3 +73,7 @@ func (service *DocumentService) GetDocumentsCreatedBetween(startDate, endDate ti
 func (service *DocumentService) CountAll() (int64, error) {
 	return service.repo.CountAll()
 }
+
+func (service *DocumentService) ProjectDocuments(projectId string) ([]models.Document, error) {
+	return service.repo.ProjectDocuments(projectId)
+}

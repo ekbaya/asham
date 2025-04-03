@@ -58,6 +58,8 @@ type Project struct {
 	Acceptance           *Acceptance           `json:"acceptance"`
 	WorkingDraftID       *string               `json:"working_draft_id"`
 	WorkingDraft         *Document             `json:"working_draft"`
+	CommitteeDraftID     *string               `json:"committee_draft_id"`
+	CommitteeDraft       *Document             `json:"committee_draft"`
 	Comments             []CommentObservation  `json:"comments,omitempty"`
 	CreatedAt            time.Time             `json:"created_at"`
 	UpdatedAt            time.Time             `json:"updated_at"`
