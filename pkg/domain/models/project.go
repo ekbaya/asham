@@ -14,6 +14,14 @@ const (
 	INTERNATIONAL ProjectType = "INTERNATIONAL"
 )
 
+type WorkingDraftStatus string
+
+const (
+	UNDER_REVIEW WorkingDraftStatus = "UNDER_REVIEW"
+	ACCEPTED     WorkingDraftStatus = "ACCEPTED"
+	DROPED       WorkingDraftStatus = "DROPED"
+)
+
 // ProjectStageHistory tracks the history of stages a project has gone through
 type ProjectStageHistory struct {
 	ID        uuid.UUID  `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
@@ -58,6 +66,8 @@ type Project struct {
 	Acceptance           *Acceptance           `json:"acceptance"`
 	WorkingDraftID       *string               `json:"working_draft_id"`
 	WorkingDraft         *Document             `json:"working_draft"`
+	WorkingDraftStatus   WorkingDraftStatus    `json:"wd_status"`
+	WorkingDraftComments string                `json:"wd_comments"`
 	CommitteeDraftID     *string               `json:"committee_draft_id"`
 	CommitteeDraft       *Document             `json:"committee_draft"`
 	Comments             []CommentObservation  `json:"comments,omitempty"`
