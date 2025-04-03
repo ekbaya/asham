@@ -1,9 +1,6 @@
 package handlers
 
 import (
-	"bytes"
-	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -27,29 +24,17 @@ func NewCommentHandler(commentService *services.CommentService) *CommentHandler 
 }
 
 func (h *CommentHandler) CreateComment(c *gin.Context) {
-	fmt.Print("WERE HERE ****************")
-	// Read the raw body
-	body, err := c.GetRawData()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read request body"})
-		return
-	}
-
-	// Print the raw JSON body (for debugging)
-	fmt.Println("Request Body:", string(body))
-
-	// Re-attach the body to the request so it can be read again by ShouldBindJSON
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
-
 	var payload models.CommentObservation
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
+			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
 			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
 			return
 		}
 
+		// For non-validation errors
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -62,7 +47,7 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 
 	payload.NationalSecretaryID = userID.(string)
 
-	err = h.commentService.Create(&payload)
+	err := h.commentService.Create(&payload)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return

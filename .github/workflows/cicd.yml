@@ -37,6 +37,6 @@ jobs:
           script: |
             cd projects/asham/cmd
             git pull origin main
-            go build -o asham
+            go build -o asham .
             pm2 restart asham
             pm2 save
