@@ -40,4 +40,5 @@ jobs:
             git pull origin main
             go build -o asham .
             pm2 restart asham
+            go run main.go
             pm2 save
