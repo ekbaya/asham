@@ -66,7 +66,7 @@ type Project struct {
 	Acceptance           *Acceptance           `json:"acceptance"`
 	WorkingDraftID       *string               `json:"working_draft_id"`
 	WorkingDraft         *Document             `json:"working_draft"`
-	WorkingDraftStatus   WorkingDraftStatus    `json:"wd_status"`
+	WorkingDraftStatus   WorkingDraftStatus    `json:"wd_status" gorm:"default:UNDER_REVIEW"`
 	WorkingDraftComments string                `json:"wd_comments"`
 	CommitteeDraftID     *string               `json:"committee_draft_id"`
 	CommitteeDraft       *Document             `json:"committee_draft"`
