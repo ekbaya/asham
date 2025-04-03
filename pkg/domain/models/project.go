@@ -22,6 +22,14 @@ const (
 	DROPPED      WorkingDraftStatus = "DROPPED"
 )
 
+type ProposalAction string
+
+const (
+	DISCUSS_CD_COMMENTS  ProposalAction = "DISCUSS_CD_COMMENTS"
+	REVISED_CD           ProposalAction = "REVISED_CD"
+	REGISTER_FOR_ENQUIRY ProposalAction = "REGISTER_FOR_ENQUIRY"
+)
+
 // ProjectStageHistory tracks the history of stages a project has gone through
 type ProjectStageHistory struct {
 	ID        uuid.UUID  `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
@@ -73,6 +81,10 @@ type Project struct {
 	CommitteeDraftID     *string               `json:"committee_draft_id"`
 	CommitteeDraft       *Document             `json:"committee_draft"`
 	Comments             []CommentObservation  `json:"comments,omitempty"`
+	IsConsensusReached   bool                  `json:"is_consensus_reached"`
+	ProposalAction       ProposalAction        `json:"proposal_action"`
+	MeetingRequired      bool                  `json:"meeting_required"`
+	SubmissionDate       *time.Time            `json:"submission_date,omitempty"`
 	CreatedAt            time.Time             `json:"created_at"`
 	UpdatedAt            time.Time             `json:"updated_at"`
 }

@@ -558,3 +558,53 @@ func (repo *ProjectRepository) FindByDocumentID(documentID uuid.UUID) ([]models.
 
 	return projects, nil
 }
+
+func (r *ProjectRepository) ReviewCD(projectId string, isConsensusReached bool, action models.ProposalAction, meetingRequired bool) error {
+	// Start a transaction
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	// Defer a rollback in case anything fails
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var project models.Project
+	if err := tx.Where("id = ?", projectId).First(&project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	project.IsConsensusReached = isConsensusReached
+	project.ProposalAction = action
+	project.MeetingRequired = meetingRequired
+
+	if isConsensusReached && project.SubmissionDate != nil {
+		now := time.Now()
+		project.SubmissionDate = &now
+
+		var stage models.Stage
+
+		if err := tx.Where("number = ?", 4).First(&stage).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		if err := UpdateProjectStageWithTx(tx, projectId, stage.ID.String(), "CD Consensus reached", "CD", "DARS"); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	if err := tx.Save(&project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Commit the transaction
+	return tx.Commit().Error
+}
