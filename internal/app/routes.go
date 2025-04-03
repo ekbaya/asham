@@ -181,7 +181,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		comment.POST("/", commentHandler.CreateComment)
 		comment.GET("/:id", commentHandler.GetCommentByID)
 		comment.GET("/list", commentHandler.GetAllComments)
-		comment.PUT("/", commentHandler.UpdateComment)
+		comment.PUT("/:comment_id", commentHandler.UpdateComment)
 		comment.DELETE("/:id", commentHandler.DeleteComment)
 		comment.GET("/project/:id", commentHandler.GetCommentsByProjectID)
 	}
