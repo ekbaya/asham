@@ -26,11 +26,15 @@ func NewCommentHandler(commentService *services.CommentService) *CommentHandler 
 func (h *CommentHandler) CreateComment(c *gin.Context) {
 	var payload models.CommentObservation
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
 			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
 			return
 		}
+
+		// For non-validation errors
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
 		return
 	}
