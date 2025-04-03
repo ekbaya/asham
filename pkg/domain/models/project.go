@@ -19,7 +19,7 @@ type WorkingDraftStatus string
 const (
 	UNDER_REVIEW WorkingDraftStatus = "UNDER_REVIEW"
 	ACCEPTED     WorkingDraftStatus = "ACCEPTED"
-	DROPED       WorkingDraftStatus = "DROPED"
+	DROPPED      WorkingDraftStatus = "DROPPED"
 )
 
 // ProjectStageHistory tracks the history of stages a project has gone through
