@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -222,6 +223,12 @@ func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, statu
 
 	// If status is ACCEPTED, update the project stage
 	if status == models.ACCEPTED {
+		var project models.Project
+		if err := tx.Where("id = ?", projectID).First(&project).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
 		var stage models.Stage
 		if err := tx.Where("number = ?", 3).First(&stage).Error; err != nil {
 			tx.Rollback()
@@ -230,6 +237,34 @@ func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, statu
 
 		err := UpdateProjectStageWithTx(tx, projectID, stage.ID.String(), "WD Elevated to a CD", "WD", "CD")
 		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		var document models.Document
+		if err := tx.Where("id = ?", project.WorkingDraftID).First(&document).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		doc := models.Document{
+			ID:          uuid.New(),
+			CreatedByID: document.CreatedByID,
+			Title:       document.Title,
+			Description: document.Description,
+			Reference:   strings.ReplaceAll(document.Reference, "WD", "CD"),
+			FileURL:     document.FileURL,
+			CreatedAt:   time.Now(),
+		}
+
+		if err := tx.Create(&doc).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		docId := doc.ID.String()
+		project.CommitteeDraftID = &docId
+		if err := tx.Save(&project).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
