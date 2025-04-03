@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/db/repository"
@@ -9,7 +10,8 @@ import (
 )
 
 type DocumentService struct {
-	repo *repository.DocumentRepository
+	repo        *repository.DocumentRepository
+	projectRepo *repository.ProjectRepository
 }
 
 func NewDocumentService(repo *repository.DocumentRepository) *DocumentService {
@@ -51,6 +53,36 @@ func (service *DocumentService) UpdateFileURL(id uuid.UUID, fileURL string) erro
 }
 
 func (service *DocumentService) Delete(id uuid.UUID) error {
+	// Check if document is attached to a project e.g wd/cd and set to nil
+	projects, err := service.projectRepo.FindByDocumentID(id)
+	if err != nil {
+		return fmt.Errorf("error finding projects with document %s: %w", id, err)
+	}
+
+	docId := id.String()
+
+	// Update any projects that reference this document
+	for _, project := range projects {
+		updated := false
+
+		if project.WorkingDraftID == &docId {
+			project.WorkingDraftID = nil
+			updated = true
+		}
+
+		if project.CommitteeDraftID == &docId {
+			project.CommitteeDraftID = nil
+			updated = true
+		}
+
+		if updated {
+			if err := service.projectRepo.Update(&project); err != nil {
+				return fmt.Errorf("error updating project %s: %w", project.ID, err)
+			}
+		}
+	}
+
+	// Now delete the document
 	return service.repo.Delete(id)
 }
 

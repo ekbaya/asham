@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -456,4 +458,32 @@ func (r *ProjectRepository) GetStageByNumber(number int16) (*models.Stage, error
 	var stage models.Stage
 	err := r.db.Where("number = ?", number).Preload(clause.Associations).First(&stage).Error
 	return &stage, err
+}
+
+// FindByDocumentID returns all projects that reference the given document ID
+// either as WorkingDraftID or CommitteeDraftID
+func (repo *ProjectRepository) FindByDocumentID(documentID uuid.UUID) ([]models.Project, error) {
+	var projects []models.Project
+
+	// Query for projects where either WorkingDraftID or CommitteeDraftID matches the given documentID
+	err := repo.db.Where("working_draft_id = ? OR committee_draft_id = ?", documentID, documentID).Find(&projects).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to find projects with document ID %s: %w", documentID, err)
+	}
+
+	return projects, nil
+}
+
+// Update updates an existing project in the database
+func (repo *ProjectRepository) Update(project *models.Project) error {
+	if project.ID == uuid.Nil {
+		return errors.New("cannot update project with nil ID")
+	}
+
+	err := repo.db.Save(project).Error
+	if err != nil {
+		return fmt.Errorf("failed to update project with ID %s: %w", project.ID, err)
+	}
+
+	return nil
 }
