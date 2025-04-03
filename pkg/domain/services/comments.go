@@ -37,3 +37,7 @@ func (service *CommentService) Delete(id uuid.UUID) error {
 func (service *CommentService) GetByProjectID(projectID uuid.UUID) ([]models.CommentObservation, error) {
 	return service.repo.GetByProjectID(projectID)
 }
+
+func (service *CommentService) GetByProjectIDAndMemberState(projectID, memberState string) ([]models.CommentObservation, error) {
+	return service.repo.GetByProjectIDAndMemberState(projectID, memberState)
+}

@@ -35,6 +35,14 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 		return
 	}
 
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	payload.NationalSecretaryID = userID.(string)
+
 	err := h.commentService.Create(&payload)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())

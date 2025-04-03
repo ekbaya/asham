@@ -68,3 +68,21 @@ func (r *CommentRepository) GetByProjectID(projectID uuid.UUID) ([]models.Commen
 	}
 	return comments, nil
 }
+
+func (r *CommentRepository) GetByProjectIDAndMemberState(projectID, memberState string) ([]models.CommentObservation, error) {
+	var comments []models.CommentObservation
+	err := r.db.
+		Joins("JOIN members ON members.id=comment_observations.national_secretary_id").
+		Joins("JOIN national_standard_bodys ON national_standard_bodys.id=members.national_standard_body_id").
+		Joins("JOIN member_states ON member_states.id=national_standard_bodys.member_state_id").
+		Where("comment_observations.project_id = ? AND member_states.id = ?", projectID, memberState).
+		Preload("Member").
+		Preload("Member.NationalStandardBody").
+		Preload("Member.NationalStandardBody.MemberState").
+		Find(&comments).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return comments, nil
+}

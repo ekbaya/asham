@@ -18,7 +18,7 @@ const (
 // CommentObservation represents a single comment and observation entry
 type CommentObservation struct {
 	ID                  uuid.UUID   `json:"id"`
-	ProjectID           string      `json:"-"`
+	ProjectID           string      `json:"project_id"`
 	Project             *Project    `json:"project"`
 	NationalSecretaryID string      `json:"member_id"`
 	NationalSecretary   *Member     `json:"member"`
