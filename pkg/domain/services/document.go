@@ -76,7 +76,7 @@ func (service *DocumentService) Delete(id uuid.UUID) error {
 		}
 
 		if updated {
-			if err := service.projectRepo.Update(&project); err != nil {
+			if err := service.projectRepo.UpdateProject(&project); err != nil {
 				return fmt.Errorf("error updating project %s: %w", project.ID, err)
 			}
 		}

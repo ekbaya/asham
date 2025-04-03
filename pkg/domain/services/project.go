@@ -144,3 +144,7 @@ func (service *ProjectService) GetRelatedProjects(projectID uuid.UUID) ([]models
 func (service *ProjectService) FetchStages() (*[]models.Stage, error) {
 	return service.repo.FetchStages()
 }
+
+func (service *ProjectService) ReviewWD(secretary, projectID, comment string, status models.WorkingDraftStatus) error {
+	return service.repo.ReviewWD(secretary, projectID, comment, status)
+}

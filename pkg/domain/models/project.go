@@ -67,6 +67,8 @@ type Project struct {
 	WorkingDraftID       *string               `json:"working_draft_id"`
 	WorkingDraft         *Document             `json:"working_draft"`
 	WorkingDraftStatus   WorkingDraftStatus    `json:"wd_status" gorm:"default:UNDER_REVIEW"`
+	WDTCSecretaryID      *string               `json:"wd_tc_secretary_id" gorm:"column:wd_tc_secretary_id"`
+	WDTCSecretary        *Member               `json:"wd_tc_secretary"`
 	WorkingDraftComments string                `json:"wd_comments"`
 	CommitteeDraftID     *string               `json:"committee_draft_id"`
 	CommitteeDraft       *Document             `json:"committee_draft"`

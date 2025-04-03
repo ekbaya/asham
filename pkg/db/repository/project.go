@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -185,6 +184,59 @@ func (r *ProjectRepository) GetTCByID(id string) (*models.TechnicalCommittee, er
 
 func (r *ProjectRepository) UpdateProject(project *models.Project) error {
 	return r.db.Save(project).Error
+}
+
+func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, status models.WorkingDraftStatus) error {
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	// Defer a rollback in case anything fails
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	// Update the project within the transaction
+	result := tx.Model(&models.Project{}).
+		Where("id = ?", projectID).
+		Updates(map[string]any{
+			"working_draft_status":   status,
+			"working_draft_comments": comment,
+			"wd_tc_secretary_id":     secretary,
+		})
+
+	if result.Error != nil {
+		tx.Rollback()
+		return result.Error
+	}
+
+	// Check if the project exists
+	if result.RowsAffected == 0 {
+		tx.Rollback()
+		return fmt.Errorf("project with ID %s not found", projectID)
+	}
+
+	// If status is ACCEPTED, update the project stage
+	if status == models.ACCEPTED {
+		var stage models.Stage
+		if err := tx.Where("number = ?", 3).First(&stage).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		err := UpdateProjectStageWithTx(tx, projectID, stage.ID.String(), "WD Elevated to a CD", "WD", "CD")
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	// Commit the transaction if everything was successful
+	return tx.Commit().Error
 }
 
 func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comment, approvedBy string) error {
@@ -460,8 +512,6 @@ func (r *ProjectRepository) GetStageByNumber(number int16) (*models.Stage, error
 	return &stage, err
 }
 
-// FindByDocumentID returns all projects that reference the given document ID
-// either as WorkingDraftID or CommitteeDraftID
 func (repo *ProjectRepository) FindByDocumentID(documentID uuid.UUID) ([]models.Project, error) {
 	var projects []models.Project
 
@@ -472,18 +522,4 @@ func (repo *ProjectRepository) FindByDocumentID(documentID uuid.UUID) ([]models.
 	}
 
 	return projects, nil
-}
-
-// Update updates an existing project in the database
-func (repo *ProjectRepository) Update(project *models.Project) error {
-	if project.ID == uuid.Nil {
-		return errors.New("cannot update project with nil ID")
-	}
-
-	err := repo.db.Save(project).Error
-	if err != nil {
-		return fmt.Errorf("failed to update project with ID %s: %w", project.ID, err)
-	}
-
-	return nil
 }
