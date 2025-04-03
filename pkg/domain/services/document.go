@@ -81,7 +81,6 @@ func (service *DocumentService) Delete(id uuid.UUID) error {
 			}
 		}
 	}
-
 	// Now delete the document
 	return service.repo.Delete(id)
 }
