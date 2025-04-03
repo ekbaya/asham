@@ -59,9 +59,9 @@ func (r *CommentRepository) Delete(id uuid.UUID) error {
 func (r *CommentRepository) GetByProjectID(projectID uuid.UUID) ([]models.CommentObservation, error) {
 	var comments []models.CommentObservation
 	err := r.db.
-		Preload("Member").
-		Preload("Member.NationalStandardBody").
-		Preload("Member.NationalStandardBody.MemberState").
+		Preload("NationalSecretary").
+		Preload("NationalSecretary.NationalStandardBody").
+		Preload("NationalSecretary.NationalStandardBody.MemberState").
 		Where("project_id = ?", projectID).
 		Find(&comments).Error
 
