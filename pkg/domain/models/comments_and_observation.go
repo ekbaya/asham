@@ -20,8 +20,8 @@ type CommentObservation struct {
 	ID                  uuid.UUID   `json:"id"`
 	ProjectID           string      `json:"project_id"`
 	Project             *Project    `json:"project"`
-	NationalSecretaryID string      `json:"member_id"`
-	NationalSecretary   *Member     `json:"member"`
+	NationalSecretaryID string      `json:"national_secretary_id"`
+	NationalSecretary   *Member     `json:"national_secretary"`
 	ClauseNo            string      `json:"clause_no" binding:"required"`
 	ParagraphRef        string      `json:"paragraph_ref" binding:"required"`
 	CommentType         CommentType `json:"comment_type" binding:"required"`

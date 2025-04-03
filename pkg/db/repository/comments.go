@@ -20,7 +20,7 @@ func NewCommentRepository(db *gorm.DB) *CommentRepository {
 func (r *CommentRepository) Create(comment *models.CommentObservation) error {
 	comment.ID = uuid.New()
 	comment.CreatedAt = comment.CreatedAt.UTC()
-	return r.db.Create(comment).Error
+	return r.db.Create(&comment).Error
 }
 
 // GetByID retrieves a CommentObservation by its ID
