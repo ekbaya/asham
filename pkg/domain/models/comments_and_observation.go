@@ -17,16 +17,16 @@ const (
 
 // CommentObservation represents a single comment and observation entry
 type CommentObservation struct {
-	ID                 uuid.UUID   `json:"id"`
-	ProjectID          string      `json:"-"`
-	Project            *Project    `json:"project"`
-	MemberID           string      `json:"-"`
-	Member             *Member     `json:"member"`
-	ClauseNo           string      `json:"clause_no" binding:"required"`
-	ParagraphRef       string      `json:"paragraph_ref" binding:"required"`
-	CommentType        CommentType `json:"comment_type" binding:"required"`
-	Comment            string      `json:"comment" binding:"required"`
-	ProposedChange     string      `json:"proposed_change"`
-	SecretariatRemarks string      `json:"secretariat_remarks"`
-	CreatedAt          time.Time   `json:"created_at"`
+	ID                  uuid.UUID   `json:"id"`
+	ProjectID           string      `json:"-"`
+	Project             *Project    `json:"project"`
+	NationalSecretaryID string      `json:"member_id"`
+	NationalSecretary   *Member     `json:"member"`
+	ClauseNo            string      `json:"clause_no" binding:"required"`
+	ParagraphRef        string      `json:"paragraph_ref" binding:"required"`
+	CommentType         CommentType `json:"comment_type" binding:"required"`
+	Comment             string      `json:"comment" binding:"required"`
+	ProposedChange      string      `json:"proposed_change"`
+	SecretariatRemarks  string      `json:"secretariat_remarks"`
+	CreatedAt           time.Time   `json:"created_at"`
 }
