@@ -36,6 +36,7 @@ func NewProposalHandler(
 }
 
 func (h *ProposalHandler) CreateProposal(c *gin.Context) {
+	// Parse multipart form with 10 MB max memory
 	if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
 		utilities.ShowMessage(c, http.StatusBadRequest, "Failed to parse form: "+err.Error())
 		return
