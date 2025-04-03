@@ -559,7 +559,7 @@ func (repo *ProjectRepository) FindByDocumentID(documentID uuid.UUID) ([]models.
 	return projects, nil
 }
 
-func (r *ProjectRepository) ReviewCD(projectId string, isConsensusReached bool, action models.ProposalAction, meetingRequired bool) error {
+func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusReached bool, action models.ProposalAction, meetingRequired bool) error {
 	// Start a transaction
 	tx := r.db.Begin()
 	if tx.Error != nil {
@@ -582,6 +582,7 @@ func (r *ProjectRepository) ReviewCD(projectId string, isConsensusReached bool, 
 	project.IsConsensusReached = isConsensusReached
 	project.ProposalAction = action
 	project.MeetingRequired = meetingRequired
+	project.CDTCSecretaryID = &secretary
 
 	if isConsensusReached && project.SubmissionDate != nil {
 		now := time.Now()

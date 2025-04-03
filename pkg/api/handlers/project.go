@@ -515,3 +515,41 @@ func (h *ProjectHandler) ReviewWD(c *gin.Context) {
 
 	utilities.ShowMessage(c, http.StatusCreated, "WD review updated successfully")
 }
+
+func (h *ProjectHandler) ReviewCD(c *gin.Context) {
+	var payload struct {
+		Project            string                `json:"project" binding:"required"`
+		IsConsensusReached bool                  `json:"is_consensus_reached"`
+		Action             models.ProposalAction `json:"proposed_action"`
+		MeetingRequired    bool                  `json:"meeting_required"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			// Convert validation errors into human-readable messages
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			return
+		}
+
+		// For non-validation errors
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userIDStr := userID.(string)
+
+	err := h.projectService.ReviewCD(userIDStr, payload.Project, payload.IsConsensusReached, payload.Action, payload.MeetingRequired)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "CD updated successfully")
+}

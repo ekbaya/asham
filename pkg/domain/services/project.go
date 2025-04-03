@@ -149,6 +149,6 @@ func (service *ProjectService) ReviewWD(secretary, projectID, comment string, st
 	return service.repo.ReviewWD(secretary, projectID, comment, status)
 }
 
-func (service *ProjectService) ReviewCD(projectId string, isConsensusReached bool, action models.ProposalAction, meetingRequired bool) error {
-	return service.repo.ReviewCD(projectId, isConsensusReached, action, meetingRequired)
+func (service *ProjectService) ReviewCD(secretary, projectId string, isConsensusReached bool, action models.ProposalAction, meetingRequired bool) error {
+	return service.repo.ReviewCD(secretary, projectId, isConsensusReached, action, meetingRequired)
 }

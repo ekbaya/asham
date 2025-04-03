@@ -81,6 +81,8 @@ type Project struct {
 	CommitteeDraftID     *string               `json:"committee_draft_id"`
 	CommitteeDraft       *Document             `json:"committee_draft"`
 	Comments             []CommentObservation  `json:"comments,omitempty"`
+	CDTCSecretaryID      *string               `json:"cd_tc_secretary_id" gorm:"column:cd_tc_secretary_id"`
+	CDTCSecretary        *Member               `json:"cd_tc_secretary"`
 	IsConsensusReached   bool                  `json:"is_consensus_reached"`
 	ProposalAction       ProposalAction        `json:"proposal_action"`
 	MeetingRequired      bool                  `json:"meeting_required"`

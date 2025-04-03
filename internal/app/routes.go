@@ -104,6 +104,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		projects.POST("/", projectHandler.CreateProject)
 		projects.POST("/approve", projectHandler.ApproveProject)
 		projects.POST("/wd/review", projectHandler.ReviewWD)
+		projects.POST("/cd/review", projectHandler.ReviewCD)
 		projects.GET("/:id", projectHandler.GetProjectByID)
 		projects.PUT("/:id", projectHandler.UpdateProject)
 		projects.DELETE("/:id", projectHandler.DeleteProject)
