@@ -27,6 +27,7 @@ func NewCommentHandler(commentService *services.CommentService) *CommentHandler 
 }
 
 func (h *CommentHandler) CreateComment(c *gin.Context) {
+	fmt.Print("WERE HERE ****************")
 	// Read the raw body
 	body, err := c.GetRawData()
 	if err != nil {

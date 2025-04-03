@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -19,7 +21,7 @@ func NewCommentRepository(db *gorm.DB) *CommentRepository {
 // Create adds a new CommentObservation to the database
 func (r *CommentRepository) Create(comment *models.CommentObservation) error {
 	comment.ID = uuid.New()
-	comment.CreatedAt = comment.CreatedAt.UTC()
+	comment.CreatedAt = time.Now()
 	return r.db.Create(&comment).Error
 }
 
