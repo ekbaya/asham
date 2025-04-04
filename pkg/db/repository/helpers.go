@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -41,8 +42,15 @@ func UpdateProjectStageWithTx(tx *gorm.DB, projectID string, newStageID string, 
 		return err
 	}
 
+	// Debug the replacement operation
+	oldRef := project.Reference
+	fmt.Printf("Before replacement: '%s'", oldRef)
+	fmt.Printf("Replacing '%s' with '%s'", currentDoc, newDoc)
+
 	// Change Ref to $newDoc
 	reference := strings.ReplaceAll(project.Reference, currentDoc, newDoc)
+
+	fmt.Printf("After replacement: '%s'", reference)
 
 	// Update current stage of the project
 	if err := tx.Model(&models.Project{}).
