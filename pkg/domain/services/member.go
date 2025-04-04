@@ -16,8 +16,11 @@ type MemberService struct {
 	emailService *EmailService
 }
 
-func NewMemberService(repo *repository.MemberRepository) *MemberService {
-	return &MemberService{repo: repo}
+func NewMemberService(repo *repository.MemberRepository, emailService *EmailService) *MemberService {
+	return &MemberService{
+		repo:         repo,
+		emailService: emailService,
+	}
 }
 
 func (service *MemberService) CreateMember(member *models.Member) error {
@@ -37,7 +40,10 @@ func (service *MemberService) CreateMember(member *models.Member) error {
 	member.HashedPassword = hashedPassword
 	member.ID = uuid.New()
 	member.CreatedAt = time.Now()
-	service.repo.CreateMember(member)
+	err = service.repo.CreateMember(member)
+	if err != nil {
+		return err
+	}
 
 	// Send welcome email with password
 	err = service.emailService.SendWelcomeEmail(member.Email, member.FirstName, clearPassword)
