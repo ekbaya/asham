@@ -189,40 +189,35 @@ func (r *ProjectRepository) UpdateProject(project *models.Project) error {
 
 func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, status models.WorkingDraftStatus) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		// Update the project within the transaction
-		result := tx.Model(&models.Project{}).
-			Where("id = ?", projectID).
-			Updates(map[string]any{
-				"working_draft_status":   status,
-				"working_draft_comments": comment,
-				"wd_tc_secretary_id":     secretary,
-			})
-
-		if result.Error != nil {
-			return result.Error
+		// First, fetch the entire project
+		var project models.Project
+		if err := tx.Where("id = ?", projectID).First(&project).Error; err != nil {
+			return fmt.Errorf("project with ID %s not found: %w", projectID, err)
 		}
 
-		if result.RowsAffected == 0 {
-			return fmt.Errorf("project with ID %s not found", projectID)
-		}
+		// Update fields directly on the project object
+		project.WorkingDraftStatus = status
+		project.WorkingDraftComments = comment
+		project.WDTCSecretaryID = &secretary
 
-		// If status is ACCEPTED, update the project stage
+		// If status is ACCEPTED, prepare additional changes
 		if status == models.ACCEPTED {
-			var project models.Project
-			if err := tx.Where("id = ?", projectID).First(&project).Error; err != nil {
-				return err
-			}
-
 			var stage models.Stage
 			if err := tx.Where("number = ?", 3).First(&stage).Error; err != nil {
 				return err
 			}
 
-			err := UpdateProjectStageWithTx(tx, projectID, stage.ID.String(), "WD Elevated to a CD", "WD", stage.Abbreviation)
-			if err != nil {
+			// First save initial changes to the project
+			if err := tx.Save(&project).Error; err != nil {
 				return err
 			}
 
+			// Update the stage (which will update the reference)
+			if err := UpdateProjectStageWithTx(tx, projectID, stage.ID.String(), "WD Elevated to a CD", "WD", stage.Abbreviation); err != nil {
+				return err
+			}
+
+			// Fetch document and create new one
 			var document models.Document
 			if err := tx.Where("id = ?", project.WorkingDraftID).First(&document).Error; err != nil {
 				return err
@@ -233,7 +228,7 @@ func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, statu
 				CreatedByID: document.CreatedByID,
 				Title:       document.Title,
 				Description: document.Description,
-				Reference:   strings.ReplaceAll(document.Reference, "WD", "CD"),
+				Reference:   strings.ReplaceAll(document.Reference, "WD", stage.Abbreviation),
 				FileURL:     document.FileURL,
 				CreatedAt:   time.Now(),
 			}
@@ -242,8 +237,21 @@ func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, statu
 				return err
 			}
 
+			// Fetch the updated project (after stage update)
+			if err := tx.Where("id = ?", projectID).First(&project).Error; err != nil {
+				return err
+			}
+
+			// Update document ID
 			docId := doc.ID.String()
 			project.CommitteeDraftID = &docId
+
+			// Save final changes
+			if err := tx.Save(&project).Error; err != nil {
+				return err
+			}
+		} else {
+			// For non-ACCEPTED status, just save the initial changes
 			if err := tx.Save(&project).Error; err != nil {
 				return err
 			}
@@ -559,11 +567,21 @@ func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusRea
 				return err
 			}
 
+			// First save the current changes
+			if err := tx.Save(&project).Error; err != nil {
+				return err
+			}
+
+			// Then update the stage (which will fetch and update the project again)
 			if err := UpdateProjectStageWithTx(tx, projectId, stage.ID.String(), "CD Consensus reached", "CD", stage.Abbreviation); err != nil {
 				return err
 			}
+
+			// Don't save again after this point
+			return nil
 		}
 
+		// Only save if we didn't reach consensus
 		if err := tx.Save(&project).Error; err != nil {
 			return err
 		}

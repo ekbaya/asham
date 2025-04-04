@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -12,22 +10,22 @@ import (
 
 // Helper method to update project stage within a transaction
 func UpdateProjectStageWithTx(tx *gorm.DB, projectID string, newStageID string, notes, currentDoc, newDoc string) error {
-	// Get current project
-	var project models.Project
-	if err := tx.Where("id = ?", projectID).Preload("StageHistory").First(&project).Error; err != nil {
+	// Direct SQL update to avoid fetching the project again
+	if err := tx.Exec("UPDATE projects SET reference = REPLACE(reference, ?, ?), stage_id = ?, updated_at = ? WHERE id = ?",
+		currentDoc, newDoc, newStageID, time.Now(), projectID).Error; err != nil {
 		return err
 	}
 
+	// Handle stage history separately
 	now := time.Now()
 
-	// Find the current active stage history entry and mark it as ended
-	if err := tx.Model(&models.ProjectStageHistory{}).
-		Where("project_id = ? AND stage_id = ? AND ended_at IS NULL", projectID, project.StageID).
-		Update("ended_at", now).Error; err != nil {
+	// Close previous stage
+	if err := tx.Exec("UPDATE project_stage_histories SET ended_at = ? WHERE project_id = ? AND ended_at IS NULL",
+		now, projectID).Error; err != nil {
 		return err
 	}
 
-	// Add new stage to history
+	// Add new stage history
 	stageHistory := models.ProjectStageHistory{
 		ID:        uuid.New(),
 		ProjectID: projectID,
@@ -39,27 +37,6 @@ func UpdateProjectStageWithTx(tx *gorm.DB, projectID string, newStageID string, 
 	}
 
 	if err := tx.Create(&stageHistory).Error; err != nil {
-		return err
-	}
-
-	// Debug the replacement operation
-	oldRef := project.Reference
-	fmt.Printf("Before replacement: '%s'", oldRef)
-	fmt.Printf("Replacing '%s' with '%s'", currentDoc, newDoc)
-
-	// Change Ref to $newDoc
-	reference := strings.ReplaceAll(project.Reference, currentDoc, newDoc)
-
-	fmt.Printf("After replacement: '%s'", reference)
-
-	// Update current stage of the project
-	if err := tx.Model(&models.Project{}).
-		Where("id = ?", projectID).
-		Updates(map[string]any{
-			"stage_id":   newStageID,
-			"updated_at": now,
-			"reference":  reference,
-		}).Error; err != nil {
 		return err
 	}
 
