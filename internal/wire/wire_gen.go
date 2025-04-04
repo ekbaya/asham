@@ -18,7 +18,9 @@ func InitializeServices(db *gorm.DB) (*services.ServiceContainer, error) {
 	organizationRepository := repository.NewOrganizationRepository(db)
 	organizationService := services.NewOrganizationService(organizationRepository)
 	memberRepository := repository.NewMemberRepository(db)
-	memberService := services.NewMemberService(memberRepository)
+	emailConfig := GetEmailConfigurations()
+	emailService := services.NewEmailService(emailConfig)
+	memberService := services.NewMemberService(memberRepository, emailService)
 	projectRepository := repository.NewProjectRepository(db)
 	projectService := services.NewProjectService(projectRepository)
 	documentRepository := repository.NewDocumentRepository(db)
@@ -29,8 +31,6 @@ func InitializeServices(db *gorm.DB) (*services.ServiceContainer, error) {
 	acceptanceService := services.NewAcceptanceService(acceptanceRepository)
 	commentRepository := repository.NewCommentRepository(db)
 	commentService := services.NewCommentService(commentRepository)
-	emailConfig := GetEmailConfigurations()
-	emailService := services.NewEmailService(emailConfig)
 	serviceContainer := services.NewServiceContainer(organizationService, memberService, projectService, documentService, proposalService, acceptanceService, commentService, emailService)
 	return serviceContainer, nil
 }
