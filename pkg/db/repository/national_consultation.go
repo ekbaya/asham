@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -18,11 +19,48 @@ func NewConsultationRepository(db *gorm.DB) *ConsultationRepository {
 	return &ConsultationRepository{db: db}
 }
 
-// Create adds a new NationalConsultation to the database
-func (r *ConsultationRepository) Create(Consultation *models.NationalConsultation) error {
-	Consultation.ID = uuid.New()
-	Consultation.CreatedAt = time.Now()
-	return r.db.Create(&Consultation).Error
+func (r *ConsultationRepository) Create(consultation *models.NationalConsultation) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var dars models.DARS
+
+		// Check if DARS exists for the given project
+		if err := tx.Where("project_id = ?", consultation.ProjectID).First(&dars).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				// Get Project
+				var project models.Project
+				if err := tx.Where("id = ?", consultation.ProjectID).First(&project).Error; err != nil {
+					tx.Rollback()
+					return err
+				}
+
+				// Create a new DARS if it does not exist
+				dars = models.DARS{
+					ID:        uuid.New(),
+					ProjectID: consultation.ProjectID,
+					CreatedAt: time.Now(),
+				}
+
+				if err := tx.Create(&dars).Error; err != nil {
+					tx.Rollback()
+					return err
+				}
+			} else {
+				tx.Rollback()
+				return err
+			}
+		}
+
+		consultation.DARSID = dars.ID
+		consultation.ID = uuid.New()
+		consultation.CreatedAt = time.Now()
+
+		if err := tx.Create(&consultation).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		return nil
+	})
 }
 
 // GetByID retrieves a NationalConsultation by its ID

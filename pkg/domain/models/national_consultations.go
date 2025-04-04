@@ -11,6 +11,8 @@ type NationalConsultation struct {
 	ID                  uuid.UUID   `json:"id"`
 	ProjectID           string      `json:"project_id" binding:"required"`
 	Project             *Project    `json:"project"`
+	DARSID              uuid.UUID   `json:"-"`
+	DARS                *DARS       `json:"-"`
 	NationalSecretaryID string      `json:"national_secretary_id"`
 	NationalSecretary   *Member     `json:"national_secretary"`
 	ClauseNo            string      `json:"clause_no" binding:"required"`
