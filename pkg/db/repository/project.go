@@ -559,7 +559,7 @@ func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusRea
 				return err
 			}
 
-			if err := UpdateProjectStageWithTx(r.db, projectId, stage.ID.String(), "CD Consensus reached", "CD", stage.Abbreviation); err != nil {
+			if err := UpdateProjectStageWithTx(tx, projectId, stage.ID.String(), "CD Consensus reached", "CD", stage.Abbreviation); err != nil {
 				return err
 			}
 		}
