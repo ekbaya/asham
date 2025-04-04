@@ -41,8 +41,8 @@ func UpdateProjectStageWithTx(tx *gorm.DB, projectID string, newStageID string, 
 		return err
 	}
 
-	// Change Ref to NWIP
-	reference := strings.Replace(project.Reference, currentDoc, newDoc, -1)
+	// Change Ref to $newDoc
+	reference := strings.ReplaceAll(project.Reference, currentDoc, newDoc)
 
 	// Update current stage of the project
 	if err := tx.Model(&models.Project{}).
