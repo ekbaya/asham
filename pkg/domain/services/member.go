@@ -45,11 +45,8 @@ func (service *MemberService) CreateMember(member *models.Member) error {
 		return err
 	}
 
-	// Send welcome email with password
-	err = service.emailService.SendWelcomeEmail(member.Email, member.FirstName, clearPassword)
-	if err != nil {
-		return errors.New("member created but failed to send email: " + err.Error())
-	}
+	go service.emailService.SendWelcomeEmail(member.Email, member.FirstName, clearPassword)
+
 	return nil
 }
 
