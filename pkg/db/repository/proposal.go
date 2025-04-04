@@ -74,7 +74,7 @@ func (r *ProposalRepository) Create(proposal *models.Proposal) error {
 	}
 
 	// Update the project stage
-	if err := UpdateProjectStageWithTx(tx, proposal.ProjectID, stage.ID.String(), "Proposal submitted", "PWI", "NWIP"); err != nil {
+	if err := UpdateProjectStageWithTx(tx, proposal.ProjectID, stage.ID.String(), "Proposal submitted", "PWI", stage.Abbreviation); err != nil {
 		tx.Rollback()
 		return err
 	}

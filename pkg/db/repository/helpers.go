@@ -13,7 +13,7 @@ import (
 func UpdateProjectStageWithTx(tx *gorm.DB, projectID string, newStageID string, notes, currentDoc, newDoc string) error {
 	// Get current project
 	var project models.Project
-	if err := tx.Preload("StageHistory").First(&project, "id = ?", projectID).Error; err != nil {
+	if err := tx.Where("id = ?", projectID).Preload("StageHistory").First(&project).Error; err != nil {
 		return err
 	}
 
