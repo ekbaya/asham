@@ -19,6 +19,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	proposalHandler := handlers.NewProposalHandler(services.ProposalService, services.DocumentService, services.ProjectService)
 	acceptanceHandler := handlers.NewAcceptanceHandler(*services.AcceptanceService)
 	commentHandler := handlers.NewCommentHandler(*&services.CommentService)
+	publicCommentHandler := handlers.NewNationalConsultationHandler(*&services.NationalConsultationService)
 
 	api := router.Group("/api")
 
@@ -184,6 +185,14 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		comment.PUT("/:comment_id", commentHandler.UpdateComment)
 		comment.DELETE("/:id", commentHandler.DeleteComment)
 		comment.GET("/project/:id", commentHandler.GetCommentsByProjectID)
+
+		// Public comments
+		comment.POST("/public/", publicCommentHandler.CreateNationalConsultation)
+		comment.GET("/public/:id", publicCommentHandler.GetNationalConsultationByID)
+		comment.GET("/public/list", publicCommentHandler.GetAllNationalConsultations)
+		comment.PUT("/public/:comment_id", publicCommentHandler.UpdateNationalConsultation)
+		comment.DELETE("/public/:id", publicCommentHandler.DeleteNationalConsultation)
+		comment.GET("/public/project/:id", publicCommentHandler.GetNationalConsultationsByProjectID)
 	}
 
 	return router, nil
