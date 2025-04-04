@@ -584,7 +584,7 @@ func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusRea
 	project.MeetingRequired = meetingRequired
 	project.CDTCSecretaryID = &secretary
 
-	if isConsensusReached && project.SubmissionDate != nil {
+	if isConsensusReached && project.SubmissionDate == nil {
 		now := time.Now()
 		project.SubmissionDate = &now
 
