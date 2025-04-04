@@ -112,7 +112,7 @@ func (r *ConsultationRepository) GetByProjectID(projectID uuid.UUID) ([]models.N
 func (r *ConsultationRepository) GetByProjectIDAndMemberState(projectID, memberState string) ([]models.NationalConsultation, error) {
 	var Consultations []models.NationalConsultation
 	err := r.db.
-		Joins("JOIN members ON members.id=Consultation_observations.national_secretary_id").
+		Joins("JOIN members ON members.id=consultation_observations.national_secretary_id").
 		Joins("JOIN national_standard_bodys ON national_standard_bodys.id=members.national_standard_body_id").
 		Joins("JOIN member_states ON member_states.id=national_standard_bodys.member_state_id").
 		Where("Consultation_observations.project_id = ? AND member_states.id = ?", projectID, memberState).
