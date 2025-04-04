@@ -218,7 +218,7 @@ func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, statu
 				return err
 			}
 
-			err := UpdateProjectStageWithTx(r.db, projectID, stage.ID.String(), "WD Elevated to a CD", "WD", stage.Abbreviation)
+			err := UpdateProjectStageWithTx(tx, projectID, stage.ID.String(), "WD Elevated to a CD", "WD", stage.Abbreviation)
 			if err != nil {
 				return err
 			}
