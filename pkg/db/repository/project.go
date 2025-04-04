@@ -188,90 +188,69 @@ func (r *ProjectRepository) UpdateProject(project *models.Project) error {
 }
 
 func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, status models.WorkingDraftStatus) error {
-	tx := r.db.Begin()
-	if tx.Error != nil {
-		return tx.Error
-	}
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		// Update the project within the transaction
+		result := tx.Model(&models.Project{}).
+			Where("id = ?", projectID).
+			Updates(map[string]any{
+				"working_draft_status":   status,
+				"working_draft_comments": comment,
+				"wd_tc_secretary_id":     secretary,
+			})
 
-	// Defer a rollback in case anything fails
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
-	// Update the project within the transaction
-	result := tx.Model(&models.Project{}).
-		Where("id = ?", projectID).
-		Updates(map[string]any{
-			"working_draft_status":   status,
-			"working_draft_comments": comment,
-			"wd_tc_secretary_id":     secretary,
-		})
-
-	if result.Error != nil {
-		tx.Rollback()
-		return result.Error
-	}
-
-	// Check if the project exists
-	if result.RowsAffected == 0 {
-		tx.Rollback()
-		return fmt.Errorf("project with ID %s not found", projectID)
-	}
-
-	// If status is ACCEPTED, update the project stage
-	if status == models.ACCEPTED {
-		var project models.Project
-		if err := tx.Where("id = ?", projectID).First(&project).Error; err != nil {
-			tx.Rollback()
-			return err
+		if result.Error != nil {
+			return result.Error
 		}
 
-		var stage models.Stage
-		if err := tx.Where("number = ?", 3).First(&stage).Error; err != nil {
-			tx.Rollback()
-			return err
+		if result.RowsAffected == 0 {
+			return fmt.Errorf("project with ID %s not found", projectID)
 		}
 
-		err := UpdateProjectStageWithTx(tx, projectID, stage.ID.String(), "WD Elevated to a CD", "WD", stage.Abbreviation)
-		if err != nil {
-			tx.Rollback()
-			return err
+		// If status is ACCEPTED, update the project stage
+		if status == models.ACCEPTED {
+			var project models.Project
+			if err := tx.Where("id = ?", projectID).First(&project).Error; err != nil {
+				return err
+			}
+
+			var stage models.Stage
+			if err := tx.Where("number = ?", 3).First(&stage).Error; err != nil {
+				return err
+			}
+
+			err := UpdateProjectStageWithTx(tx, projectID, stage.ID.String(), "WD Elevated to a CD", "WD", stage.Abbreviation)
+			if err != nil {
+				return err
+			}
+
+			var document models.Document
+			if err := tx.Where("id = ?", project.WorkingDraftID).First(&document).Error; err != nil {
+				return err
+			}
+
+			doc := models.Document{
+				ID:          uuid.New(),
+				CreatedByID: document.CreatedByID,
+				Title:       document.Title,
+				Description: document.Description,
+				Reference:   strings.ReplaceAll(document.Reference, "WD", "CD"),
+				FileURL:     document.FileURL,
+				CreatedAt:   time.Now(),
+			}
+
+			if err := tx.Create(&doc).Error; err != nil {
+				return err
+			}
+
+			docId := doc.ID.String()
+			project.CommitteeDraftID = &docId
+			if err := tx.Save(&project).Error; err != nil {
+				return err
+			}
 		}
 
-		var document models.Document
-		if err := tx.Where("id = ?", project.WorkingDraftID).First(&document).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		doc := models.Document{
-			ID:          uuid.New(),
-			CreatedByID: document.CreatedByID,
-			Title:       document.Title,
-			Description: document.Description,
-			Reference:   strings.ReplaceAll(document.Reference, "WD", "CD"),
-			FileURL:     document.FileURL,
-			CreatedAt:   time.Now(),
-		}
-
-		if err := tx.Create(&doc).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		docId := doc.ID.String()
-		project.CommitteeDraftID = &docId
-		if err := tx.Save(&project).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	// Commit the transaction if everything was successful
-	return tx.Commit().Error
+		return nil
+	})
 }
 
 func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comment, approvedBy string) error {
@@ -560,52 +539,35 @@ func (repo *ProjectRepository) FindByDocumentID(documentID uuid.UUID) ([]models.
 }
 
 func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusReached bool, action models.ProposalAction, meetingRequired bool) error {
-	// Start a transaction
-	tx := r.db.Begin()
-	if tx.Error != nil {
-		return tx.Error
-	}
-
-	// Defer a rollback in case anything fails
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
-	var project models.Project
-	if err := tx.Where("id = ?", projectId).First(&project).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	project.IsConsensusReached = isConsensusReached
-	project.ProposalAction = action
-	project.MeetingRequired = meetingRequired
-	project.CDTCSecretaryID = &secretary
-
-	if isConsensusReached {
-		now := time.Now()
-		project.SubmissionDate = &now
-
-		var stage models.Stage
-
-		if err := tx.Where("number = ?", 4).First(&stage).Error; err != nil {
-			tx.Rollback()
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var project models.Project
+		if err := tx.Where("id = ?", projectId).First(&project).Error; err != nil {
 			return err
 		}
 
-		if err := UpdateProjectStageWithTx(tx, projectId, stage.ID.String(), "CD Consensus reached", "CD", stage.Abbreviation); err != nil {
-			tx.Rollback()
+		project.IsConsensusReached = isConsensusReached
+		project.ProposalAction = action
+		project.MeetingRequired = meetingRequired
+		project.CDTCSecretaryID = &secretary
+
+		if isConsensusReached {
+			now := time.Now()
+			project.SubmissionDate = &now
+
+			var stage models.Stage
+			if err := tx.Where("number = ?", 4).First(&stage).Error; err != nil {
+				return err
+			}
+
+			if err := UpdateProjectStageWithTx(tx, projectId, stage.ID.String(), "CD Consensus reached", "CD", stage.Abbreviation); err != nil {
+				return err
+			}
+		}
+
+		if err := tx.Save(&project).Error; err != nil {
 			return err
 		}
-	}
 
-	if err := tx.Save(&project).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Commit the transaction
-	return tx.Commit().Error
+		return nil
+	})
 }
