@@ -218,7 +218,7 @@ func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, statu
 				return err
 			}
 
-			err := UpdateProjectStageWithTx(tx, projectID, stage.ID.String(), "WD Elevated to a CD", "WD", stage.Abbreviation)
+			err := UpdateProjectStageWithTx(r.db, projectID, stage.ID.String(), "WD Elevated to a CD", "WD", stage.Abbreviation)
 			if err != nil {
 				return err
 			}
@@ -559,7 +559,7 @@ func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusRea
 				return err
 			}
 
-			if err := UpdateProjectStageWithTx(tx, projectId, stage.ID.String(), "CD Consensus reached", "CD", stage.Abbreviation); err != nil {
+			if err := UpdateProjectStageWithTx(r.db, projectId, stage.ID.String(), "CD Consensus reached", "CD", stage.Abbreviation); err != nil {
 				return err
 			}
 		}
