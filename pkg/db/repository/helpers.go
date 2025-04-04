@@ -21,7 +21,7 @@ func UpdateProjectStageWithTx(tx *gorm.DB, projectID string, newStageID string, 
 
 	// Find the current active stage history entry and mark it as ended
 	if err := tx.Model(&models.ProjectStageHistory{}).
-		Where("project_id = ? AND stage_id = ? AND ended_at IS NULL", projectID, newStageID).
+		Where("project_id = ? AND stage_id = ? AND ended_at IS NULL", projectID, project.StageID).
 		Update("ended_at", now).Error; err != nil {
 		return err
 	}
