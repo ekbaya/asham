@@ -59,14 +59,23 @@ func (r *BallotingRepository) CreateVote(vote *models.Vote) error {
 }
 
 func (r *BallotingRepository) IsEligibleToVote(memberID string, projectID string) (bool, error) {
-	// Check if member has already voted
-	var voteCount int64
-	if err := r.db.Model(&models.Vote{}).
-		Where("member_id = ? AND project_id = ?", memberID, projectID).
-		Count(&voteCount).Error; err != nil {
+	// Load member to get NSB ID
+	var member models.Member
+	if err := r.db.Where("id = ?", memberID).
+		First(&member).Error; err != nil {
 		return false, err
 	}
-	if voteCount > 0 {
+
+	// Check if any member from the same NSB has already voted
+	var nsbVoteCount int64
+	if err := r.db.Model(&models.Vote{}).
+		Joins("JOIN members ON members.id = votes.member_id").
+		Where("members.national_standard_body_id = ? AND votes.project_id = ?",
+			member.NationalStandardBodyID, projectID).
+		Count(&nsbVoteCount).Error; err != nil {
+		return false, err
+	}
+	if nsbVoteCount > 0 {
 		return false, nil
 	}
 
@@ -78,13 +87,6 @@ func (r *BallotingRepository) IsEligibleToVote(memberID string, projectID string
 	}
 	if time.Now().After(balloting.EndDate) {
 		return false, nil
-	}
-
-	// Load member to get NSB ID
-	var member models.Member
-	if err := r.db.Where("id = ?", memberID).
-		First(&member).Error; err != nil {
-		return false, err
 	}
 
 	// Check involvement in committee stage
