@@ -18,34 +18,63 @@ func NewBallotingRepository(db *gorm.DB) *BallotingRepository {
 }
 
 func (r *BallotingRepository) CreateVote(vote *models.Vote) error {
-	vote.ID = uuid.New()
 	return r.db.Create(vote).Error
 }
 
 func (r *BallotingRepository) IsEligibleToVote(memberID string, projectID uuid.UUID) (bool, error) {
-	// check if the user has already voted
-	var count int64
-	err := r.db.Model(&models.Vote{}).
+	// Check if member has already voted
+	var voteCount int64
+	if err := r.db.Model(&models.Vote{}).
 		Where("member_id = ? AND project_id = ?", memberID, projectID).
-		Count(&count).Error
-	if err != nil {
+		Count(&voteCount).Error; err != nil {
 		return false, err
 	}
-
-	// Check if the balloting is active and end date is in the future
-	var balloting models.Balloting
-	err = r.db.Where("project_id = ?", projectID).First(&balloting).Error
-	if err != nil {
-		return false, err
-	}
-
-	if balloting.EndDate.Before(time.Now()) {
+	if voteCount > 0 {
 		return false, nil
 	}
 
-	// check if nsb was involved during committee or enquiry stage
+	// Check if the balloting is active
+	var balloting models.Balloting
+	if err := r.db.Where("project_id = ?", projectID).
+		First(&balloting).Error; err != nil {
+		return false, err
+	}
+	if time.Now().After(balloting.EndDate) {
+		return false, nil
+	}
 
-	return count == 0, nil
+	// Load member to get NSB ID
+	var member models.Member
+	if err := r.db.Where("id = ?", memberID).
+		First(&member).Error; err != nil {
+		return false, err
+	}
+
+	// Check involvement in committee stage
+	var committeeCount int64
+	if err := r.db.Model(&models.CommentObservation{}).
+		Joins("JOIN members ON members.id = comment_observations.national_secretary_id").
+		Joins("JOIN national_standard_bodys ON national_standard_bodys.id = members.national_standard_body_id").
+		Where("national_standard_bodys.id = ?", member.NationalStandardBodyID).
+		Count(&committeeCount).Error; err != nil {
+		return false, err
+	}
+
+	// Check involvement in enquiry stage
+	var enquiryCount int64
+	if err := r.db.Model(&models.NationalConsultation{}).
+		Joins("JOIN members ON members.id = national_consultations.national_secretary_id").
+		Joins("JOIN national_standard_bodys ON national_standard_bodys.id = members.national_standard_body_id").
+		Where("national_standard_bodys.id = ?", member.NationalStandardBodyID).
+		Count(&enquiryCount).Error; err != nil {
+		return false, err
+	}
+
+	if committeeCount == 0 && enquiryCount == 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (r *BallotingRepository) FindVoteByID(id uuid.UUID) (*models.Vote, error) {

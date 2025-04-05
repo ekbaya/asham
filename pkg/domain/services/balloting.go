@@ -17,6 +17,7 @@ func NewBallotingService(repo *repository.BallotingRepository) *BallotingService
 }
 
 func (service *BallotingService) CreateVote(vote *models.Vote) error {
+	vote.ID = uuid.New()
 	return service.repo.CreateVote(vote)
 }
 

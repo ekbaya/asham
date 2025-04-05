@@ -88,6 +88,7 @@ type Project struct {
 	MeetingRequired      bool                  `json:"meeting_required"`
 	SubmissionDate       *time.Time            `json:"submission_date,omitempty"`
 	DARS                 *DARS                 `json:"dars"`
+	Balloting            *Balloting            `json:"balloting"`
 	CreatedAt            time.Time             `json:"created_at"`
 	UpdatedAt            time.Time             `json:"updated_at"`
 }
