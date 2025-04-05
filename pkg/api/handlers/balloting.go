@@ -220,5 +220,5 @@ func (h *BallotingHandler) VerifyFDARSRecommendation(c *gin.Context) {
 		return
 	}
 
-	utilities.ShowMessage(c, http.StatusOK, "Recommendation updated successfully")
+	utilities.ShowMessage(c, http.StatusOK, "Recommendation verified updated successfully")
 }
