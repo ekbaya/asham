@@ -214,6 +214,8 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 		// Decision of Balloting
 		balloting.POST("/", ballotingHandler.CreateBalloting)
+		balloting.POST("/recomendation", ballotingHandler.RecommendFDARS)
+		balloting.POST("/recomendation/verify", ballotingHandler.VerifyFDARSRecommendation)
 	}
 
 	return router, nil

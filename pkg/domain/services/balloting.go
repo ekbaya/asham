@@ -86,3 +86,11 @@ func (service *BallotingService) FindActiveBallotingWithVotes() ([]models.Ballot
 func (service *BallotingService) FindBallotingByPeriod(startDate, endDate time.Time) ([]models.Balloting, error) {
 	return service.repo.FindBallotingByPeriod(startDate, endDate)
 }
+
+func (service *BallotingService) RecommendFDARS(memberId, projectId string, recommended bool) error {
+	return service.repo.RecommendFDARS(memberId, projectId, recommended)
+}
+
+func (service *BallotingService) VerifyFDARSRecommendation(memberId, projectId string) error {
+	return service.repo.VerifyFDARSRecommendation(memberId, projectId)
+}

@@ -280,3 +280,42 @@ func (r *BallotingRepository) FindBallotingByPeriod(startDate, endDate time.Time
 	}
 	return ballotings, nil
 }
+
+func (r *BallotingRepository) RecommendFDARS(memberId, projectId string, recommended bool) error {
+	var ballot models.Balloting
+	if err := r.db.Where("project_id = ?", projectId).First(&ballot).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("balloting not found for project ID %s", projectId)
+		}
+		return err
+	}
+
+	now := time.Now()
+
+	ballot.RecommendedByID = &memberId
+	ballot.Recommended = recommended
+	ballot.RecommendedAt = &now
+	return r.db.Save(&ballot).Error
+}
+
+func (r *BallotingRepository) VerifyFDARSRecommendation(memberId, projectId string) error {
+	var ballot models.Balloting
+	if err := r.db.Where("project_id = ?", projectId).First(&ballot).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("balloting not found for project ID %s", projectId)
+		}
+		return err
+	}
+
+	if ballot.RecommendedByID == nil {
+		return fmt.Errorf("balloting not recommended by any member for project ID %s", projectId)
+
+	}
+
+	if ballot.RecommendedByID == &memberId {
+		return fmt.Errorf("member %s cannot verify their own recommendation", memberId)
+	}
+
+	ballot.VerifiedByID = &memberId
+	return r.db.Save(&ballot).Error
+}
