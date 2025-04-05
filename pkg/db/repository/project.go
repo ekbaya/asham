@@ -709,6 +709,21 @@ func (r *ProjectRepository) ApproveFDARS(secretary,
 
 		}
 
+		if approve {
+			var stage models.Stage
+			if err := tx.Where("number = ?", 6).First(&stage).Error; err != nil {
+				return err
+			}
+
+			if err := UpdateProjectStageWithTx(tx, projectId, stage.ID.String(), "FDARS is approved in accordance with the conditions in 7.7.3", "FDARS", stage.Abbreviation); err != nil {
+				return err
+			}
+		}
+
+		if err := tx.Save(&balloting).Error; err != nil {
+			return err
+		}
+
 		return nil
 	})
 }

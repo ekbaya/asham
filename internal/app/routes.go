@@ -216,6 +216,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		balloting.POST("/", ballotingHandler.CreateBalloting)
 		balloting.POST("/recommendation", ballotingHandler.RecommendFDARS)
 		balloting.GET("/recommendation/verify/:project_id", ballotingHandler.VerifyFDARSRecommendation)
+		balloting.POST("/approve", projectHandler.ApproveFDARS)
 	}
 
 	return router, nil

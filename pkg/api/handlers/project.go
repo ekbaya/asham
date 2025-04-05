@@ -592,3 +592,40 @@ func (h *ProjectHandler) ReviewDARS(c *gin.Context) {
 
 	utilities.ShowMessage(c, http.StatusCreated, "DARS updated successfully")
 }
+
+func (h *ProjectHandler) ApproveFDARS(c *gin.Context) {
+	var payload struct {
+		Project string `json:"project" binding:"required"`
+		Approve bool   `json:"approve"`
+		Action  string `json:"action"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			// Convert validation errors into human-readable messages
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			return
+		}
+
+		// For non-validation errors
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userIDStr := userID.(string)
+
+	err := h.projectService.ApproveFDARS(userIDStr, payload.Project, payload.Approve, payload.Action)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "FDARS updated successfully")
+}

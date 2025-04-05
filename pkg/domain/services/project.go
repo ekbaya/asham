@@ -166,3 +166,10 @@ func (service *ProjectService) ReviewDARS(secretary,
 	}
 	return service.repo.ReviewDARS(secretary, projectId, wto_notification_notified, unresolvedIssues, alternativeDeliverable, status)
 }
+
+func (service *ProjectService) ApproveFDARS(secretary, projectId string, approve bool, action string) error {
+	if action == "" && !approve {
+		return fmt.Errorf("Action cannot be empty when not approving")
+	}
+	return service.repo.ApproveFDARS(secretary, projectId, approve, action)
+}

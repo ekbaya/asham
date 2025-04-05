@@ -295,6 +295,7 @@ func (r *BallotingRepository) RecommendFDARS(memberId, projectId string, recomme
 	ballot.RecommendedByID = &memberId
 	ballot.Recommended = recommended
 	ballot.RecommendedAt = &now
+	ballot.Active = false
 	return r.db.Save(&ballot).Error
 }
 
