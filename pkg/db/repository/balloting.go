@@ -19,6 +19,33 @@ func NewBallotingRepository(db *gorm.DB) *BallotingRepository {
 }
 
 func (r *BallotingRepository) CreateVote(vote *models.Vote) error {
+	var ballot models.Balloting
+	if err := r.db.Where("project_id = ?", vote.ProjectID).First(&ballot).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// Get Project
+			var project models.Project
+			if err := r.db.Where("id = ?", vote.ProjectID).First(&project).Error; err != nil {
+				return err
+			}
+
+			now := time.Now()
+			// Create a new Balloting if it does not exist
+			ballot = models.Balloting{
+				ID:        uuid.New(),
+				ProjectID: vote.ProjectID,
+				CreatedAt: now,
+				UpdatedAt: now,
+				StartDate: now,
+				EndDate:   now.AddDate(0, 0, 30), // Set end date to 30 days from now
+			}
+
+			if err := r.db.Create(&ballot).Error; err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
 	isEligible, err := r.IsEligibleToVote(vote.MemberID, vote.ProjectID)
 	if err != nil {
 		return err
@@ -27,6 +54,7 @@ func (r *BallotingRepository) CreateVote(vote *models.Vote) error {
 	if !isEligible {
 		return errors.New("member is not eligible to vote")
 	}
+	vote.BallotingID = ballot.ID
 	return r.db.Create(vote).Error
 }
 

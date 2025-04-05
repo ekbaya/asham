@@ -17,12 +17,17 @@ type AcceptanceCriteriaResult struct {
 }
 
 type Balloting struct {
-	ID        uuid.UUID `json:"id"`
-	ProjectID string    `json:"project_id" binding:"required"`
-	Project   *Project  `json:"-"`
-	Votes     *[]Vote   `json:"nsb_submissions,omitempty"`
-	StartDate time.Time `json:"start_date" binding:"required"`
-	EndDate   time.Time `json:"end_date" binding:"required"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID              uuid.UUID `json:"id"`
+	ProjectID       string    `json:"project_id" binding:"required"`
+	Project         *Project  `json:"-"`
+	Votes           *[]Vote   `json:"nsb_submissions,omitempty"`
+	StartDate       time.Time `json:"start_date" binding:"required"`
+	EndDate         time.Time `json:"end_date" binding:"required"`
+	Recommended     bool      `json:"recommended" gorm:"default:false"`
+	RecommendedByID *string   `json:"recommended_by_id"`
+	RecommendedBy   Member    `json:"recommended_by,omitempty" gorm:"constraint:OnDelete:SET NULL"`
+	VerifiedByByID  *string   `json:"verified_by_id"`
+	VerifiedBy      Member    `json:"verified_by,omitempty" gorm:"constraint:OnDelete:SET NULL"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
