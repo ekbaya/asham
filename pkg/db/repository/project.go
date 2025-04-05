@@ -524,7 +524,11 @@ func (r *ProjectRepository) GetRelatedProjects(projectID uuid.UUID) ([]models.Pr
 
 func (r *ProjectRepository) FetchStages() (*[]models.Stage, error) {
 	var stages []models.Stage
-	err := r.db.Preload(clause.Associations).Find(&stages).Error
+	err := r.db.Preload(clause.Associations).
+		Preload("Timeframe.Standard").
+		Preload("Timeframe.IS").
+		Preload("Timeframe.Emergency").
+		Find(&stages).Error
 	return &stages, err
 }
 

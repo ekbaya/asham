@@ -219,5 +219,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		balloting.POST("/approve", projectHandler.ApproveFDARS)
 	}
 
+	// Appoval Stage Route
+
 	return router, nil
 }
