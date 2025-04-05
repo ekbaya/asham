@@ -20,8 +20,8 @@ type DARS struct {
 	ProjectID string    `json:"project_id" binding:"required"`
 	Project   *Project  `json:"-"`
 	// Public review information
-	PublicReviewStartDate *time.Time `json:"public_review_start_date"` // Start date of public review
-	PublicReviewEndDate   *time.Time `json:"public_review_end_date"`   // End date of public review (60 days after start)
+	PublicReviewStartDate time.Time `json:"public_review_start_date"` // Start date of public review
+	PublicReviewEndDate   time.Time `json:"public_review_end_date"`   // End date of public review (60 days after start)
 
 	// WTO notification (optional)
 	WTONotificationDate *time.Time              `json:"wto_notification_date,omitempty"` // Date of WTO notification
@@ -34,6 +34,9 @@ type DARS struct {
 	// Decision for the next stage
 	MoveToBalloting        bool   `json:"move_to_balloting" gorm:"default:false"` // Whether to move to Balloting Stage
 	AlternativeDeliverable string `json:"alternative_deliverable,omitempty"`      // If another deliverable is needed
+
+	DARSTCSecretaryID *string `json:"dars_tc_secretary_id" gorm:"column:dars_tc_secretary_id"`
+	DARSTCSecretary   *Member `json:"dars_tc_secretary"`
 
 	// Standard timestamps
 	CreatedAt time.Time `json:"created_at"`

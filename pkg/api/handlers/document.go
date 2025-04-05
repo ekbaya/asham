@@ -54,7 +54,7 @@ func (h *DocumentHandler) UploadDocument(c *gin.Context) {
 	}
 	defer file.Close()
 
-	assetsDir := "assets/documents"
+	assetsDir := "../assets/documents"
 	if err := os.MkdirAll(assetsDir, 0755); err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create assets directory: "+err.Error())
 		return
@@ -133,7 +133,7 @@ func (h *DocumentHandler) CreateDocument(c *gin.Context) {
 	}
 	defer file.Close()
 
-	assetsDir := "assets/documents"
+	assetsDir := "../assets/documents"
 	if err := os.MkdirAll(assetsDir, 0755); err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create assets directory: "+err.Error())
 		return

@@ -152,3 +152,17 @@ func (service *ProjectService) ReviewWD(secretary, projectID, comment string, st
 func (service *ProjectService) ReviewCD(secretary, projectId string, isConsensusReached bool, action models.ProposalAction, meetingRequired bool) error {
 	return service.repo.ReviewCD(secretary, projectId, isConsensusReached, action, meetingRequired)
 }
+
+func (service *ProjectService) ReviewDARS(secretary,
+	projectId string,
+	wto_notification_notified bool,
+	unresolvedIssues,
+	alternativeDeliverable,
+	status string) error {
+	if models.DARSStatus(status) == models.DARSRejected &&
+		alternativeDeliverable == "" {
+		return fmt.Errorf("Alternative deliverables cannot be empty when status is rejected")
+
+	}
+	return service.repo.ReviewDARS(secretary, projectId, wto_notification_notified, unresolvedIssues, alternativeDeliverable, status)
+}

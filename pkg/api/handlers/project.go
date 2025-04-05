@@ -553,3 +553,42 @@ func (h *ProjectHandler) ReviewCD(c *gin.Context) {
 
 	utilities.ShowMessage(c, http.StatusCreated, "CD updated successfully")
 }
+
+func (h *ProjectHandler) ReviewDARS(c *gin.Context) {
+	var payload struct {
+		Project                 string `json:"project" binding:"required"`
+		WTONotificationNotified bool   `json:"wto_notification_notified"`
+		UnresolvedIssues        string `json:"unresolved_issues"`
+		Status                  string `json:"status"`
+		AlternativeDeliverable  string `json:"alternative_deliverable"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			// Convert validation errors into human-readable messages
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			return
+		}
+
+		// For non-validation errors
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userIDStr := userID.(string)
+
+	err := h.projectService.ReviewDARS(userIDStr, payload.Project, payload.WTONotificationNotified, payload.UnresolvedIssues, payload.AlternativeDeliverable, payload.Status)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "DARS updated successfully")
+}

@@ -589,3 +589,64 @@ func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusRea
 		return nil
 	})
 }
+
+func (r *ProjectRepository) ReviewDARS(secretary,
+	projectId string,
+	wto_notification_notified bool,
+	unresolvedIssues,
+	alternativeDeliverable,
+	status string) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var dars models.DARS
+		if err := tx.Where("project_id = ?", projectId).First(&dars).Error; err != nil {
+			return err
+		}
+
+		dars.DARSTCSecretaryID = &secretary
+		if unresolvedIssues != "" {
+			dars.UnresolvedIssues = unresolvedIssues
+
+		}
+
+		if unresolvedIssues != "" {
+			dars.AlternativeDeliverable = alternativeDeliverable
+		}
+
+		if status != "" {
+			dars.Status = models.DARSStatus(status)
+
+		}
+		if wto_notification_notified && dars.WTONotificationDate == nil {
+			now := time.Now()
+			dars.WTONotificationDate = &now
+		}
+
+		if status != "" && status == string(models.DARSApproved) {
+			dars.MoveToBalloting = true
+			var stage models.Stage
+			if err := tx.Where("number = ?", 5).First(&stage).Error; err != nil {
+				return err
+			}
+
+			// First save the current changes
+			if err := tx.Save(&dars).Error; err != nil {
+				return err
+			}
+
+			// Then update the stage (which will fetch and update the project again)
+			if err := UpdateProjectStageWithTx(tx, projectId, stage.ID.String(), "DARS is accepted to advance to the balloting stage as an FDARS", "DARS", stage.Abbreviation); err != nil {
+				return err
+			}
+
+			// Don't save again after this point
+			return nil
+		}
+
+		// Only save if we didn't reach consensus
+		if err := tx.Save(&dars).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}

@@ -33,11 +33,15 @@ func (r *ConsultationRepository) Create(consultation *models.NationalConsultatio
 					return err
 				}
 
+				now := time.Now()
+
 				// Create a new DARS if it does not exist
 				dars = models.DARS{
-					ID:        uuid.New(),
-					ProjectID: consultation.ProjectID,
-					CreatedAt: time.Now(),
+					ID:                    uuid.New(),
+					ProjectID:             consultation.ProjectID,
+					CreatedAt:             time.Now(),
+					PublicReviewStartDate: now,
+					PublicReviewEndDate:   now.AddDate(0, 2, 7),
 				}
 
 				if err := tx.Create(&dars).Error; err != nil {
