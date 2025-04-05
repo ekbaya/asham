@@ -205,7 +205,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		balloting.GET("/votes/:id", voteHandler.GetVoteByID)
 		balloting.GET("/votes/list", voteHandler.GetVotesByBallotingID)
 		balloting.PUT("/votes", voteHandler.UpdateVote)
-		balloting.DELETE("votes/:id", voteHandler.DeleteVote)
+		balloting.DELETE("/votes/:id", voteHandler.DeleteVote)
 		balloting.GET("/votes/all", voteHandler.GetAllVotesWithAssociations)
 		balloting.GET("/votes/count", voteHandler.CountVotesByBalloting)
 		balloting.GET("/votes/criteria", voteHandler.CheckProjectAcceptanceCriteria)
