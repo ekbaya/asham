@@ -212,7 +212,7 @@ func (h *VoteHandler) CountVotesByBalloting(c *gin.Context) {
 
 // CheckProjectAcceptanceCriteria checks if a project meets the acceptance criteria
 func (h *VoteHandler) CheckProjectAcceptanceCriteria(c *gin.Context) {
-	projectID := c.Param("project_id")
+	projectID := c.Param("id")
 
 	result, err := h.ballotingService.CheckAcceptanceCriteria(projectID)
 	if err != nil {
