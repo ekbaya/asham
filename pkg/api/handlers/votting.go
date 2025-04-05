@@ -80,7 +80,7 @@ func (h *VoteHandler) GetVoteByID(c *gin.Context) {
 
 // GetVotesByBallotingID retrieves all votes for a specific balloting
 func (h *VoteHandler) GetVotesByBallotingID(c *gin.Context) {
-	ballotingID, err := uuid.Parse(c.Param("balloting_id"))
+	ballotingID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid balloting ID")
 		return
@@ -97,7 +97,7 @@ func (h *VoteHandler) GetVotesByBallotingID(c *gin.Context) {
 
 // GetVotesByProjectID retrieves all votes for a specific project
 func (h *VoteHandler) GetVotesByProjectID(c *gin.Context) {
-	projectID := c.Param("project_id")
+	projectID := c.Param("id")
 
 	votes, err := h.ballotingService.FindByProjectID(projectID)
 	if err != nil {
