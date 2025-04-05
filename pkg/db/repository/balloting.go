@@ -94,7 +94,8 @@ func (r *BallotingRepository) IsEligibleToVote(memberID string, projectID string
 	if err := r.db.Model(&models.CommentObservation{}).
 		Joins("JOIN members ON members.id = comment_observations.national_secretary_id").
 		Joins("JOIN national_standard_bodies ON national_standard_bodies.id = members.national_standard_body_id").
-		Where("national_standard_bodies.id = ?", member.NationalStandardBodyID).
+		Where("national_standard_bodies.id = ? AND comment_observations.project_id = ?",
+			member.NationalStandardBodyID, projectID).
 		Count(&committeeCount).Error; err != nil {
 		return false, err
 	}
@@ -104,7 +105,8 @@ func (r *BallotingRepository) IsEligibleToVote(memberID string, projectID string
 	if err := r.db.Model(&models.NationalConsultation{}).
 		Joins("JOIN members ON members.id = national_consultations.national_secretary_id").
 		Joins("JOIN national_standard_bodies ON national_standard_bodies.id = members.national_standard_body_id").
-		Where("national_standard_bodies.id = ?", member.NationalStandardBodyID).
+		Where("national_standard_bodies.id = ? AND national_consultations.project_id = ?",
+			member.NationalStandardBodyID, projectID).
 		Count(&enquiryCount).Error; err != nil {
 		return false, err
 	}
