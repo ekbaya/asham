@@ -31,19 +31,24 @@ type AcceptanceCriteriaResult struct {
 }
 
 type Balloting struct {
-	ID              uuid.UUID  `json:"id"`
-	ProjectID       string     `json:"project_id" binding:"required"`
-	Project         *Project   `json:"-"`
-	Votes           *[]Vote    `json:"nsb_submissions,omitempty"`
-	StartDate       time.Time  `json:"start_date" binding:"required"`
-	EndDate         time.Time  `json:"end_date" binding:"required"`
-	Active          bool       `json:"active" gorm:"default:true"`
-	Recommended     bool       `json:"recommended" gorm:"default:false"`
-	RecommendedAt   *time.Time `json:"recommended_at"`
-	RecommendedByID *string    `json:"recommended_by_id"`
-	RecommendedBy   Member     `json:"recommended_by" gorm:"constraint:OnDelete:SET NULL"`
-	VerifiedByID    *string    `json:"verified_by_id"`
-	VerifiedBy      Member     `json:"verified_by" gorm:"constraint:OnDelete:SET NULL"`
-	CreatedAt       time.Time  `json:"created_at"`
-	UpdatedAt       time.Time  `json:"updated_at"`
+	ID                 uuid.UUID   `json:"id"`
+	ProjectID          string      `json:"project_id" binding:"required"`
+	Project            *Project    `json:"-"`
+	Votes              *[]Vote     `json:"nsb_submissions,omitempty"`
+	StartDate          time.Time   `json:"start_date" binding:"required"`
+	EndDate            time.Time   `json:"end_date" binding:"required"`
+	Active             bool        `json:"active" gorm:"default:true"`
+	Recommended        bool        `json:"recommended" gorm:"default:false"`
+	RecommendedAt      *time.Time  `json:"recommended_at"`
+	RecommendedByID    *string     `json:"recommended_by_id"`
+	RecommendedBy      Member      `json:"recommended_by" gorm:"constraint:OnDelete:SET NULL"`
+	VerifiedByID       *string     `json:"verified_by_id"`
+	VerifiedBy         Member      `json:"verified_by" gorm:"constraint:OnDelete:SET NULL"`
+	Approved           bool        `json:"approved" gorm:"default:false"`
+	ApprovedByID       *string     `json:"approved_by_id"`
+	ApprovedBy         Member      `json:"approved_by" gorm:"constraint:OnDelete:SET NULL"`
+	ApprovedAt         *time.Time  `json:"approved_at"`
+	NextCourseOfAction FDARSAction `json:"next_course_of_action"`
+	CreatedAt          time.Time   `json:"created_at"`
+	UpdatedAt          time.Time   `json:"updated_at"`
 }

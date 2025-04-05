@@ -89,6 +89,9 @@ type Project struct {
 	SubmissionDate       *time.Time            `json:"submission_date,omitempty"`
 	DARS                 *DARS                 `json:"dars"`
 	Balloting            *Balloting            `json:"ballot"`
-	CreatedAt            time.Time             `json:"created_at"`
-	UpdatedAt            time.Time             `json:"updated_at"`
+	// Keep track of cancellation at ballot level
+	Cancelled     bool       `json:"cancelled" gorm:"default:false"`
+	CancelledDate *time.Time `json:"cancelled_date"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
 }
