@@ -26,7 +26,7 @@ type Balloting struct {
 	Recommended     bool      `json:"recommended" gorm:"default:false"`
 	RecommendedByID *string   `json:"recommended_by_id"`
 	RecommendedBy   Member    `json:"recommended_by,omitempty" gorm:"constraint:OnDelete:SET NULL"`
-	VerifiedByByID  *string   `json:"verified_by_id"`
+	VerifiedByID    *string   `json:"verified_by_id"`
 	VerifiedBy      Member    `json:"verified_by,omitempty" gorm:"constraint:OnDelete:SET NULL"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
