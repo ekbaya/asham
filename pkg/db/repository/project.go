@@ -572,6 +572,18 @@ func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusRea
 				return err
 			}
 
+			dars := models.DARS{
+				ID:                    uuid.New(),
+				ProjectID:             projectId,
+				CreatedAt:             time.Now(),
+				PublicReviewStartDate: now,
+				PublicReviewEndDate:   now.AddDate(0, 2, 7),
+			}
+
+			if err := tx.Create(&dars).Error; err != nil {
+				return err
+			}
+
 			// Then update the stage (which will fetch and update the project again)
 			if err := UpdateProjectStageWithTx(tx, projectId, stage.ID.String(), "CD Consensus reached", "CD", stage.Abbreviation); err != nil {
 				return err
@@ -630,6 +642,19 @@ func (r *ProjectRepository) ReviewDARS(secretary,
 
 			// First save the current changes
 			if err := tx.Save(&dars).Error; err != nil {
+				return err
+			}
+
+			balloting := models.Balloting{
+				ID:        uuid.New(),
+				ProjectID: projectId,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+				StartDate: time.Now(),
+				EndDate:   time.Now().AddDate(0, 0, 30), // Set end date to 30 days from now
+			}
+
+			if err := tx.Create(&balloting).Error; err != nil {
 				return err
 			}
 

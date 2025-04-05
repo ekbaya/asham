@@ -38,5 +38,7 @@ func RunMigrations(db *gorm.DB) error {
 		&models.NSBResponseStatusChange{},
 		&models.DARS{},
 		&models.NationalConsultation{},
+		&models.Balloting{},
+		&models.Vote{},
 	)
 }
