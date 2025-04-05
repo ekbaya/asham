@@ -20,6 +20,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	acceptanceHandler := handlers.NewAcceptanceHandler(*services.AcceptanceService)
 	commentHandler := handlers.NewCommentHandler(*&services.CommentService)
 	publicCommentHandler := handlers.NewNationalConsultationHandler(*&services.NationalConsultationService)
+	voteHandler := handlers.NewVoteHandler(*&services.BallotingService)
 
 	api := router.Group("/api")
 
@@ -194,6 +195,22 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		comment.PUT("/public/:comment_id", publicCommentHandler.UpdateNationalConsultation)
 		comment.DELETE("/public/:id", publicCommentHandler.DeleteNationalConsultation)
 		comment.GET("/public/project/:id", publicCommentHandler.GetNationalConsultationsByProjectID)
+	}
+
+	// Balloting and  Observations Route
+	balloting := api.Group("balloting")
+	balloting.Use(middleware.AuthMiddleware())
+	{
+		balloting.POST("/votes", voteHandler.CreateVote)
+		balloting.GET("/votes/:id", voteHandler.GetVoteByID)
+		balloting.GET("/votes/list", voteHandler.GetVotesByBallotingID)
+		balloting.PUT("/votes", voteHandler.UpdateVote)
+		balloting.DELETE("votes/:id", voteHandler.DeleteVote)
+		balloting.GET("/votes/all", voteHandler.GetAllVotesWithAssociations)
+		balloting.GET("/votes/count", voteHandler.CountVotesByBalloting)
+		balloting.GET("/votes/criteria", voteHandler.CheckProjectAcceptanceCriteria)
+
+		// Decision of Balloting
 	}
 
 	return router, nil

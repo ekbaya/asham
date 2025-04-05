@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -16,17 +17,12 @@ func NewBallotingRepository(db *gorm.DB) *BallotingRepository {
 	return &BallotingRepository{db: db}
 }
 
-// Create adds a new vote to the database
-func (r *BallotingRepository) Create(vote *models.Vote) error {
-	// Generate UUID if not provided
-	if vote.ID == uuid.Nil {
-		vote.ID = uuid.New()
-	}
+func (r *BallotingRepository) CreateVote(vote *models.Vote) error {
+	vote.ID = uuid.New()
 	return r.db.Create(vote).Error
 }
 
-// FindByID retrieves a vote by its ID
-func (r *BallotingRepository) FindByID(id uuid.UUID) (*models.Vote, error) {
+func (r *BallotingRepository) FindVoteByID(id uuid.UUID) (*models.Vote, error) {
 	var vote models.Vote
 	err := r.db.Where("id = ?", id).First(&vote).Error
 	if err != nil {
@@ -35,8 +31,7 @@ func (r *BallotingRepository) FindByID(id uuid.UUID) (*models.Vote, error) {
 	return &vote, nil
 }
 
-// FindByBallotingID retrieves all votes for a specific balloting
-func (r *BallotingRepository) FindByBallotingID(ballotingID uuid.UUID) ([]models.Vote, error) {
+func (r *BallotingRepository) FindVotesByBallotingID(ballotingID uuid.UUID) ([]models.Vote, error) {
 	var votes []models.Vote
 	err := r.db.Where("balloting_id = ?", ballotingID).Find(&votes).Error
 	if err != nil {
@@ -45,7 +40,6 @@ func (r *BallotingRepository) FindByBallotingID(ballotingID uuid.UUID) ([]models
 	return votes, nil
 }
 
-// FindByProjectID retrieves all votes for a specific project
 func (r *BallotingRepository) FindByProjectID(projectID string) ([]models.Vote, error) {
 	var votes []models.Vote
 	err := r.db.Where("project_id = ?", projectID).Find(&votes).Error
@@ -55,8 +49,7 @@ func (r *BallotingRepository) FindByProjectID(projectID string) ([]models.Vote, 
 	return votes, nil
 }
 
-// FindByMemberID retrieves all votes cast by a specific member
-func (r *BallotingRepository) FindByMemberID(memberID string) ([]models.Vote, error) {
+func (r *BallotingRepository) FindVotesByMemberID(memberID string) ([]models.Vote, error) {
 	var votes []models.Vote
 	err := r.db.Where("member_id = ?", memberID).Find(&votes).Error
 	if err != nil {
@@ -65,17 +58,14 @@ func (r *BallotingRepository) FindByMemberID(memberID string) ([]models.Vote, er
 	return votes, nil
 }
 
-// Update modifies an existing vote
-func (r *BallotingRepository) Update(vote *models.Vote) error {
+func (r *BallotingRepository) UpdateVote(vote *models.Vote) error {
 	return r.db.Save(vote).Error
 }
 
-// Delete removes a vote from the database
-func (r *BallotingRepository) Delete(id uuid.UUID) error {
+func (r *BallotingRepository) DeleteVote(id uuid.UUID) error {
 	return r.db.Delete(&models.Vote{}, id).Error
 }
 
-// FindVotesWithAssociations retrieves votes with their Project and Member data loaded
 func (r *BallotingRepository) FindVotesWithAssociations() ([]models.Vote, error) {
 	var votes []models.Vote
 	err := r.db.Preload("Project").Preload("Member").Find(&votes).Error
@@ -85,32 +75,54 @@ func (r *BallotingRepository) FindVotesWithAssociations() ([]models.Vote, error)
 	return votes, nil
 }
 
-// CountVotesByBalloting counts votes for a specific balloting
 func (r *BallotingRepository) CountVotesByBalloting(ballotingID uuid.UUID) (int64, error) {
 	var count int64
 	err := r.db.Model(&models.Vote{}).Where("balloting_id = ?", ballotingID).Count(&count).Error
 	return count, err
 }
 
-// GetAcceptanceRate calculates the acceptance rate for a project
-func (r *BallotingRepository) GetAcceptanceRate(projectID string) (float64, error) {
-	var acceptedCount, totalCount int64
+// CheckAcceptanceCriteria determines if a project has met the 75% acceptance threshold
+func (r *BallotingRepository) CheckAcceptanceCriteria(projectID string) (*models.AcceptanceCriteriaResult, error) {
+	const requiredRate float64 = 0.75 // 75% acceptance required
 
-	err := r.db.Model(&models.Vote{}).Where("project_id = ?", projectID).Count(&totalCount).Error
+	result := &models.AcceptanceCriteriaResult{
+		RequiredRate: requiredRate,
+	}
+
+	// Count total votes for this project
+	err := r.db.Model(&models.Vote{}).Where("project_id = ?", projectID).Count(&result.TotalVotes).Error
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	if totalCount == 0 {
-		return 0, nil
+	// If no votes, criteria not met
+	if result.TotalVotes == 0 {
+		result.Message = "No votes recorded for this project."
+		return result, nil
 	}
 
-	err = r.db.Model(&models.Vote{}).Where("project_id = ? AND acceptance = ?", projectID, true).Count(&acceptedCount).Error
+	// Count accepted votes for this project
+	err = r.db.Model(&models.Vote{}).Where("project_id = ? AND acceptance = ?", projectID, true).Count(&result.AcceptedVotes).Error
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return float64(acceptedCount) / float64(totalCount), nil
+	// Calculate acceptance rate
+	result.AcceptanceRate = float64(result.AcceptedVotes) / float64(result.TotalVotes)
+
+	// Check if acceptance threshold is met
+	result.CriteriaMet = result.AcceptanceRate >= requiredRate
+
+	// Generate appropriate message
+	if result.CriteriaMet {
+		result.Message = fmt.Sprintf("Project accepted with %.1f%% approval (required: %.1f%%)",
+			result.AcceptanceRate*100, requiredRate*100)
+	} else {
+		result.Message = fmt.Sprintf("Project not accepted. Current approval: %.1f%% (required: %.1f%%)",
+			result.AcceptanceRate*100, requiredRate*100)
+	}
+
+	return result, nil
 }
 
 func (r *BallotingRepository) FindBallotingByID(id uuid.UUID) (*models.Balloting, error) {
