@@ -108,3 +108,7 @@ func (service *DocumentService) CountAll() (int64, error) {
 func (service *DocumentService) ProjectDocuments(projectId string) ([]models.Document, error) {
 	return service.repo.ProjectDocuments(projectId)
 }
+
+func (service *DocumentService) UpdateProjectRelatedDoc(projectId, docTitle, docRef, docDescription, fileURL, member string) error {
+	return service.repo.UpdateProjectRelatedDoc(projectId, docTitle, docRef, docDescription, fileURL, member)
+}

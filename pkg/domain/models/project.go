@@ -89,6 +89,7 @@ type Project struct {
 	SubmissionDate       *time.Time            `json:"submission_date,omitempty"`
 	DARS                 *DARS                 `json:"dars"`
 	Balloting            *Balloting            `json:"ballot"`
+	RelatedDocuments     *[]Document           `json:"project_related_documents" gorm:"many2many:project_related_documents;"`
 	// Keep track of cancellation at ballot level
 	Cancelled     bool       `json:"cancelled" gorm:"default:false"`
 	CancelledDate *time.Time `json:"cancelled_date"`

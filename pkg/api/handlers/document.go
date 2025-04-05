@@ -490,3 +490,69 @@ func (h *DocumentHandler) ProjectDocuments(c *gin.Context) {
 
 	utilities.Show(c, http.StatusOK, "docs", docs)
 }
+
+func (h *DocumentHandler) UploadRelatedDocument(c *gin.Context) {
+	// Parse the multipart form
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil { // 10 MB max
+		utilities.ShowMessage(c, http.StatusBadRequest, "Unable to parse form: "+err.Error())
+		return
+	}
+
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utilities.ShowMessage(c, http.StatusUnauthorized, "User not authenticated")
+		return
+	}
+
+	project := c.PostForm("project")
+	docTitle := c.PostForm("title")
+	docDesc := c.PostForm("description")
+	reference := c.PostForm("reference")
+
+	if project == "" || docTitle == "" || reference == "" {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Project, title and reference are required fields")
+		return
+	}
+
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Error retrieving file: "+err.Error())
+		return
+	}
+	defer file.Close()
+
+	assetsDir := "../assets/documents"
+	if err := os.MkdirAll(assetsDir, 0755); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create assets directory: "+err.Error())
+		return
+	}
+
+	filename := uuid.New().String() + filepath.Ext(header.Filename)
+	filepath := filepath.Join(assetsDir, filename)
+
+	dst, err := os.Create(filepath)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create destination file: "+err.Error())
+		return
+	}
+	defer dst.Close()
+
+	if _, err = io.Copy(dst, file); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to save file: "+err.Error())
+		return
+	}
+
+	// Set the file URL in the document
+	// For local storage, we'll use a relative path
+	// This we will change to an S3 URL later
+	fileURl := "/" + filepath // prepend with slash for URL format
+
+	err = h.documentService.UpdateProjectRelatedDoc(project, docTitle, reference, docDesc, fileURl, userID.(string))
+	if err != nil {
+		os.Remove(filepath)
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, fmt.Sprintf("%s added successfully", docTitle))
+}

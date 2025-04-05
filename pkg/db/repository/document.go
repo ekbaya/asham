@@ -75,6 +75,43 @@ func (r *DocumentRepository) UpdateProjectDoc(projectId, docType, fileURL, membe
 	return tx.Commit().Error
 }
 
+func (r *DocumentRepository) UpdateProjectRelatedDoc(projectId, docTitle, docRef, docDescription, fileURL, member string) error {
+	tx := r.db.Begin() // Start a transaction
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var project models.Project
+	if err := tx.Preload("RelatedDocuments").Where("id = ?", projectId).First(&project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	doc := models.Document{
+		ID:          uuid.New(),
+		Reference:   docRef,
+		Title:       docTitle,
+		FileURL:     fileURL,
+		Description: docDescription,
+		CreatedByID: member,
+	}
+
+	if err := tx.Create(&doc).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Associate the new document with the project
+	if err := tx.Model(&project).Association("RelatedDocuments").Append(&doc); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
 // GetByID retrieves a document by its ID
 func (r *DocumentRepository) GetByID(id uuid.UUID) (*models.Document, error) {
 	var doc models.Document
