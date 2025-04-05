@@ -129,7 +129,11 @@ func (r *BallotingRepository) FindVoteByID(id uuid.UUID) (*models.Vote, error) {
 
 func (r *BallotingRepository) FindVotesByBallotingID(ballotingID uuid.UUID) ([]models.Vote, error) {
 	var votes []models.Vote
-	err := r.db.Where("balloting_id = ?", ballotingID).Preload("Member").Preload("Member.NationalStandardBody").Find(&votes).Error
+	err := r.db.Where("balloting_id = ?", ballotingID).
+		Preload("Member").
+		Preload("Member.NationalStandardBody").
+		Preload("Member.NationalStandardBody.MemberState").
+		Find(&votes).Error
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +142,11 @@ func (r *BallotingRepository) FindVotesByBallotingID(ballotingID uuid.UUID) ([]m
 
 func (r *BallotingRepository) FindByProjectID(projectID string) ([]models.Vote, error) {
 	var votes []models.Vote
-	err := r.db.Where("project_id = ?", projectID).Preload("Member").Preload("Member.NationalStandardBody").Find(&votes).Error
+	err := r.db.Where("project_id = ?", projectID).
+		Preload("Member").
+		Preload("Member.NationalStandardBody").
+		Preload("Member.NationalStandardBody.MemberState").
+		Find(&votes).Error
 	if err != nil {
 		return nil, err
 	}

@@ -6,6 +6,20 @@ import (
 	"github.com/google/uuid"
 )
 
+// FDARSAction represents the action taken on a FDARS in it is not approved
+type FDARSAction string
+
+const (
+	RESUBMIT_CD            FDARSAction = "RESUBMIT_CD"
+	RESUBMIT_ENQUIRY_DRAFT FDARSAction = "RESUBMIT_ENQUIRY_DRAFT"
+	RESUBMIT_FDARS         FDARSAction = "RESUBMIT_FDARS"
+	TS                     FDARSAction = "Publish Technical Specification (TS)"
+	PAS                    FDARSAction = "Publish Publicly Available Specification (PAS)"
+	TR                     FDARSAction = "Publish Technical Report (TR)"
+	Guide                  FDARSAction = "Publish Guide"
+	CANCELLED              FDARSAction = "CANCELLED"
+)
+
 // AcceptanceCriteriaResult represents the result of checking project acceptance criteria
 type AcceptanceCriteriaResult struct {
 	CriteriaMet    bool    `json:"criteria_met"`
