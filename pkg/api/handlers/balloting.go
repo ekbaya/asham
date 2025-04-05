@@ -207,23 +207,6 @@ func (h *BallotingHandler) RecommendFDARS(c *gin.Context) {
 }
 
 func (h *BallotingHandler) VerifyFDARSRecommendation(c *gin.Context) {
-	var payload struct {
-		Project string `json:"project_id" binding:"required"`
-	}
-
-	if err := c.ShouldBindJSON(&payload); err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if ok {
-			// Convert validation errors into human-readable messages
-			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
-			return
-		}
-		// For non-validation errors
-		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
@@ -231,8 +214,7 @@ func (h *BallotingHandler) VerifyFDARSRecommendation(c *gin.Context) {
 	}
 
 	userIDStr := userID.(string)
-
-	err := h.ballotingService.VerifyFDARSRecommendation(userIDStr, payload.Project)
+	err := h.ballotingService.VerifyFDARSRecommendation(userIDStr, c.Param("project_id"))
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return

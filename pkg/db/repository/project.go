@@ -675,3 +675,40 @@ func (r *ProjectRepository) ReviewDARS(secretary,
 		return nil
 	})
 }
+
+func (r *ProjectRepository) ApproveFDARS(secretary,
+	projectId string, approve bool, action string) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var balloting models.Balloting
+		if err := tx.Where("project_id = ?", projectId).First(&balloting).Error; err != nil {
+			return err
+		}
+
+		now := time.Now()
+
+		balloting.ApprovedByID = &secretary
+		balloting.Approved = approve
+		balloting.ApprovedAt = &now
+
+		if action != "" {
+			balloting.NextCourseOfAction = models.FDARSAction(action)
+
+			if models.FDARSAction(action) == models.CANCELLED {
+				// get project and update it
+				var project models.Project
+				if err := tx.Where("id = ?", projectId).First(&project).Error; err != nil {
+					return err
+				}
+				project.Cancelled = true
+				project.CancelledDate = &now
+
+				if err := tx.Save(&project).Error; err != nil {
+					return err
+				}
+			}
+
+		}
+
+		return nil
+	})
+}
