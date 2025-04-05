@@ -12,9 +12,6 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	// Cors Middleware
 	router.Use(middleware.CORSMiddleware())
 
-	// Serve static assets
-	router.Static("/api/assets", "../assets")
-
 	authHandler := handlers.NewUsersHandler(*services.MemberService)
 	organizationHandler := handlers.NewOrganizationHandler(*services.OrganizationService)
 	documentHandler := handlers.NewDocumentHandler(*services.DocumentService)
@@ -27,6 +24,9 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	ballotingHandler := handlers.NewBallotingHandler(*&services.BallotingService)
 
 	api := router.Group("/api")
+
+	// Serve static assets
+	api.Static("/assets", "../assets")
 
 	// Health check route
 	api.GET("/health", handlers.HealthCheckHandler)
