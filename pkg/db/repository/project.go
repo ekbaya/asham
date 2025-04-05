@@ -731,3 +731,29 @@ func (r *ProjectRepository) ApproveFDARS(secretary,
 		return nil
 	})
 }
+
+func (r *ProjectRepository) ApproveFDRSForPublication(secretary, projectId string, approve bool, comment string) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var project models.Project
+		if err := tx.Where("project_id = ?", projectId).First(&project).Error; err != nil {
+			return err
+		}
+
+		now := time.Now()
+
+		project.ApprovedForPublicationByID = &secretary
+		project.ApprovedForPublication = approve
+		project.ApprovedForPublicationDate = &now
+		project.ApprovedForPublicationComment = comment
+
+		if approve {
+			project.Reference = fmt.Sprintf("ARS %03d:%d", project.Number, time.Now().Year())
+		}
+
+		if err := tx.Save(&project).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}

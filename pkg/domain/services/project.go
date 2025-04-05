@@ -173,3 +173,7 @@ func (service *ProjectService) ApproveFDARS(secretary, projectId string, approve
 	}
 	return service.repo.ApproveFDARS(secretary, projectId, approve, action)
 }
+
+func (service *ProjectService) ApproveFDRSForPublication(secretary, projectId string, approve bool, comment string) error {
+	return service.repo.ApproveFDRSForPublication(secretary, projectId, approve, comment)
+}

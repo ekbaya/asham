@@ -91,8 +91,13 @@ type Project struct {
 	Balloting            *Balloting            `json:"ballot"`
 	RelatedDocuments     *[]Document           `json:"project_related_documents" gorm:"many2many:project_related_documents;"`
 	// Keep track of cancellation at ballot level
-	Cancelled     bool       `json:"cancelled" gorm:"default:false"`
-	CancelledDate *time.Time `json:"cancelled_date"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
+	Cancelled                     bool       `json:"cancelled" gorm:"default:false"`
+	CancelledDate                 *time.Time `json:"cancelled_date"`
+	ApprovedForPublication        bool       `json:"approved_for_publication" gorm:"default:false"`
+	ApprovedForPublicationDate    *time.Time `json:"approved_for_publication_date"`
+	ApprovedForPublicationByID    *string    `json:"approved_for_publication_by_id"`
+	ApprovedForPublicationBy      *Member    `json:"approved_for_publication_by"`
+	ApprovedForPublicationComment string     `json:"approved_for_publication_comment"`
+	CreatedAt                     time.Time  `json:"created_at"`
+	UpdatedAt                     time.Time  `json:"updated_at"`
 }
