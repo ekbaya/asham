@@ -13,7 +13,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	router.Use(middleware.CORSMiddleware())
 
 	// Serve static assets
-	router.Static("/assets", "../assets")
+	router.Static("/api/assets", "../assets")
 
 	authHandler := handlers.NewUsersHandler(*services.MemberService)
 	organizationHandler := handlers.NewOrganizationHandler(*services.OrganizationService)
