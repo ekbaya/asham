@@ -38,11 +38,6 @@ func (h *BallotingHandler) CreateBalloting(c *gin.Context) {
 		return
 	}
 
-	// Set ID if not provided
-	if payload.ID == uuid.Nil {
-		payload.ID = uuid.New()
-	}
-
 	err := h.ballotingService.CreateBalloting(&payload)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())

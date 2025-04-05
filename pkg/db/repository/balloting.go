@@ -22,6 +22,32 @@ func (r *BallotingRepository) CreateVote(vote *models.Vote) error {
 	return r.db.Create(vote).Error
 }
 
+func (r *BallotingRepository) IsEligibleToVote(memberID string, projectID uuid.UUID) (bool, error) {
+	// check if the user has already voted
+	var count int64
+	err := r.db.Model(&models.Vote{}).
+		Where("member_id = ? AND project_id = ?", memberID, projectID).
+		Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+
+	// Check if the balloting is active and end date is in the future
+	var balloting models.Balloting
+	err = r.db.Where("project_id = ?", projectID).First(&balloting).Error
+	if err != nil {
+		return false, err
+	}
+
+	if balloting.EndDate.Before(time.Now()) {
+		return false, nil
+	}
+
+	// check if nsb was involved during committee or enquiry stage
+
+	return count == 0, nil
+}
+
 func (r *BallotingRepository) FindVoteByID(id uuid.UUID) (*models.Vote, error) {
 	var vote models.Vote
 	err := r.db.Where("id = ?", id).First(&vote).Error

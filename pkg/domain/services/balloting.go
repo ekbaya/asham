@@ -61,6 +61,8 @@ func (service *BallotingService) FindBallotingByID(id uuid.UUID) (*models.Ballot
 }
 
 func (service *BallotingService) CreateBalloting(balloting *models.Balloting) error {
+	balloting.ID = uuid.New()
+	balloting.CreatedAt = time.Now()
 	return service.repo.CreateBalloting(balloting)
 }
 

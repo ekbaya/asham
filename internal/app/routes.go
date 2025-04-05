@@ -21,6 +21,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	commentHandler := handlers.NewCommentHandler(*&services.CommentService)
 	publicCommentHandler := handlers.NewNationalConsultationHandler(*&services.NationalConsultationService)
 	voteHandler := handlers.NewVoteHandler(*&services.BallotingService)
+	ballotingHandler := handlers.NewBallotingHandler(*&services.BallotingService)
 
 	api := router.Group("/api")
 
@@ -211,6 +212,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		balloting.GET("/votes/criteria", voteHandler.CheckProjectAcceptanceCriteria)
 
 		// Decision of Balloting
+		balloting.POST("/", ballotingHandler.CreateBalloting)
 	}
 
 	return router, nil
