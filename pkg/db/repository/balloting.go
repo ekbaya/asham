@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -18,10 +19,18 @@ func NewBallotingRepository(db *gorm.DB) *BallotingRepository {
 }
 
 func (r *BallotingRepository) CreateVote(vote *models.Vote) error {
+	isEligible, err := r.IsEligibleToVote(vote.MemberID, vote.ProjectID)
+	if err != nil {
+		return err
+	}
+
+	if !isEligible {
+		return errors.New("member is not eligible to vote")
+	}
 	return r.db.Create(vote).Error
 }
 
-func (r *BallotingRepository) IsEligibleToVote(memberID string, projectID uuid.UUID) (bool, error) {
+func (r *BallotingRepository) IsEligibleToVote(memberID string, projectID string) (bool, error) {
 	// Check if member has already voted
 	var voteCount int64
 	if err := r.db.Model(&models.Vote{}).
