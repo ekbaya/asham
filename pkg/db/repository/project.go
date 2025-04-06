@@ -735,7 +735,7 @@ func (r *ProjectRepository) ApproveFDARS(secretary,
 func (r *ProjectRepository) ApproveFDRSForPublication(secretary, projectId string, approve bool, comment string) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		var project models.Project
-		if err := tx.Where("project_id = ?", projectId).First(&project).Error; err != nil {
+		if err := tx.Where("id = ?", projectId).First(&project).Error; err != nil {
 			return err
 		}
 
