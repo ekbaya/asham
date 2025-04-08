@@ -118,7 +118,7 @@ func (r *AcceptanceRepository) DeleteNSBResponse(id string) error {
 
 func (r *AcceptanceRepository) GetAcceptance(id string) (*models.Acceptance, error) {
 	var acceptance models.Acceptance
-	if err := r.db.Where("id = ?", id).First(&acceptance).Error; err != nil {
+	if err := r.db.Where("project_id = ?", id).First(&acceptance).Error; err != nil {
 		return nil, err
 	}
 	return &acceptance, nil
