@@ -8,6 +8,7 @@ import (
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type BallotingRepository struct {
@@ -256,7 +257,7 @@ func (r *BallotingRepository) DeleteBalloting(id uuid.UUID) error {
 
 func (r *BallotingRepository) FindAll() ([]models.Balloting, error) {
 	var ballotings []models.Balloting
-	err := r.db.Find(&ballotings).Error
+	err := r.db.Preload(clause.Associations).Find(&ballotings).Error
 	if err != nil {
 		return nil, err
 	}

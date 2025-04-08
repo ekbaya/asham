@@ -219,6 +219,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 		// Decision of Balloting
 		balloting.POST("/", ballotingHandler.CreateBalloting)
+		balloting.GET("/list", ballotingHandler.GetAllBallotings)
 		balloting.POST("/recommendation", ballotingHandler.RecommendFDARS)
 		balloting.GET("/recommendation/verify/:project_id", ballotingHandler.VerifyFDARSRecommendation)
 		balloting.POST("/approve", projectHandler.ApproveFDARS)
