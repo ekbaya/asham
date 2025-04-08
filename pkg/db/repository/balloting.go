@@ -232,7 +232,7 @@ func (r *BallotingRepository) CheckAcceptanceCriteria(projectID string) (*models
 
 func (r *BallotingRepository) FindBallotingByID(id uuid.UUID) (*models.Balloting, error) {
 	var balloting models.Balloting
-	err := r.db.Where("id = ?", id).First(&balloting).Error
+	err := r.db.Where("id = ?", id).Preload(clause.Associations).First(&balloting).Error
 	if err != nil {
 		return nil, err
 	}
