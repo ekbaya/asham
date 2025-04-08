@@ -33,7 +33,7 @@ type AcceptanceCriteriaResult struct {
 type Balloting struct {
 	ID                 uuid.UUID   `json:"id"`
 	ProjectID          string      `json:"project_id" binding:"required"`
-	Project            *Project    `json:"-"`
+	Project            *Project    `json:"project"`
 	Votes              *[]Vote     `json:"nsb_submissions,omitempty"`
 	StartDate          time.Time   `json:"start_date" binding:"required"`
 	EndDate            time.Time   `json:"end_date" binding:"required"`
