@@ -22,6 +22,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	publicCommentHandler := handlers.NewNationalConsultationHandler(*&services.NationalConsultationService)
 	voteHandler := handlers.NewVoteHandler(*&services.BallotingService)
 	ballotingHandler := handlers.NewBallotingHandler(*&services.BallotingService)
+	meetingHandler := handlers.NewMeetingHandler(*services.MeetingService)
 
 	api := router.Group("/api")
 
@@ -226,7 +227,24 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		balloting.POST("/approve", projectHandler.ApproveFDARS)
 	}
 
-	// Appoval Stage Route
+	// Meeting Route
+	meeting := api.Group("meetings")
+	meeting.Use(middleware.AuthMiddleware())
+	{
+		meeting.POST("/create", meetingHandler.CreateMeeting)
+		meeting.GET("/:id", meetingHandler.GetMeetingByID)
+		meeting.GET("/list", meetingHandler.GetAllMeetings)
+		meeting.GET("/committee/:committee_id", meetingHandler.GetMeetingsByCommittee)
+		meeting.GET("/project/:project_id", meetingHandler.GetMeetingsByProject)
+		meeting.GET("/upcoming", meetingHandler.GetUpcomingMeetings)
+		meeting.PUT("/:id", meetingHandler.UpdateMeeting)
+		meeting.DELETE("/:id", meetingHandler.DeleteMeeting)
+		meeting.PATCH("/status/:id", meetingHandler.UpdateMeetingStatus)
+		meeting.POST("/attendees/:id", meetingHandler.AddAttendeeToMeeting)
+		meeting.DELETE("attendees/:meeting_id/:member_id", meetingHandler.RemoveAttendeeFromMeeting)
+		meeting.POST("/documents/:meeting_id", meetingHandler.AddRelatedDocumentToMeeting)
+		meeting.GET("/check-quorum/:meeting_id", meetingHandler.CheckQuorum)
+	}
 
 	return router, nil
 }

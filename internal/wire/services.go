@@ -27,6 +27,8 @@ var ServiceSet = wire.NewSet(
 	services.NewNationalConsultationService,
 	repository.NewBallotingRepository,
 	services.NewBallotingService,
+	repository.NewMeetingRepository,
+	services.NewMeetingService,
 )
 
 func GetEmailConfigurations() *services.EmailConfig {
