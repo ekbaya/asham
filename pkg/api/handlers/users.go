@@ -128,7 +128,7 @@ func (h *UsersHandler) Account(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.Account(userID.(string))
+	user, err := h.userService.AccountWithResponsibilities(userID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -145,7 +145,7 @@ func (h *UsersHandler) GetUserDetails(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.Account(userID.(string))
+	user, err := h.userService.AccountWithResponsibilities(userID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

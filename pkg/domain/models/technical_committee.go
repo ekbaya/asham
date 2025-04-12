@@ -7,6 +7,6 @@ type TechnicalCommittee struct {
 	WorkProgram    string          `json:"work_program"`
 	WorkingGroups  []*WorkingGroup `gorm:"foreignKey:ParentTCID"`
 	SubCommittees  []*SubCommittee `gorm:"foreignKey:ParentTCID"`
-	MinimumMembers int
-	CurrentMembers []*Member `gorm:"many2many:current_members;"`
+	MinimumMembers int             `json:"minimum_members" gorm:"default:5"`
+	CurrentMembers []*Member       `gorm:"many2many:current_members;"`
 }

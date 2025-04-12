@@ -8,14 +8,14 @@ import (
 
 // TaskForce represents a task-specific group
 type TaskForce struct {
-	ID                  uuid.UUID
-	Name                string
-	ConvenorId          uuid.UUID
-	Convenor            *Member
-	NationalDeligations []*Member `gorm:"many2many:national_deligations;"`
-	ParentTCID          uuid.UUID
-	ParentTC            *TechnicalCommittee
-	Task                string
-	CreatedAt           time.Time
-	CompletedAt         *time.Time
+	ID                  uuid.UUID           `json:"id" gorm:"primaryKey"`
+	Name                string              `json:"name" gorm:"unique;not null"`
+	ConvenorId          string              `json:"convenor_id" gorm:"index"`
+	Convenor            *Member             `json:"convenor"`
+	NationalDeligations []*Member           `gorm:"many2many:national_deligations;"`
+	ParentTCID          string              `json:"parent_tc_id" gorm:"index"`
+	ParentTC            *TechnicalCommittee `json:"parent_tc"`
+	Task                string              `json:"task"`
+	CreatedAt           time.Time           `json:"created_at" gorm:"autoCreateTime"`
+	CompletedAt         *time.Time          `json:"completed_at" gorm:"autoUpdateTime"`
 }

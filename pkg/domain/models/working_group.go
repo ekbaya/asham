@@ -8,14 +8,14 @@ import (
 
 // WorkingGroup represents a task-specific group
 type WorkingGroup struct {
-	ID          uuid.UUID
-	Name        string
-	ConvenorId  uuid.UUID
-	Convenor    *Member
-	Experts     []*Member `json:"experts" gorm:"many2many:working_group_experts;"`
-	ParentTCID  uuid.UUID
-	ParentTC    *TechnicalCommittee
-	Task        string
-	CreatedAt   time.Time
-	CompletedAt *time.Time
+	ID          uuid.UUID           `json:"id" gorm:"primaryKey"`
+	Name        string              `json:"name" gorm:"unique;not null"`
+	ConvenorId  string              `json:"convenor_id" gorm:"index"`
+	Convenor    *Member             `json:"convenor"`
+	Experts     []*Member           `json:"experts" gorm:"many2many:working_group_experts;"`
+	ParentTCID  string              `json:"parent_tc_id" gorm:"index"`
+	ParentTC    *TechnicalCommittee `json:"parent_tc"`
+	Task        string              `json:"task"`
+	CreatedAt   time.Time           `json:"created_at" gorm:"autoCreateTime"`
+	CompletedAt *time.Time          `json:"completed_at" gorm:"autoUpdateTime"`
 }

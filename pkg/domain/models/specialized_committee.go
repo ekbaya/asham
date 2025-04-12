@@ -7,5 +7,5 @@ type SpecializedCommittee struct {
 	Committee
 	Type       string         // e.g., "Conformity Assessment", "Consumer"
 	Objectives pq.StringArray `json:"objectives" gorm:"type:text[]"`
-	Members    []*Member      `gorm:"many2many:specialized_committee_members;"`
+	Members    []*Member      `json:"specialized_committee_members" gorm:"many2many:specialized_committee_members;"`
 }

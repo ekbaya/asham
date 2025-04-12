@@ -89,6 +89,28 @@ func (service *MemberService) Account(memberId string) (models.Member, error) {
 	return *member, nil
 }
 
+func (service *MemberService) AccountWithResponsibilities(memberId string) (map[string]any, error) {
+	// Retrieve member
+	member, err := service.repo.GetMemberByID(memberId)
+	if err != nil {
+		return nil, errors.New("member does not exist")
+	}
+
+	// Retrieve responsibilities
+	responsibilities, err := service.repo.GetMemberResponsibilities(memberId)
+	if err != nil {
+		return nil, errors.New("failed to retrieve responsibilities")
+	}
+
+	// Construct response map
+	result := map[string]any{
+		"member":           member,
+		"responsibilities": responsibilities,
+	}
+
+	return result, nil
+}
+
 func (service *MemberService) GetMemberByEmail(email string) (*models.Member, error) {
 	return service.repo.GetMemberByEmail(email)
 }

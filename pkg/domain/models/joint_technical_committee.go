@@ -6,6 +6,6 @@ import "github.com/lib/pq"
 type JointTechnicalCommittee struct {
 	Committee
 	CollaboratingOrganizations pq.StringArray `json:"collaborating_organizations" gorm:"type:text[]"`
-	JointMembers               []*Member      `gorm:"many2many:joint_members;"`
+	JointMembers               []*Member      `json:"joint_members" gorm:"many2many:joint_members;"`
 	Scope                      string         `json:"scope"`
 }
