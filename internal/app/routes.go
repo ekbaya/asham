@@ -241,7 +241,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		meeting.DELETE("/:id", meetingHandler.DeleteMeeting)
 		meeting.PATCH("/status/:id", meetingHandler.UpdateMeetingStatus)
 		meeting.POST("/attendees/:id", meetingHandler.AddAttendeeToMeeting)
-		meeting.DELETE("attendees/:meeting_id/:member_id", meetingHandler.RemoveAttendeeFromMeeting)
+		meeting.DELETE("/attendees/:meeting_id/:member_id", meetingHandler.RemoveAttendeeFromMeeting)
 		meeting.POST("/documents/:meeting_id", meetingHandler.AddRelatedDocumentToMeeting)
 		meeting.GET("/check-quorum/:meeting_id", meetingHandler.CheckQuorum)
 	}
