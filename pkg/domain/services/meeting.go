@@ -1,8 +1,11 @@
 package services
 
 import (
+	"time"
+
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/models"
+	"github.com/google/uuid"
 )
 
 type MeetingService struct {
@@ -14,6 +17,8 @@ func NewMeetingService(repo *repository.MeetingRepository) *MeetingService {
 }
 
 func (service *MeetingService) CreateMeeting(meeting *models.Meeting) error {
+	meeting.ID = uuid.New()
+	meeting.CreatedAt = time.Now()
 	return service.repo.CreateMeeting(meeting)
 }
 

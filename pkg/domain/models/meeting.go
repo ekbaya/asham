@@ -43,11 +43,11 @@ type Meeting struct {
 	Minutes     string        `json:"minutes" binding:"required"`
 
 	// Committee/Working Group Information
-	CommitteeID   string `json:"committee_id"`   // ID of TC, SC, or WG
-	CommitteeName string `json:"committee_name"` // Name of TC, SC, or WG
+	CommitteeID   string `json:"committee_id" binding:"required"`   // ID of TC, SC, or WG
+	CommitteeName string `json:"committee_name" binding:"required"` // Name of TC, SC, or WG
 
 	// Host information
-	HostOrganizationID *string               `json:"host_organization_id"` // National body acting as host
+	HostOrganizationID string                `json:"host_organization_id" binding:"required"` // National body acting as host
 	HostOrganization   *NationalStandardBody `json:"host_organization"`
 
 	// Quorum tracking
@@ -64,7 +64,7 @@ type Meeting struct {
 	SecretariatApproval bool `json:"secretariat_approval"` // Secretariat approved date/place
 
 	// Meeting status
-	Status             MeetingStatus `json:"status"`                        // Planned, confirmed, cancelled, etc.
+	Status             MeetingStatus `json:"status" gorm:"default:PLANNED"` // Planned, confirmed, cancelled, etc.
 	CancellationReason string        `json:"cancellation_reason,omitempty"` // If cancelled, why
 
 	// Project information

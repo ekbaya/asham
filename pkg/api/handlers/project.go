@@ -666,3 +666,23 @@ func (h *ProjectHandler) ApproveFDRSForPublication(c *gin.Context) {
 
 	utilities.ShowMessage(c, http.StatusCreated, "FDARS updated successfully")
 }
+
+func (h *ProjectHandler) GetDashboardStats(c *gin.Context) {
+	stats, err := h.projectService.GetDashboardStats()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Project not found")
+		return
+	}
+
+	utilities.Show(c, http.StatusOK, "statistics", stats)
+}
+
+func (h *ProjectHandler) GetAllDistributions(c *gin.Context) {
+	stats, err := h.projectService.GetAllDistributions()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Project not found")
+		return
+	}
+
+	utilities.Show(c, http.StatusOK, "distributions", stats)
+}

@@ -177,3 +177,11 @@ func (service *ProjectService) ApproveFDARS(secretary, projectId string, approve
 func (service *ProjectService) ApproveFDRSForPublication(secretary, projectId string, approve bool, comment string) error {
 	return service.repo.ApproveFDRSForPublication(secretary, projectId, approve, comment)
 }
+
+func (service *ProjectService) GetDashboardStats() (map[string]any, error) {
+	return service.repo.GetDashboardStats()
+}
+
+func (service *ProjectService) GetAllDistributions() (map[string]map[string]float64, error) {
+	return service.repo.GetAllDistributions()
+}

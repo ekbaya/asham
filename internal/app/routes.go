@@ -142,6 +142,10 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 		// Project versioning
 		projects.POST("/:id/revision", projectHandler.CreateProjectRevision)
+
+		// Dashboard and statistics
+		projects.GET("/statistics", projectHandler.GetDashboardStats)
+		projects.GET("/distributions", projectHandler.GetAllDistributions)
 	}
 
 	// Proposal Route
@@ -236,7 +240,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		meeting.GET("/list", meetingHandler.GetAllMeetings)
 		meeting.GET("/committee/:committee_id", meetingHandler.GetMeetingsByCommittee)
 		meeting.GET("/project/:project_id", meetingHandler.GetMeetingsByProject)
-		meeting.GET("/upcoming", meetingHandler.GetUpcomingMeetings)
+		meeting.GET("/upcoming", meetingHandler.GetUpcomingMeetings) // Can also be used in dashboard
 		meeting.PUT("/:id", meetingHandler.UpdateMeeting)
 		meeting.DELETE("/:id", meetingHandler.DeleteMeeting)
 		meeting.PATCH("/status/:id", meetingHandler.UpdateMeetingStatus)

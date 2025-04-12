@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -78,7 +79,7 @@ func (r *ProjectRepository) UpdateProjectStage(projectID uuid.UUID, newStageID u
 	// Update current stage of the project
 	if err := tx.Model(&models.Project{}).
 		Where("id = ?", projectID).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"stage_id":   newStageID,
 			"updated_at": now,
 		}).Error; err != nil {
@@ -320,7 +321,7 @@ func (r *ProjectRepository) DeleteProject(projectID uuid.UUID) error {
 }
 
 // FindProjects searches for projects with optional filters
-func (r *ProjectRepository) FindProjects(params map[string]interface{}, limit, offset int) ([]models.Project, int64, error) {
+func (r *ProjectRepository) FindProjects(params map[string]any, limit, offset int) ([]models.Project, int64, error) {
 	var projects []models.Project
 	var total int64
 
@@ -756,4 +757,258 @@ func (r *ProjectRepository) ApproveFDRSForPublication(secretary, projectId strin
 
 		return nil
 	})
+}
+
+func (r *ProjectRepository) GetDashboardStats() (map[string]any, error) {
+	stats := make(map[string]any)
+
+	// Get total projects count
+	var totalCount int64
+	if err := r.db.Model(&models.Project{}).Where("cancelled = ?", false).Count(&totalCount).Error; err != nil {
+		return nil, err
+	}
+	stats["total"] = totalCount
+
+	// Get counts by stage
+	stageStats := make(map[string]int)
+	stageRows, err := r.db.Model(&models.Project{}).
+		Select("s.name as stage_name, COUNT(projects.id) as count").
+		Joins("JOIN stages s ON projects.stage_id = s.id").
+		Where("projects.cancelled = ?", false).
+		Group("s.name").
+		Rows()
+
+	if err != nil {
+		return nil, err
+	}
+	defer stageRows.Close()
+
+	for stageRows.Next() {
+		var stageName string
+		var count int
+		if err := stageRows.Scan(&stageName, &count); err != nil {
+			return nil, err
+		}
+		stageStats[stageName] = count
+	}
+	stats["by_stage"] = stageStats
+
+	// Get counts by project type
+	typeStats := make(map[string]int)
+	typeRows, err := r.db.Model(&models.Project{}).
+		Select("type, COUNT(id) as count").
+		Where("cancelled = ?", false).
+		Group("type").
+		Rows()
+
+	if err != nil {
+		return nil, err
+	}
+	defer typeRows.Close()
+
+	for typeRows.Next() {
+		var typeName string
+		var count int
+		if err := typeRows.Scan(&typeName, &count); err != nil {
+			return nil, err
+		}
+		typeStats[typeName] = count
+	}
+	stats["by_type"] = typeStats
+
+	// Get counts by working draft status
+	wdStats := make(map[string]int)
+	wdRows, err := r.db.Model(&models.Project{}).
+		Select("working_draft_status as status, COUNT(id) as count").
+		Where("cancelled = ?", false).
+		Where("working_draft_status IS NOT NULL").
+		Group("working_draft_status").
+		Rows()
+
+	if err != nil {
+		return nil, err
+	}
+	defer wdRows.Close()
+
+	for wdRows.Next() {
+		var status string
+		var count int
+		if err := wdRows.Scan(&status, &count); err != nil {
+			return nil, err
+		}
+		wdStats[status] = count
+	}
+	stats["by_working_draft_status"] = wdStats
+
+	// Get counts by technical committee
+	tcStats := make(map[string]int)
+	tcRows, err := r.db.Model(&models.Project{}).
+		Select("tc.name as committee_name, COUNT(projects.id) as count").
+		Joins("JOIN technical_committees tc ON projects.technical_committee_id = tc.id").
+		Where("projects.cancelled = ?", false).
+		Group("tc.name").
+		Rows()
+
+	if err != nil {
+		return nil, err
+	}
+	defer tcRows.Close()
+
+	for tcRows.Next() {
+		var committeeName string
+		var count int
+		if err := tcRows.Scan(&committeeName, &count); err != nil {
+			return nil, err
+		}
+		tcStats[committeeName] = count
+	}
+	stats["by_committee"] = tcStats
+
+	// Get counts for emergency projects
+	var emergencyCount int64
+	if err := r.db.Model(&models.Project{}).
+		Where("cancelled = ?", false).
+		Where("is_emergency = ?", true).
+		Count(&emergencyCount).Error; err != nil {
+		return nil, err
+	}
+	stats["emergency_projects"] = emergencyCount
+
+	// Get counts for projects approved for publication
+	var publishedCount int64
+	if err := r.db.Model(&models.Project{}).
+		Where("cancelled = ?", false).
+		Where("approved_for_publication = ?", true).
+		Count(&publishedCount).Error; err != nil {
+		return nil, err
+	}
+	stats["published_projects"] = publishedCount
+
+	return stats, nil
+}
+
+func (r *ProjectRepository) GetAllDistributions() (map[string]map[string]float64, error) {
+	allDistributions := make(map[string]map[string]float64)
+
+	// Get total count of non-cancelled projects
+	var totalCount int64
+	if err := r.db.Model(&models.Project{}).
+		Where("cancelled = ?", false).
+		Count(&totalCount).Error; err != nil {
+		return nil, err
+	}
+
+	// If there are no projects, return empty distributions
+	if totalCount == 0 {
+		allDistributions["by_stage"] = make(map[string]float64)
+		allDistributions["by_type"] = make(map[string]float64)
+		allDistributions["by_working_draft_status"] = make(map[string]float64)
+		allDistributions["by_committee"] = make(map[string]float64)
+		return allDistributions, nil
+	}
+
+	// Get stage distribution
+	stageDistribution := make(map[string]float64)
+	stageRows, err := r.db.Model(&models.Project{}).
+		Select("s.name as stage_name, COUNT(projects.id) as count").
+		Joins("JOIN stages s ON projects.stage_id = s.id").
+		Where("projects.cancelled = ?", false).
+		Group("s.name").
+		Rows()
+
+	if err != nil {
+		return nil, err
+	}
+	defer stageRows.Close()
+
+	for stageRows.Next() {
+		var stageName string
+		var count int64
+		if err := stageRows.Scan(&stageName, &count); err != nil {
+			return nil, err
+		}
+
+		percentage := float64(count) / float64(totalCount) * 100
+		stageDistribution[stageName] = math.Round(percentage*100) / 100
+	}
+	allDistributions["by_stage"] = stageDistribution
+
+	// Get type distribution
+	typeDistribution := make(map[string]float64)
+	typeRows, err := r.db.Model(&models.Project{}).
+		Select("type, COUNT(id) as count").
+		Where("cancelled = ?", false).
+		Group("type").
+		Rows()
+
+	if err != nil {
+		return nil, err
+	}
+	defer typeRows.Close()
+
+	for typeRows.Next() {
+		var typeName string
+		var count int64
+		if err := typeRows.Scan(&typeName, &count); err != nil {
+			return nil, err
+		}
+
+		percentage := float64(count) / float64(totalCount) * 100
+		typeDistribution[typeName] = math.Round(percentage*100) / 100
+	}
+	allDistributions["by_type"] = typeDistribution
+
+	// Get working draft status distribution
+	wdDistribution := make(map[string]float64)
+	wdRows, err := r.db.Model(&models.Project{}).
+		Select("working_draft_status as status, COUNT(id) as count").
+		Where("cancelled = ?", false).
+		Where("working_draft_status IS NOT NULL").
+		Group("working_draft_status").
+		Rows()
+
+	if err != nil {
+		return nil, err
+	}
+	defer wdRows.Close()
+
+	for wdRows.Next() {
+		var status string
+		var count int64
+		if err := wdRows.Scan(&status, &count); err != nil {
+			return nil, err
+		}
+
+		percentage := float64(count) / float64(totalCount) * 100
+		wdDistribution[status] = math.Round(percentage*100) / 100
+	}
+	allDistributions["by_working_draft_status"] = wdDistribution
+
+	// Get technical committee distribution
+	tcDistribution := make(map[string]float64)
+	tcRows, err := r.db.Model(&models.Project{}).
+		Select("tc.name as committee_name, COUNT(projects.id) as count").
+		Joins("JOIN technical_committees tc ON projects.technical_committee_id = tc.id").
+		Where("projects.cancelled = ?", false).
+		Group("tc.name").
+		Rows()
+
+	if err != nil {
+		return nil, err
+	}
+	defer tcRows.Close()
+
+	for tcRows.Next() {
+		var committeeName string
+		var count int64
+		if err := tcRows.Scan(&committeeName, &count); err != nil {
+			return nil, err
+		}
+
+		percentage := float64(count) / float64(totalCount) * 100
+		tcDistribution[committeeName] = math.Round(percentage*100) / 100
+	}
+	allDistributions["by_committee"] = tcDistribution
+
+	return allDistributions, nil
 }
