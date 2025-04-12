@@ -278,8 +278,8 @@ func (r *MemberRepository) GetMemberResponsibilities(memberID string) (map[strin
 	// Similar patterns for other committee types:
 	// ARSO Council
 	var arsoCouncils []models.ARSOCouncil
-	if err := r.db.Joins("JOIN arsocouncil_members ON arsocouncil_members.arso_council_id = arsocouncils.id").
-		Where("arsocouncil_members.member_id = ? OR arsocouncils.chairperson_id = ? OR arsocouncils.secretary_id = ?",
+	if err := r.db.Joins("JOIN arsocouncil_members ON arsocouncil_members.arso_council_id = arso_councils.id").
+		Where("arsocouncil_members.member_id = ? OR arso_councils.chairperson_id = ? OR arso_councils.secretary_id = ?",
 			memberID, memberID, memberID).
 		Find(&arsoCouncils).Error; err != nil {
 		return nil, err
