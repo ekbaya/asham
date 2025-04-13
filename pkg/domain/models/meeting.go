@@ -42,7 +42,7 @@ type Meeting struct {
 	Format      MeetingFormat `json:"format" binding:"required"`   // Electronic, in-person, hybrid
 	Language    string        `json:"language" binding:"required"` // English and/or French
 	Agenda      string        `json:"agenda" binding:"required"`
-	Minutes     string        `json:"minutes" binding:"required"`
+	Minutes     string        `json:"minutes"`
 
 	// Committee/Working Group Information
 	CommitteeID   string `json:"committee_id" binding:"required"`   // ID of TC, SC, or WG
