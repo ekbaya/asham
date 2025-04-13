@@ -129,7 +129,6 @@ func (h *MeetingHandler) GetAllMeetings(c *gin.Context) {
 		"page":     page,
 	})
 
-	utilities.Show(c, http.StatusOK, "meetings", meetings)
 }
 
 func (h *MeetingHandler) GetMeetingsByCommittee(c *gin.Context) {
