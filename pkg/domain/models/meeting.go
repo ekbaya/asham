@@ -39,6 +39,7 @@ type Meeting struct {
 	StartTime   string        `json:"start_time" binding:"required"` // Start time of the meeting
 	EndTime     string        `json:"end_time" binding:"required"`   // End time of the meeting
 	Venue       string        `json:"venue" binding:"required"`
+	Title       string        `json:"title" binding:"required"`    // City, country, and/or virtual link
 	Format      MeetingFormat `json:"format" binding:"required"`   // Electronic, in-person, hybrid
 	Language    string        `json:"language" binding:"required"` // English and/or French
 	Agenda      string        `json:"agenda" binding:"required"`
