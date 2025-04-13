@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -103,7 +104,19 @@ func (h *MeetingHandler) GetMeetingByID(c *gin.Context) {
 }
 
 func (h *MeetingHandler) GetAllMeetings(c *gin.Context) {
-	meetings, err := h.meetingService.GetAllMeetings()
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid page number")
+		return
+	}
+
+	pageSize, err := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	if err != nil || pageSize < 1 {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid page size")
+		return
+	}
+
+	meetings, err := h.meetingService.GetAllMeetings(page, pageSize)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return

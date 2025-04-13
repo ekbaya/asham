@@ -33,9 +33,13 @@ func (r *MeetingRepository) GetMeetingByID(id string) (*models.Meeting, error) {
 	return &meeting, nil
 }
 
-func (r *MeetingRepository) GetAllMeetings() (*[]models.Meeting, error) {
+func (r *MeetingRepository) GetAllMeetings(page, pageSize int) (*[]models.Meeting, error) {
 	var meetings []models.Meeting
-	result := r.db.Preload("Project").Find(&meetings)
+	offset := (page - 1) * pageSize
+	result := r.db.Preload("Project").
+		Limit(pageSize).
+		Offset(offset).
+		Find(&meetings)
 	if result.Error != nil {
 		return nil, result.Error
 	}

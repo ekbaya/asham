@@ -26,8 +26,8 @@ func (service *MeetingService) GetMeetingByID(id string) (*models.Meeting, error
 	return service.repo.GetMeetingByID(id)
 }
 
-func (service *MeetingService) GetAllMeetings() (*[]models.Meeting, error) {
-	return service.repo.GetAllMeetings()
+func (service *MeetingService) GetAllMeetings(page, pageSize int) (*[]models.Meeting, error) {
+	return service.repo.GetAllMeetings(page, pageSize)
 }
 
 func (service *MeetingService) GetMeetingsByCommittee(committeeID string) (*[]models.Meeting, error) {
