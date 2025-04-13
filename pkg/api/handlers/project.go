@@ -229,13 +229,13 @@ func (h *ProjectHandler) FindProjects(c *gin.Context) {
 	limit := 10
 	offset := 0
 
-	if limitStr := c.Query("limit"); limitStr != "" {
+	if limitStr := c.Query("pageSize"); limitStr != "" {
 		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
 			limit = val
 		}
 	}
 
-	if offsetStr := c.Query("offset"); offsetStr != "" {
+	if offsetStr := c.Query("page"); offsetStr != "" {
 		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
 			offset = val
 		}
@@ -251,7 +251,7 @@ func (h *ProjectHandler) FindProjects(c *gin.Context) {
 		"projects": projects,
 		"total":    total,
 		"limit":    limit,
-		"offset":   offset,
+		"page":     offset,
 	})
 }
 

@@ -122,6 +122,13 @@ func (h *MeetingHandler) GetAllMeetings(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{
+		"meetings": meetings,
+		"total":    len(*meetings),
+		"limit":    pageSize,
+		"page":     page,
+	})
+
 	utilities.Show(c, http.StatusOK, "meetings", meetings)
 }
 
