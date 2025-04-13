@@ -47,7 +47,7 @@ type Meeting struct {
 	CommitteeName string `json:"committee_name" binding:"required"` // Name of TC, SC, or WG
 
 	// Host information
-	HostOrganizationID string                `json:"host_organization_id" binding:"required"` // National body acting as host
+	HostOrganizationID *string               `json:"host_organization_id"` // National body acting as host
 	HostOrganization   *NationalStandardBody `json:"host_organization"`
 
 	// Quorum tracking
@@ -75,7 +75,7 @@ type Meeting struct {
 	RelatedDocuments *[]Document `json:"meeting_related_documents" gorm:"many2many:meeting_related_documents;"` // CDs to be discussed and Other documents
 
 	// Management
-	CreatedByID             string    `json:"created_by" binding:"required"`
+	CreatedByID             string    `json:"created_by"`
 	CreatedBy               *Member   `json:"created_by_member"`
 	Comments                string    `json:"comments"`
 	MinutesApprovalDeadline time.Time `json:"minutes_approval_deadline"` // 30 days after minutes circulation
