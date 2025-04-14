@@ -32,7 +32,7 @@ func (r *MemberRepository) GetMemberByID(id string) (*models.Member, error) {
 
 func (r *MemberRepository) GetAllMembers() (*[]models.Member, error) {
 	var members []models.Member
-	result := r.db.Preload(clause.Associations).Find(&members)
+	result := r.db.Preload(clause.Associations).Preload("NationalStandardBody.MemberState").Find(&members)
 	if result.Error != nil {
 		return nil, result.Error
 	}
