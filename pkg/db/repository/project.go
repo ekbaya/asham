@@ -271,9 +271,14 @@ func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comm
 	var project models.Project
 
 	// Retrieve the project by ID
-	if err := tx.First(&project, "id = ?", projectID).Error; err != nil {
+	if err := tx.Preload("TechnicalCommittee").First(&project, "id = ?", projectID).Error; err != nil {
 		tx.Rollback()
 		return err
+	}
+
+	if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != approvedBy {
+		tx.Rollback()
+		return fmt.Errorf("User is not allowed to perform this action")
 	}
 
 	// Update approval status and comment
