@@ -12,6 +12,7 @@ type ServiceContainer struct {
 	NationalConsultationService *NationalConsultationService
 	BallotingService            *BallotingService
 	MeetingService              *MeetingService
+	LibraryService              *LibraryService
 }
 
 func NewServiceContainer(
@@ -26,6 +27,7 @@ func NewServiceContainer(
 	nationalConsultationService *NationalConsultationService,
 	ballotingService *BallotingService,
 	meetingService *MeetingService,
+	libraryService *LibraryService,
 ) *ServiceContainer {
 	return &ServiceContainer{
 		OrganizationService:         organizationService,
@@ -39,5 +41,6 @@ func NewServiceContainer(
 		NationalConsultationService: nationalConsultationService,
 		BallotingService:            ballotingService,
 		MeetingService:              meetingService,
+		LibraryService:              libraryService,
 	}
 }

@@ -23,6 +23,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	voteHandler := handlers.NewVoteHandler(*&services.BallotingService)
 	ballotingHandler := handlers.NewBallotingHandler(*&services.BallotingService)
 	meetingHandler := handlers.NewMeetingHandler(*services.MeetingService)
+	libraryHandler := handlers.NewLibraryHandler(*services.LibraryService)
 
 	api := router.Group("/api")
 
@@ -248,6 +249,12 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		meeting.DELETE("/attendees/:meeting_id/:member_id", meetingHandler.RemoveAttendeeFromMeeting)
 		meeting.POST("/documents/:meeting_id", meetingHandler.AddRelatedDocumentToMeeting)
 		meeting.GET("/check-quorum/:meeting_id", meetingHandler.CheckQuorum)
+	}
+
+	// library Route
+	library := api.Group("library")
+	{
+		library.GET("/standards", libraryHandler.FindStandards)
 	}
 
 	return router, nil
