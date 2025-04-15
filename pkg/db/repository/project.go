@@ -192,8 +192,13 @@ func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, statu
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		// First, fetch the entire project
 		var project models.Project
-		if err := tx.Where("id = ?", projectID).First(&project).Error; err != nil {
+		if err := tx.Where("id = ?", projectID).Preload("TechnicalCommittee").First(&project).Error; err != nil {
 			return fmt.Errorf("project with ID %s not found: %w", projectID, err)
+		}
+
+		if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
+			tx.Rollback()
+			return fmt.Errorf("User is not allowed to perform this action")
 		}
 
 		// Update fields directly on the project object
