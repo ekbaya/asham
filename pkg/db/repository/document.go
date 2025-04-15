@@ -67,6 +67,12 @@ func (r *DocumentRepository) UpdateProjectDoc(projectId, docType, fileURL, membe
 		project.CommitteeDraftID = &docID
 	}
 
+	if docType == "ARS" {
+		docID := doc.ID.String()
+		project.StandardID = &docID
+		project.Published = true
+	}
+
 	if err := tx.Save(&project).Error; err != nil {
 		tx.Rollback()
 		return err

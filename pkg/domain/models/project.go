@@ -98,6 +98,9 @@ type Project struct {
 	ApprovedForPublicationByID    *string    `json:"approved_for_publication_by_id"`
 	ApprovedForPublicationBy      *Member    `json:"approved_for_publication_by"`
 	ApprovedForPublicationComment string     `json:"approved_for_publication_comment"`
+	StandardID                    *string    `json:"standard_id"`
+	Standard                      *Document  `json:"standard"`
+	Published                     bool       `json:"published" gorm:"default:false"`
 	CreatedAt                     time.Time  `json:"created_at"`
 	UpdatedAt                     time.Time  `json:"updated_at"`
 }

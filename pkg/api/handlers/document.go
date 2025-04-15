@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -28,7 +29,7 @@ func NewDocumentHandler(documentService services.DocumentService) *DocumentHandl
 
 func (h *DocumentHandler) UploadDocument(c *gin.Context) {
 	// Parse the multipart form
-	if err := c.Request.ParseMultipartForm(10 << 20); err != nil { // 10 MB max
+	if err := c.Request.ParseMultipartForm(100 << 20); err != nil { // 100 MB max
 		utilities.ShowMessage(c, http.StatusBadRequest, "Unable to parse form: "+err.Error())
 		return
 	}
@@ -53,6 +54,15 @@ func (h *DocumentHandler) UploadDocument(c *gin.Context) {
 		return
 	}
 	defer file.Close()
+
+	// Add validation for ARS document type - must be PDF
+	if docType == "ARS" {
+		extension := strings.ToLower(filepath.Ext(header.Filename))
+		if extension != ".pdf" {
+			utilities.ShowMessage(c, http.StatusBadRequest, "ARS standard must be a PDF file")
+			return
+		}
+	}
 
 	assetsDir := "../assets/documents"
 	if err := os.MkdirAll(assetsDir, 0755); err != nil {
