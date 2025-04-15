@@ -13,10 +13,10 @@ import (
 )
 
 type LibraryHandler struct {
-	libraryService *services.LibraryService
+	libraryService services.LibraryService
 }
 
-func NewLibraryHandler(libraryService *services.LibraryService) *LibraryHandler {
+func NewLibraryHandler(libraryService services.LibraryService) *LibraryHandler {
 	return &LibraryHandler{
 		libraryService: libraryService,
 	}
