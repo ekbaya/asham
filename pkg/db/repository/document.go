@@ -71,6 +71,8 @@ func (r *DocumentRepository) UpdateProjectDoc(projectId, docType, fileURL, membe
 		docID := doc.ID.String()
 		project.StandardID = &docID
 		project.Published = true
+		now := time.Now()
+		project.PublishedDate = &now
 	}
 
 	if err := tx.Save(&project).Error; err != nil {
