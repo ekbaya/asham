@@ -564,8 +564,13 @@ func (repo *ProjectRepository) FindByDocumentID(documentID uuid.UUID) ([]models.
 func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusReached bool, action models.ProposalAction, meetingRequired bool) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		var project models.Project
-		if err := tx.Where("id = ?", projectId).First(&project).Error; err != nil {
+		if err := tx.Where("id = ?", projectId).Preload("TechnicalCommittee").First(&project).Error; err != nil {
 			return err
+		}
+
+		if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
+			tx.Rollback()
+			return fmt.Errorf("User is not allowed to perform this action")
 		}
 
 		project.IsConsensusReached = isConsensusReached
