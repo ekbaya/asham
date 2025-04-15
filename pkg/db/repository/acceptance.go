@@ -31,7 +31,7 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 
 		if member.NationalStandardBody.NationalTCSecretaryID != &response.ResponderID {
 			tx.Rollback()
-			return errors.New("user is not a National TC secretary")
+			return errors.New("user is not a National TC secretary of the responsing NSB")
 		}
 
 		// Check if Acceptance exists for the given project
