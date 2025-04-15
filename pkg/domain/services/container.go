@@ -9,6 +9,7 @@ type ServiceContainer struct {
 	AcceptanceService   *AcceptanceService
 	CommentService      *CommentService
 	EmailService        *EmailService
+	LibraryService      *LibraryService
 }
 
 func NewServiceContainer(
@@ -20,6 +21,7 @@ func NewServiceContainer(
 	acceptanceService *AcceptanceService,
 	commentService *CommentService,
 	emailService *EmailService,
+	libraryService *LibraryService,
 ) *ServiceContainer {
 	return &ServiceContainer{
 		OrganizationService: organizationService,
@@ -30,5 +32,6 @@ func NewServiceContainer(
 		AcceptanceService:   acceptanceService,
 		CommentService:      commentService,
 		EmailService:        emailService,
+		LibraryService:      libraryService,
 	}
 }

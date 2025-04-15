@@ -16,7 +16,7 @@ type LibraryApiHandler struct {
 }
 
 // NewLibraryApiHandler creates a new LibraryApiHandler
-func NewLibraryApiHandler(service *services.LibraryService) *LibraryApiHandler {
+func NewLibraryApiHandler(service services.LibraryService) *LibraryApiHandler {
 	return &LibraryApiHandler{service: service}
 }
 

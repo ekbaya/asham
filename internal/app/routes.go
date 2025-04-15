@@ -18,7 +18,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	projectHandler := handlers.NewProjectHandler(*services.ProjectService)
 	proposalHandler := handlers.NewProposalHandler(services.ProposalService, services.DocumentService, services.ProjectService)
 	acceptanceHandler := handlers.NewAcceptanceHandler(*services.AcceptanceService)
-	commentHandler := handlers.NewCommentHandler(*&services.CommentService)
+	libraryApiHandler := handlers.NewLibraryApiHandler(*services.LibraryService)
 
 	api := router.Group("/api")
 
@@ -174,7 +174,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		acceptance.GET("/submission/compilation/:id/results", acceptanceHandler.GetAcceptanceResults)
 	}
 
-	// Comments and  Observations Route
+	// Comments and Observations Route
 	comment := api.Group("comments")
 	comment.Use(middleware.AuthMiddleware())
 	{
@@ -184,6 +184,28 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		comment.PUT("/:comment_id", commentHandler.UpdateComment)
 		comment.DELETE("/:id", commentHandler.DeleteComment)
 		comment.GET("/project/:id", commentHandler.GetCommentsByProjectID)
+	}
+
+	// Library Route
+	library := api.Group("library")
+	{
+		// Standards (Projects) endpoints
+		library.GET("/standards", libraryApiHandler.ListStandards)
+		library.GET("/standards/:id", libraryApiHandler.GetStandardByID)
+		library.GET("/standards/reference/:reference", libraryApiHandler.GetStandardByReference)
+		library.GET("/standards/search", libraryApiHandler.SearchStandards)
+		library.GET("/standards/date", libraryApiHandler.GetStandardsByDateRange)
+		library.GET("/standards/count", libraryApiHandler.CountStandards)
+
+		// Committees endpoints
+		library.GET("/committees", libraryApiHandler.ListCommittees)
+		library.GET("/committees/:id", libraryApiHandler.GetCommitteeByID)
+		library.GET("/committees/code/:code", libraryApiHandler.GetCommitteeByCode)
+		library.GET("/committees/search", libraryApiHandler.SearchCommittees)
+		library.GET("/committees/count", libraryApiHandler.CountCommittees)
+
+		// Committee-related standards
+		library.GET("/committees/:id/standards", libraryApiHandler.GetStandardsByCommittee)
 	}
 
 	return router, nil
