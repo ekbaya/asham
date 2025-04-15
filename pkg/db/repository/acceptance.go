@@ -225,6 +225,15 @@ func (r *AcceptanceRepository) CalculateNSBResponseStats(projectID string) error
 
 func (r *AcceptanceRepository) SetAcceptanceApproval(results models.Acceptance) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
+		var project models.Project
+		if err := tx.Where("id = ?", results.ProjectID).Preload("TechnicalCommittee").First(&project).Error; err != nil {
+			return err
+		}
+
+		if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != *results.TCSecretaryID {
+			tx.Rollback()
+			return fmt.Errorf("User is not allowed to perform this action")
+		}
 		var acceptance models.Acceptance
 		if err := tx.Where("project_id = ?", results.ProjectID).First(&acceptance).Error; err != nil {
 			tx.Rollback()
