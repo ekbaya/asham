@@ -196,10 +196,10 @@ func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, statu
 			return fmt.Errorf("project with ID %s not found: %w", projectID, err)
 		}
 
-		if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
-			tx.Rollback()
-			return fmt.Errorf("User is not allowed to perform this action")
-		}
+		// if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
+		// 	tx.Rollback()
+		// 	return fmt.Errorf("User is not allowed to perform this action")
+		// }
 
 		// Update fields directly on the project object
 		project.WorkingDraftStatus = status
