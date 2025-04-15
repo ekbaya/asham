@@ -568,10 +568,10 @@ func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusRea
 			return err
 		}
 
-		if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
-			tx.Rollback()
-			return fmt.Errorf("User is not allowed to perform this action")
-		}
+		// if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
+		// 	tx.Rollback()
+		// 	return fmt.Errorf("User is not allowed to perform this action")
+		// }
 
 		project.IsConsensusReached = isConsensusReached
 		project.ProposalAction = action
