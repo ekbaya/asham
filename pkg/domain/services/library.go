@@ -3,16 +3,9 @@ package services
 import (
 	"time"
 
-	"io"
-	"log"
-	"net/http"
-	"net/url"
-	"os"
-
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/google/uuid"
-
 )
 
 type LibraryService struct {
