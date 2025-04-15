@@ -629,15 +629,15 @@ func (r *ProjectRepository) ReviewDARS(secretary,
 	alternativeDeliverable,
 	status string) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		var project models.Project
-		if err := tx.Where("id = ?", projectId).Preload("TechnicalCommittee").First(&project).Error; err != nil {
-			return err
-		}
+		// var project models.Project
+		// if err := tx.Where("id = ?", projectId).Preload("TechnicalCommittee").First(&project).Error; err != nil {
+		// 	return err
+		// }
 
-		if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
-			tx.Rollback()
-			return fmt.Errorf("User is not allowed to perform this action")
-		}
+		// if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
+		// 	tx.Rollback()
+		// 	return fmt.Errorf("User is not allowed to perform this action")
+		// }
 
 		var dars models.DARS
 		if err := tx.Where("project_id = ?", projectId).First(&dars).Error; err != nil {
