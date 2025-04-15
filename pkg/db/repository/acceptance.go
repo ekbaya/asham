@@ -23,6 +23,17 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		var acceptance models.Acceptance
 
+		var member models.Member
+		if err := tx.Where("id = ?", response.ResponderID).Preload(clause.Associations).First(&member).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		if member.NationalStandardBody.NationalTCSecretaryID != &response.ResponderID {
+			tx.Rollback()
+			return errors.New("user is not a National TC secretary")
+		}
+
 		// Check if Acceptance exists for the given project
 		if err := tx.Where("project_id = ?", response.ProjectID).First(&acceptance).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -49,12 +60,6 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 				tx.Rollback()
 				return err
 			}
-		}
-
-		var member models.Member
-		if err := tx.Where("id = ?", response.ResponderID).Preload(clause.Associations).First(&member).Error; err != nil {
-			tx.Rollback()
-			return err
 		}
 
 		// Attach NSBResponse to the existing acceptance
