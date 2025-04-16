@@ -1,14 +1,11 @@
 package services
 
 import (
-	"io"
-	"log"
-	"net/http"
-	"net/url"
-	"os"
+	"time"
 
 	"github.com/ekbaya/asham/pkg/db/repository"
-	"github.com/pdfcpu/pdfcpu/pkg/api"
+	"github.com/ekbaya/asham/pkg/domain/models"
+	"github.com/google/uuid"
 )
 
 type LibraryService struct {
@@ -19,85 +16,50 @@ func NewLibraryService(repo *repository.LibraryRepository) *LibraryService {
 	return &LibraryService{repo: repo}
 }
 
-func (service *LibraryService) FindStandards(params map[string]any, limit, offset int) ([]map[string]any, error) {
-	var standards []map[string]any
-
-	projects, err := service.repo.FindStandards(params, limit, offset)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(projects) > 0 {
-		for _, project := range projects {
-			pageCount := 20 
-			if project.Standard != nil && project.Standard.FileURL != "" {
-				calculatedPages, err := service.getPDFPageCount(project.Standard.FileURL)
-				if err == nil {
-					pageCount = calculatedPages
-				} else {
-					log.Printf("Error calculating PDF pages for standard ID %v: %v", project.ID, err)
-				}
-			}
-
-			standard := map[string]any{
-				"id":             project.ID,
-				"title":          project.Title,
-				"description":    project.Description,
-				"sector":         project.Sector,
-				"committee":      project.TechnicalCommittee.Code,
-				"language":       "English",
-				"published_date": project.PublishedDate,
-				"pages":          pageCount,
-			}
-			standards = append(standards, standard)
-		}
-		return standards, nil
-	} else {
-		return nil, err
-	}
+func (s *LibraryService) FindStandards(params map[string]any, limit, offset int) ([]models.Project, int64, error) {
+	return s.repo.FindStandards(params, limit, offset)
 }
 
-// getPDFPageCount downloads the PDF from the URL and calculates the number of pages
-func (service *LibraryService) getPDFPageCount(pdfURL string) (int, error) {
-	// Parse the URL
-	parsedURL, err := url.Parse(pdfURL)
-	if err != nil {
-		return 0, err
-	}
+func (s *LibraryService) GetProjectByID(id uuid.UUID) (*models.Project, error) {
+	return s.repo.GetProjectByID(id)
+}
 
-	// Handle local file path (for assets directory)
-	if parsedURL.Scheme == "" || parsedURL.Scheme == "file" {
-		// Assuming this is a local file path
-		return api.PageCountFile(pdfURL)
-	}
+func (s *LibraryService) GetProjectByReference(reference string) (*models.Project, error) {
+	return s.repo.GetProjectByReference(reference)
+}
 
-	// For remote URLs, download the file temporarily
-	resp, err := http.Get(pdfURL)
-	if err != nil {
-		return 0, err
-	}
-	defer resp.Body.Close()
+func (s *LibraryService) SearchProjects(query string, limit, offset int) ([]models.Project, int64, error) {
+	return s.repo.SearchProjects(query, limit, offset)
+}
 
-	// Create a temporary file to store the PDF
-	tmpFile, err := os.CreateTemp("", "standard-*.pdf")
-	if err != nil {
-		return 0, err
-	}
-	defer os.Remove(tmpFile.Name()) // Clean up
+func (s *LibraryService) GetProjectsCreatedBetween(startDate, endDate time.Time) ([]models.Project, error) {
+	return s.repo.GetProjectsCreatedBetween(startDate, endDate)
+}
 
-	// Copy the PDF data to the temporary file
-	_, err = io.Copy(tmpFile, resp.Body)
-	if err != nil {
-		tmpFile.Close()
-		return 0, err
-	}
-	tmpFile.Close()
+func (s *LibraryService) CountProjects() (int64, error) {
+	return s.repo.CountProjects()
+}
 
-	// Get the page count from the downloaded file
-	pageCount, err := api.PageCountFile(tmpFile.Name())
-	if err != nil {
-		return 0, err
-	}
+func (s *LibraryService) GetCommitteeByID(id uuid.UUID) (*models.Committee, error) {
+	return s.repo.GetCommitteeByID(id)
+}
 
-	return pageCount, nil
+func (s *LibraryService) GetCommitteeByCode(code string) (*models.Committee, error) {
+	return s.repo.GetCommitteeByCode(code)
+}
+
+func (s *LibraryService) ListCommittees(limit, offset int) ([]models.Committee, int64, error) {
+	return s.repo.ListCommittees(limit, offset)
+}
+
+func (s *LibraryService) SearchCommittees(query string, limit, offset int) ([]models.Committee, int64, error) {
+	return s.repo.SearchCommittees(query, limit, offset)
+}
+
+func (s *LibraryService) CountCommittees() (int64, error) {
+	return s.repo.CountCommittees()
+}
+
+func (s *LibraryService) GetProjectsByCommittee(committeeID string) ([]models.Project, error) {
+	return s.repo.GetProjectsByCommitteeID(committeeID)
 }
