@@ -67,6 +67,16 @@ func (r *DocumentRepository) UpdateProjectDoc(projectId, docType, fileURL, membe
 		project.CommitteeDraftID = &docID
 	}
 
+	if docType == "DARS" {
+		docID := doc.ID.String()
+		project.DARSDocID = &docID
+	}
+
+	if docType == "FDARS" {
+		docID := doc.ID.String()
+		project.FDARSDocID = &docID
+	}
+
 	if docType == "ARS" {
 		docID := doc.ID.String()
 		project.StandardID = &docID

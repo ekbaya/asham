@@ -99,6 +99,10 @@ type Project struct {
 	ApprovedForPublicationByID    *string    `json:"approved_for_publication_by_id"`
 	ApprovedForPublicationBy      *Member    `json:"approved_for_publication_by"`
 	ApprovedForPublicationComment string     `json:"approved_for_publication_comment"`
+	DARSDocID                     *string    `json:"dars_doc_id"`
+	DARSDoc                       *Document  `json:"dars_doc"`
+	FDARSDocID                    *string    `json:"fdars_doc_id"`
+	FDARSDoc                      *Document  `json:"fdars_doc"`
 	StandardID                    *string    `json:"standard_id"`
 	Standard                      *Document  `json:"standard"`
 	Published                     bool       `json:"published" gorm:"default:false"`
