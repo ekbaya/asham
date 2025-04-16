@@ -23,8 +23,8 @@ func (r *MeetingRepository) CreateMeeting(meeting *models.Meeting) error {
 
 func (r *MeetingRepository) GetMeetingByID(id string) (*models.Meeting, error) {
 	var meeting models.Meeting
-	result := r.db.Preload(clause.Associations).
-		First(&meeting, "id = ?", id)
+	result := r.db.Where("id = ?", id).Preload(clause.Associations).
+		First(&meeting)
 	if result.Error != nil {
 		return nil, result.Error
 	}
