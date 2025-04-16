@@ -409,8 +409,8 @@ func checkIfCriteriaIsMet(internationalStandard bool, responses []models.Individ
 	}
 
 	// If there are no votes, return false
-	if totalVotingCount == 0 {
-		return false, "No valid votes received", nil
+	if totalVotingCount < 6 {
+		return false, "At least 6 votes are required", nil
 	}
 
 	if internationalStandard {
