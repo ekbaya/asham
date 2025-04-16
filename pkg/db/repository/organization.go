@@ -34,6 +34,12 @@ func (r *OrganizationRepository) CreateNSB(nsb *models.NationalStandardBody) err
 	return r.db.Create(nsb).Error
 }
 
+func (r *OrganizationRepository) UpdateNationalTCSecretary(nsbID, newSecretaryID string) error {
+	return r.db.Model(&models.NationalStandardBody{}).
+		Where("id = ?", nsbID).
+		Update("national_tc_secretary_id", newSecretaryID).Error
+}
+
 func (r *OrganizationRepository) FetchNSBs() (*[]models.NationalStandardBody, error) {
 	var nsbs []models.NationalStandardBody
 	err := r.db.Find(&nsbs).Error

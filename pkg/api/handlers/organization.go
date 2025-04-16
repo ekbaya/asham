@@ -81,6 +81,32 @@ func (h *OrganizationHandler) CreateNSB(c *gin.Context) {
 	utilities.ShowMessage(c, http.StatusCreated, "NSB registered successfully")
 }
 
+func (h *OrganizationHandler) UpdateNationalTCSecretary(c *gin.Context) {
+	var payload struct {
+		NSB       string `json:"nsb" binding:"required"`
+		Secretary string `json:"secretary" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			return
+		}
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.organizationService.UpdateNationalTCSecretary(payload.NSB, payload.Secretary)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "NSB registered successfully")
+}
+
 func (h *OrganizationHandler) FetchNSBs(c *gin.Context) {
 	nsbs, err := h.organizationService.FetchNSBs()
 	if err != nil {

@@ -19,6 +19,10 @@ func (service *OrganizationService) CreateNSB(nsb *models.NationalStandardBody) 
 	return service.repo.CreateNSB(nsb)
 }
 
+func (service *OrganizationService) UpdateNationalTCSecretary(nsbID, newSecretaryID string) error {
+	return service.repo.UpdateNationalTCSecretary(nsbID, newSecretaryID)
+}
+
 func (service *OrganizationService) FetchNSBs() (*[]models.NationalStandardBody, error) {
 	return service.repo.FetchNSBs()
 }
