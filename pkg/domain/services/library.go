@@ -16,7 +16,7 @@ func NewLibraryService(repo *repository.LibraryRepository) *LibraryService {
 	return &LibraryService{repo: repo}
 }
 
-func (s *LibraryService) FindStandards(params map[string]any, limit, offset int) ([]models.Project, int64, error) {
+func (s *LibraryService) FindStandards(params map[string]any, limit, offset int) ([]models.ProjectDTO, int64, error) {
 	return s.repo.FindStandards(params, limit, offset)
 }
 

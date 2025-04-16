@@ -17,8 +17,8 @@ func NewLibraryRepository(db *gorm.DB) *LibraryRepository {
 	return &LibraryRepository{db: db}
 }
 
-func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset int) ([]models.Project, int64, error) {
-	var standards []models.Project
+func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset int) ([]models.ProjectDTO, int64, error) {
+	var standards []models.ProjectDTO
 	var total int64
 
 	query := r.db.Model(&models.Project{}).Where("published = ?", true)
@@ -58,8 +58,6 @@ func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset i
 
 	// Apply pagination and preload
 	result := query.Limit(limit).Offset(offset).
-		Preload("Standard").Preload("TechnicalCommittee").Preload("WorkingGroup").
-		Preload("Stage").Preload("WorkingDraft").Preload("CommitteeDraft").
 		Order("created_at DESC").
 		Find(&standards)
 
