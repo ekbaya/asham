@@ -6,6 +6,7 @@ import (
 
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type MeetingRepository struct {
@@ -22,10 +23,7 @@ func (r *MeetingRepository) CreateMeeting(meeting *models.Meeting) error {
 
 func (r *MeetingRepository) GetMeetingByID(id string) (*models.Meeting, error) {
 	var meeting models.Meeting
-	result := r.db.Preload("Project").
-		Preload("CreatedByMember").
-		Preload("RelatedDocuments").
-		Preload("Attendees").
+	result := r.db.Preload(clause.Associations).
 		First(&meeting, "id = ?", id)
 	if result.Error != nil {
 		return nil, result.Error
