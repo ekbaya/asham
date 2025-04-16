@@ -7,6 +7,7 @@ import (
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // DocumentRepository handles database operations for Document entities
@@ -200,7 +201,7 @@ func (r *DocumentRepository) List(limit, offset int) ([]models.Document, int64, 
 	}
 
 	// Get documents with pagination
-	err := r.db.Limit(limit).Offset(offset).Order("created_at DESC").Find(&docs).Error
+	err := r.db.Limit(limit).Offset(offset).Order("created_at DESC").Preload(clause.Associations).Find(&docs).Error
 	if err != nil {
 		return nil, 0, err
 	}
