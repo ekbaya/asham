@@ -103,3 +103,135 @@ func (service *OrganizationService) CreateMemberState(state *models.MemberState)
 func (service *OrganizationService) FetchMemberStates() (*[]models.MemberState, error) {
 	return service.repo.FetchMemberStates()
 }
+
+func (service *OrganizationService) UpdateCommitteeSecretary(committeeType string, committeeID string, newSecretaryID string) error {
+	return service.repo.UpdateCommitteeSecretary(committeeID, committeeType, newSecretaryID)
+}
+
+func (service *OrganizationService) UpdateCommitteeChairperson(committeeType string, committeeID string, newChairpersonID string) error {
+	return service.repo.UpdateCommitteeChairperson(committeeID, committeeType, newChairpersonID)
+}
+
+func (service *OrganizationService) AddMemberToARSOCouncil(id string, memberID string) error {
+	return service.repo.AddMemberToARSOCouncil(id, memberID)
+}
+
+func (service *OrganizationService) AddRegionalEconomicCommunityToJointAdvisoryGroup(id string, memberID string) error {
+	return service.repo.AddRegionalEconomicCommunityToJointAdvisoryGroup(id, memberID)
+}
+
+func (service *OrganizationService) AddObserverMemberToJointAdvisoryGroup(id string, memberID string) error {
+	return service.repo.AddObserverMemberToJointAdvisoryGroup(id, memberID)
+}
+
+func (service *OrganizationService) AddRegionalRepresentativeToStandardsManagementCommittee(id string, memberID string) error {
+	return service.repo.AddRegionalRepresentativeToStandardsManagementCommittee(id, memberID)
+}
+
+func (service *OrganizationService) AddElectedMemberToStandardsManagementCommittee(id string, memberID string) error {
+	return service.repo.AddElectedMemberToStandardsManagementCommittee(id, memberID)
+}
+
+func (service *OrganizationService) AddObserverToStandardsManagementCommittee(id string, memberID string) error {
+	return service.repo.AddObserverToStandardsManagementCommittee(id, memberID)
+}
+
+func (service *OrganizationService) AddMemberToTechnicalCommittee(id string, memberID string) error {
+	return service.repo.AddMemberToTechnicalCommittee(id, memberID)
+}
+
+func (service *OrganizationService) AddMemberToJointTechnicalCommittee(id string, memberID string) error {
+	return service.repo.AddMemberToJointTechnicalCommittee(id, memberID)
+}
+
+func (service *OrganizationService) AddMemberToSpecializedCommittee(id string, memberID string) error {
+	return service.repo.AddMemberToSpecializedCommittee(id, memberID)
+}
+
+func (service *OrganizationService) AddMemberToTaskForce(id string, memberID string) error {
+	return service.repo.AddMemberToTaskForce(id, memberID)
+}
+
+func (service *OrganizationService) AddMemberToWorkingGroup(id string, memberID string) error {
+	return service.repo.AddMemberToWorkingGroup(id, memberID)
+}
+
+func (service *OrganizationService) RemoveMemberFromARSOCouncil(id string, memberID string) error {
+	return service.repo.RemoveMemberFromARSOCouncil(id, memberID)
+}
+
+func (service *OrganizationService) RemoveRECFromJointAdvisoryGroup(id string, memberID string) error {
+	return service.repo.RemoveRECFromJointAdvisoryGroup(id, memberID)
+}
+
+func (service *OrganizationService) RemoveObserverFromJointAdvisoryGroup(id string, memberID string) error {
+	return service.repo.RemoveObserverFromJointAdvisoryGroup(id, memberID)
+}
+
+func (service *OrganizationService) RemoveRegionalRepresentativeFromStandardsManagementCommittee(id string, memberID string) error {
+	return service.repo.RemoveRegionalRepresentativeFromStandardsManagementCommittee(id, memberID)
+}
+
+func (service *OrganizationService) RemoveRegionalElectedMemberFromStandardsManagementCommittee(id string, memberID string) error {
+	return service.repo.RemoveRegionalElectedMemberFromStandardsManagementCommittee(id, memberID)
+}
+
+func (service *OrganizationService) RemoveMemberFromTechnicalCommittee(id string, memberID string) error {
+	return service.repo.RemoveMemberFromTechnicalCommittee(id, memberID)
+}
+
+func (service *OrganizationService) RemoveMemberFromSpecializedCommittee(id string, memberID string) error {
+	return service.repo.RemoveMemberFromSpecializedCommittee(id, memberID)
+}
+
+func (service *OrganizationService) RemoveMemberFromJointTechnicalCommittee(id string, memberID string) error {
+	return service.repo.RemoveMemberFromJointTechnicalCommittee(id, memberID)
+}
+
+func (service *OrganizationService) GetArsoCouncilMembers(committeeID string) ([]*models.Member, error) {
+	return service.repo.GetArsoCouncilMembers(committeeID)
+}
+
+func (service *OrganizationService) GetJointAdvisoryGroupMembers(committeeID string) ([]*models.Member, error) {
+	return service.repo.GetJointAdvisoryGroupMembers(committeeID)
+}
+
+func (service *OrganizationService) GetStandardsManagementCommitteeMembers(committeeID string) ([]*models.Member, error) {
+	return service.repo.GetStandardsManagementCommitteeMembers(committeeID)
+}
+
+func (service *OrganizationService) GetTechnicalCommitteeMembers(committeeID string) ([]*models.Member, error) {
+	return service.repo.GetTechnicalCommitteeMembers(committeeID)
+}
+
+func (service *OrganizationService) GetSpecializedCommitteeMembers(committeeID string) ([]*models.Member, error) {
+	return service.repo.GetSpecializedCommitteeMembers(committeeID)
+}
+
+func (service *OrganizationService) GetJointTechnicalCommitteeMembers(committeeID string) ([]*models.Member, error) {
+	return service.repo.GetJointTechnicalCommitteeMembers(committeeID)
+}
+
+func (service *OrganizationService) GetArsoCouncil() ([]models.ARSOCouncil, error) {
+	return service.repo.GetArsoCouncil()
+}
+
+func (service *OrganizationService) GetJointAdvisoryGroups() ([]models.JointAdvisoryGroup, error) {
+	return service.repo.GetJointAdvisoryGroups()
+}
+
+func (service *OrganizationService) GetStandardsManagementCommittees() ([]models.StandardsManagementCommittee, error) {
+	return service.repo.GetStandardsManagementCommittees()
+}
+
+func (service *OrganizationService) GetTechnicalCommittees() ([]models.TechnicalCommittee, error) {
+	return service.repo.GetTechnicalCommittees()
+}
+
+func (service *OrganizationService) GetSpecializedCommittees() ([]models.SpecializedCommittee, error) {
+	return service.repo.GetSpecializedCommittees()
+}
+
+func (service *OrganizationService) GetJointTechnicalCommittees() ([]models.JointTechnicalCommittee, error) {
+	return service.repo.GetJointTechnicalCommittees()
+}

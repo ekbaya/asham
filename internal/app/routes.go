@@ -82,6 +82,50 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.POST("/add_member_to_sub_commitee", organizationHandler.AddMemberToSubCommittee)
 		organization.POST("/specialized_committee", organizationHandler.CreateSpecializedCommittee)
 		organization.GET("/specialized_committee/type/:id", organizationHandler.GetSpecializedCommitteeByType)
+
+		// Update Secretary / Chairperson
+		organization.PUT("/committees/:type/:id/secretary", organizationHandler.UpdateCommitteeSecretary)
+		organization.PUT("/committees/:type/:id/chairperson", organizationHandler.UpdateCommitteeChairperson)
+
+		// Add members
+		organization.POST("/committees/arso_council/:id/members", organizationHandler.AddMemberToARSOCouncil)
+		organization.POST("/committees/joint_advisory_group/:id/rec_members", organizationHandler.AddRegionalEconomicCommunityToJointAdvisoryGroup)
+		organization.POST("/committees/joint_advisory_group/:id/observers", organizationHandler.AddObserverMemberToJointAdvisoryGroup)
+		organization.POST("/committees/standards_management/:id/representatives", organizationHandler.AddRegionalRepresentativeToStandardsManagementCommittee)
+		organization.POST("/committees/standards_management/:id/elected_members", organizationHandler.AddElectedMemberToStandardsManagementCommittee)
+		organization.POST("/committees/standards_management/:id/observers", organizationHandler.AddObserverToStandardsManagementCommittee)
+		organization.POST("/committees/technical/:id/members", organizationHandler.AddMemberToTechnicalCommittee)
+		organization.POST("/committees/joint_technical/:id/members", organizationHandler.AddMemberToJointTechnicalCommittee)
+		organization.POST("/committees/specialized/:id/members", organizationHandler.AddMemberToSpecializedCommittee)
+		organization.POST("/committees/task_force/:id/members", organizationHandler.AddMemberToTaskForce)
+		organization.POST("/committees/working_group/:id/members", organizationHandler.AddMemberToWorkingGroup)
+
+		// Remove members
+		organization.DELETE("/committees/arso_council/:id/members", organizationHandler.RemoveMemberFromARSOCouncil)
+		organization.DELETE("/committees/joint_advisory_group/:id/rec_members", organizationHandler.RemoveRECFromJointAdvisoryGroup)
+		organization.DELETE("/committees/joint_advisory_group/:id/observers", organizationHandler.RemoveObserverFromJointAdvisoryGroup)
+		organization.DELETE("/committees/standards_management/:id/representatives", organizationHandler.RemoveRegionalRepresentativeFromStandardsManagementCommittee)
+		organization.DELETE("/committees/standards_management/:id/elected_members", organizationHandler.RemoveRegionalElectedMemberFromStandardsManagementCommittee)
+		organization.DELETE("/committees/technical/:id/members", organizationHandler.RemoveMemberFromTechnicalCommittee)
+		organization.DELETE("/committees/specialized/:id/members", organizationHandler.RemoveMemberFromSpecializedCommittee)
+		organization.DELETE("/committees/joint_technical/:id/members", organizationHandler.RemoveMemberFromJointTechnicalCommittee)
+
+		// Get members
+		organization.GET("/committees/arso_council/:id/members", organizationHandler.GetArsoCouncilMembers)
+		organization.GET("/committees/joint_advisory_group/:id/members", organizationHandler.GetJointAdvisoryGroupMembers)
+		organization.GET("/committees/standards_management/:id/members", organizationHandler.GetStandardsManagementCommitteeMembers)
+		organization.GET("/committees/technical/:id/members", organizationHandler.GetTechnicalCommitteeMembers)
+		organization.GET("/committees/specialized/:id/members", organizationHandler.GetSpecializedCommitteeMembers)
+		organization.GET("/committees/joint_technical/:id/members", organizationHandler.GetJointTechnicalCommitteeMembers)
+
+		// Get all committees
+		organization.GET("/committees/arso_council", organizationHandler.GetArsoCouncil)
+		organization.GET("/committees/joint_advisory_group", organizationHandler.GetJointAdvisoryGroups)
+		organization.GET("/committees/standards_management", organizationHandler.GetStandardsManagementCommittees)
+		organization.GET("/committees/technical", organizationHandler.GetTechnicalCommittees)
+		organization.GET("/committees/specialized", organizationHandler.GetSpecializedCommittees)
+		organization.GET("/committees/joint_technical", organizationHandler.GetJointTechnicalCommittees)
+
 	}
 
 	// documents Route
@@ -255,6 +299,17 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	library := api.Group("library")
 	{
 		library.GET("/standards", libraryHandler.FindStandards)
+		library.GET("/standards/:id", libraryHandler.GetStandardByID)
+		library.GET("/standards/reference/:reference", libraryHandler.GetStandardByReference)
+		library.GET("/standards/search", libraryHandler.SearchStandards)
+		library.GET("/standards/date-range", libraryHandler.GetStandardsByDateRange)
+		library.GET("/standards/count", libraryHandler.CountStandards)
+		library.GET("/committees/list", libraryHandler.ListCommittees)
+		library.GET("/committees/:id", libraryHandler.GetCommitteeByID)
+		library.GET("/committees/code/:code", libraryHandler.GetCommitteeByCode)
+		library.GET("/committees/search", libraryHandler.SearchCommittees)
+		library.GET("/committees/count", libraryHandler.CountCommittees)
+		library.GET("/standards/committee/:id", libraryHandler.GetStandardsByCommittee)
 	}
 
 	return router, nil

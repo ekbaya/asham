@@ -504,3 +504,517 @@ func (h *OrganizationHandler) SearchTechnicalCommittees(c *gin.Context) {
 		"committees": committees,
 	})
 }
+
+func (h *OrganizationHandler) UpdateCommitteeSecretary(c *gin.Context) {
+	var payload struct {
+		SecretaryID string `json:"secretary_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	committeeType := c.Param("type")
+	committeeID := c.Param("id")
+
+	if err := h.organizationService.UpdateCommitteeSecretary(committeeType, committeeID, payload.SecretaryID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Secretary updated successfully")
+}
+
+func (h *OrganizationHandler) UpdateCommitteeChairperson(c *gin.Context) {
+	var payload struct {
+		ChairpersonID string `json:"chairperson_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	committeeType := c.Param("type")
+	committeeID := c.Param("id")
+
+	if err := h.organizationService.UpdateCommitteeChairperson(committeeType, committeeID, payload.ChairpersonID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Chairperson updated successfully")
+}
+
+func (h *OrganizationHandler) AddMemberToARSOCouncil(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.AddMemberToARSOCouncil(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Committee")
+}
+
+func (h *OrganizationHandler) AddRegionalEconomicCommunityToJointAdvisoryGroup(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.AddRegionalEconomicCommunityToJointAdvisoryGroup(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Committee")
+}
+
+func (h *OrganizationHandler) AddObserverMemberToJointAdvisoryGroup(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.AddObserverMemberToJointAdvisoryGroup(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Committee")
+}
+
+func (h *OrganizationHandler) AddRegionalRepresentativeToStandardsManagementCommittee(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.AddRegionalRepresentativeToStandardsManagementCommittee(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Committee")
+}
+
+func (h *OrganizationHandler) AddElectedMemberToStandardsManagementCommittee(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.AddElectedMemberToStandardsManagementCommittee(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Committee")
+}
+
+func (h *OrganizationHandler) AddObserverToStandardsManagementCommittee(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.AddObserverToStandardsManagementCommittee(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Committee")
+}
+
+func (h *OrganizationHandler) AddMemberToTechnicalCommittee(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.AddMemberToTechnicalCommittee(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Committee")
+}
+
+func (h *OrganizationHandler) AddMemberToJointTechnicalCommittee(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.AddMemberToJointTechnicalCommittee(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Committee")
+}
+
+func (h *OrganizationHandler) AddMemberToSpecializedCommittee(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.AddMemberToSpecializedCommittee(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Committee")
+}
+
+func (h *OrganizationHandler) AddMemberToWorkingGroup(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.AddMemberToWorkingGroup(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Committee")
+}
+
+func (h *OrganizationHandler) AddMemberToTaskForce(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.AddMemberToTaskForce(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member added to Committee")
+}
+
+func (h *OrganizationHandler) RemoveMemberFromARSOCouncil(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.RemoveMemberFromARSOCouncil(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member removed to Committee")
+}
+
+func (h *OrganizationHandler) RemoveRECFromJointAdvisoryGroup(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.RemoveRECFromJointAdvisoryGroup(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member removed to Committee")
+}
+
+func (h *OrganizationHandler) RemoveObserverFromJointAdvisoryGroup(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.RemoveObserverFromJointAdvisoryGroup(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member removed to Committee")
+}
+
+func (h *OrganizationHandler) RemoveRegionalElectedMemberFromStandardsManagementCommittee(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.RemoveRegionalElectedMemberFromStandardsManagementCommittee(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member removed to Committee")
+}
+
+func (h *OrganizationHandler) RemoveRegionalRepresentativeFromStandardsManagementCommittee(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.RemoveRegionalRepresentativeFromStandardsManagementCommittee(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member removed to Committee")
+}
+
+func (h *OrganizationHandler) RemoveMemberFromTechnicalCommittee(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.RemoveMemberFromTechnicalCommittee(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member removed to Committee")
+}
+
+func (h *OrganizationHandler) RemoveMemberFromSpecializedCommittee(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.RemoveMemberFromSpecializedCommittee(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member removed to Committee")
+}
+
+func (h *OrganizationHandler) RemoveMemberFromJointTechnicalCommittee(c *gin.Context) {
+	var payload struct {
+		MemberID string `json:"member_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.RemoveMemberFromJointTechnicalCommittee(id, payload.MemberID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member removed to Committee")
+}
+
+func (h *OrganizationHandler) GetArsoCouncilMembers(c *gin.Context) {
+	id := c.Param("id")
+
+	members, err := h.organizationService.GetArsoCouncilMembers(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"members": members})
+}
+
+func (h *OrganizationHandler) GetJointAdvisoryGroupMembers(c *gin.Context) {
+	id := c.Param("id")
+
+	members, err := h.organizationService.GetJointAdvisoryGroupMembers(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"members": members})
+}
+
+func (h *OrganizationHandler) GetStandardsManagementCommitteeMembers(c *gin.Context) {
+	id := c.Param("id")
+
+	members, err := h.organizationService.GetStandardsManagementCommitteeMembers(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"members": members})
+}
+
+func (h *OrganizationHandler) GetTechnicalCommitteeMembers(c *gin.Context) {
+	id := c.Param("id")
+
+	members, err := h.organizationService.GetTechnicalCommitteeMembers(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"members": members})
+}
+
+func (h *OrganizationHandler) GetSpecializedCommitteeMembers(c *gin.Context) {
+	id := c.Param("id")
+
+	members, err := h.organizationService.GetSpecializedCommitteeMembers(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"members": members})
+}
+
+func (h *OrganizationHandler) GetJointTechnicalCommitteeMembers(c *gin.Context) {
+	id := c.Param("id")
+
+	members, err := h.organizationService.GetJointTechnicalCommitteeMembers(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"members": members})
+}
+
+func (h *OrganizationHandler) GetArsoCouncil(c *gin.Context) {
+	committees, err := h.organizationService.GetArsoCouncil()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"committees": committees})
+}
+
+func (h *OrganizationHandler) GetJointAdvisoryGroups(c *gin.Context) {
+	committees, err := h.organizationService.GetJointAdvisoryGroups()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"committees": committees})
+}
+
+func (h *OrganizationHandler) GetStandardsManagementCommittees(c *gin.Context) {
+	committees, err := h.organizationService.GetStandardsManagementCommittees()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"committees": committees})
+}
+
+func (h *OrganizationHandler) GetTechnicalCommittees(c *gin.Context) {
+	committees, err := h.organizationService.GetTechnicalCommittees()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"committees": committees})
+}
+
+func (h *OrganizationHandler) GetSpecializedCommittees(c *gin.Context) {
+	committees, err := h.organizationService.GetSpecializedCommittees()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"committees": committees})
+}
+
+func (h *OrganizationHandler) GetJointTechnicalCommittees(c *gin.Context) {
+	committees, err := h.organizationService.GetJointTechnicalCommittees()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"committees": committees})
+}

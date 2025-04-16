@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -73,6 +74,426 @@ func (r *OrganizationRepository) DeleteCommittee(committeeType string, id string
 	default:
 		return errors.New("unknown committee type")
 	}
+}
+
+func (r *OrganizationRepository) UpdateCommitteeSecretary(committeeType string, committeeID string, newSecretaryID string) error {
+	switch committeeType {
+	case string(models.ARSO_Council):
+		return r.db.Model(&models.ARSOCouncil{}).
+			Where("id = ?", committeeID).
+			Update("secretary_id", newSecretaryID).Error
+
+	case string(models.Joint_Advisory_Group):
+		return r.db.Model(&models.JointAdvisoryGroup{}).
+			Where("id = ?", committeeID).
+			Update("secretary_id", newSecretaryID).Error
+
+	case string(models.Standards_Management_Committee):
+		return r.db.Model(&models.StandardsManagementCommittee{}).
+			Where("id = ?", committeeID).
+			Update("secretary_id", newSecretaryID).Error
+
+	case string(models.Technical_Committee):
+		return r.db.Model(&models.TechnicalCommittee{}).
+			Where("id = ?", committeeID).
+			Update("secretary_id", newSecretaryID).Error
+
+	case string(models.Specialized_Committee):
+		return r.db.Model(&models.SpecializedCommittee{}).
+			Where("id = ?", committeeID).
+			Update("secretary_id", newSecretaryID).Error
+
+	case string(models.Joint_Technical_Committee):
+		return r.db.Model(&models.JointTechnicalCommittee{}).
+			Where("id = ?", committeeID).
+			Update("secretary_id", newSecretaryID).Error
+
+	default:
+		return errors.New("unknown committee type")
+	}
+}
+
+func (r *OrganizationRepository) UpdateCommitteeChairperson(committeeType string, committeeID string, newChairpersonID string) error {
+	switch committeeType {
+	case string(models.ARSO_Council):
+		return r.db.Model(&models.ARSOCouncil{}).
+			Where("id = ?", committeeID).
+			Update("chairperson_id", newChairpersonID).Error
+
+	case string(models.Joint_Advisory_Group):
+		return r.db.Model(&models.JointAdvisoryGroup{}).
+			Where("id = ?", committeeID).
+			Update("chairperson_id", newChairpersonID).Error
+
+	case string(models.Standards_Management_Committee):
+		return r.db.Model(&models.StandardsManagementCommittee{}).
+			Where("id = ?", committeeID).
+			Update("chairperson_id", newChairpersonID).Error
+
+	case string(models.Technical_Committee):
+		return r.db.Model(&models.TechnicalCommittee{}).
+			Where("id = ?", committeeID).
+			Update("chairperson_id", newChairpersonID).Error
+
+	case string(models.Specialized_Committee):
+		return r.db.Model(&models.SpecializedCommittee{}).
+			Where("id = ?", committeeID).
+			Update("chairperson_id", newChairpersonID).Error
+
+	case string(models.Joint_Technical_Committee):
+		return r.db.Model(&models.JointTechnicalCommittee{}).
+			Where("id = ?", committeeID).
+			Update("chairperson_id", newChairpersonID).Error
+
+	default:
+		return errors.New("unknown committee type")
+	}
+}
+
+func (r *OrganizationRepository) AddMemberToARSOCouncil(id string, memberID string) error {
+	var council models.ARSOCouncil
+	if err := r.db.First(&council, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&council).Association("Members").Append(&member)
+}
+
+func (r *OrganizationRepository) AddRegionalEconomicCommunityToJointAdvisoryGroup(id string, memberID string) error {
+	var group models.JointAdvisoryGroup
+	if err := r.db.First(&group, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&group).Association("RegionalEconomicCommunities").Append(&member)
+}
+
+func (r *OrganizationRepository) AddObserverMemberToJointAdvisoryGroup(id string, memberID string) error {
+	var group models.JointAdvisoryGroup
+	if err := r.db.First(&group, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&group).Association("ObserverMembers").Append(&member)
+}
+
+func (r *OrganizationRepository) AddRegionalRepresentativeToStandardsManagementCommittee(id string, memberID string) error {
+	var committee models.StandardsManagementCommittee
+	if err := r.db.First(&committee, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&committee).Association("RegionalRepresentatives").Append(&member)
+}
+
+func (r *OrganizationRepository) AddElectedMemberToStandardsManagementCommittee(id string, memberID string) error {
+	var committee models.StandardsManagementCommittee
+	if err := r.db.First(&committee, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&committee).Association("ElectedMembers").Append(&member)
+}
+
+func (r *OrganizationRepository) AddObserverToStandardsManagementCommittee(id string, memberID string) error {
+	var committee models.StandardsManagementCommittee
+	if err := r.db.First(&committee, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&committee).Association("Observers").Append(&member)
+}
+
+func (r *OrganizationRepository) AddMemberToTechnicalCommittee(id string, memberID string) error {
+	var committee models.TechnicalCommittee
+	if err := r.db.First(&committee, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&committee).Association("CurrentMembers").Append(&member)
+}
+
+func (r *OrganizationRepository) AddMemberToJointTechnicalCommittee(id string, memberID string) error {
+	var committee models.JointTechnicalCommittee
+	if err := r.db.First(&committee, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&committee).Association("JointMembers").Append(&member)
+}
+
+func (r *OrganizationRepository) AddMemberToSpecializedCommittee(id string, memberID string) error {
+	var committee models.SpecializedCommittee
+	if err := r.db.First(&committee, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&committee).Association("Members").Append(&member)
+}
+
+func (r *OrganizationRepository) AddMemberToTaskForce(id string, memberID string) error {
+	var committee models.TaskForce
+	if err := r.db.First(&committee, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&committee).Association("NationalDeligations").Append(&member)
+}
+
+func (r *OrganizationRepository) AddMemberToWorkingGroup(id string, memberID string) error {
+	var committee models.WorkingGroup
+	if err := r.db.First(&committee, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&committee).Association("Experts").Append(&member)
+}
+
+func (r *OrganizationRepository) RemoveMemberFromARSOCouncil(committeeID string, memberID string) error {
+	memberUUID, err := uuid.Parse(memberID)
+	if err != nil {
+		return err
+	}
+	var committee models.ARSOCouncil
+	if err := r.db.First(&committee, "id = ?", committeeID).Error; err != nil {
+		return err
+	}
+	return r.db.Model(&committee).Association("Members").Delete(&models.Member{ID: memberUUID})
+}
+
+func (r *OrganizationRepository) RemoveRECFromJointAdvisoryGroup(committeeID string, memberID string) error {
+	memberUUID, err := uuid.Parse(memberID)
+	if err != nil {
+		return err
+	}
+	var committee models.JointAdvisoryGroup
+	if err := r.db.First(&committee, "id = ?", committeeID).Error; err != nil {
+		return err
+	}
+	return r.db.Model(&committee).Association("RegionalEconomicCommunities").Delete(&models.Member{ID: memberUUID})
+}
+
+func (r *OrganizationRepository) RemoveObserverFromJointAdvisoryGroup(committeeID string, memberID string) error {
+	memberUUID, err := uuid.Parse(memberID)
+	if err != nil {
+		return err
+	}
+	var committee models.JointAdvisoryGroup
+	if err := r.db.First(&committee, "id = ?", committeeID).Error; err != nil {
+		return err
+	}
+	return r.db.Model(&committee).Association("ObserverMembers").Delete(&models.Member{ID: memberUUID})
+}
+
+func (r *OrganizationRepository) RemoveRegionalRepresentativeFromStandardsManagementCommittee(committeeID string, memberID string) error {
+	memberUUID, err := uuid.Parse(memberID)
+	if err != nil {
+		return err
+	}
+	var committee models.StandardsManagementCommittee
+	if err := r.db.First(&committee, "id = ?", committeeID).Error; err != nil {
+		return err
+	}
+	return r.db.Model(&committee).Association("RegionalRepresentatives").Delete(&models.Member{ID: memberUUID})
+}
+
+func (r *OrganizationRepository) RemoveRegionalElectedMemberFromStandardsManagementCommittee(committeeID string, memberID string) error {
+	memberUUID, err := uuid.Parse(memberID)
+	if err != nil {
+		return err
+	}
+	var committee models.StandardsManagementCommittee
+	if err := r.db.First(&committee, "id = ?", committeeID).Error; err != nil {
+		return err
+	}
+	return r.db.Model(&committee).Association("ElectedMembers").Delete(&models.Member{ID: memberUUID})
+}
+
+func (r *OrganizationRepository) RemoveMemberFromTechnicalCommittee(committeeID string, memberID string) error {
+	memberUUID, err := uuid.Parse(memberID)
+	if err != nil {
+		return err
+	}
+	var committee models.TechnicalCommittee
+	if err := r.db.First(&committee, "id = ?", committeeID).Error; err != nil {
+		return err
+	}
+	return r.db.Model(&committee).Association("CurrentMembers").Delete(&models.Member{ID: memberUUID})
+}
+
+func (r *OrganizationRepository) RemoveMemberFromSpecializedCommittee(committeeID string, memberID string) error {
+	memberUUID, err := uuid.Parse(memberID)
+	if err != nil {
+		return err
+	}
+	var committee models.SpecializedCommittee
+	if err := r.db.First(&committee, "id = ?", committeeID).Error; err != nil {
+		return err
+	}
+	return r.db.Model(&committee).Association("Members").Delete(&models.Member{ID: memberUUID})
+}
+
+func (r *OrganizationRepository) RemoveMemberFromJointTechnicalCommittee(committeeID string, memberID string) error {
+	memberUUID, err := uuid.Parse(memberID)
+	if err != nil {
+		return err
+	}
+	var committee models.JointTechnicalCommittee
+	if err := r.db.First(&committee, "id = ?", committeeID).Error; err != nil {
+		return err
+	}
+	return r.db.Model(&committee).Association("JointMembers").Delete(&models.Member{ID: memberUUID})
+}
+
+func (r *OrganizationRepository) GetArsoCouncilMembers(committeeID string) ([]*models.Member, error) {
+	var committee models.ARSOCouncil
+	if err := r.db.Preload("Members").First(&committee, "id = ?", committeeID).Error; err != nil {
+		return nil, err
+	}
+	return committee.Members, nil
+}
+
+func (r *OrganizationRepository) GetJointAdvisoryGroupMembers(committeeID string) ([]*models.Member, error) {
+	var committee models.JointAdvisoryGroup
+	if err := r.db.Preload("ObserverMembers").First(&committee, "id = ?", committeeID).Error; err != nil {
+		return nil, err
+	}
+	return committee.ObserverMembers, nil
+}
+
+func (r *OrganizationRepository) GetStandardsManagementCommitteeMembers(committeeID string) ([]*models.Member, error) {
+	var committee models.StandardsManagementCommittee
+	if err := r.db.Preload("ElectedMembers").First(&committee, "id = ?", committeeID).Error; err != nil {
+		return nil, err
+	}
+	return committee.ElectedMembers, nil
+}
+
+func (r *OrganizationRepository) GetTechnicalCommitteeMembers(committeeID string) ([]*models.Member, error) {
+	var committee models.TechnicalCommittee
+	if err := r.db.Preload("CurrentMembers").First(&committee, "id = ?", committeeID).Error; err != nil {
+		return nil, err
+	}
+	return committee.CurrentMembers, nil
+}
+
+func (r *OrganizationRepository) GetSpecializedCommitteeMembers(committeeID string) ([]*models.Member, error) {
+	var committee models.SpecializedCommittee
+	if err := r.db.Preload("Members").First(&committee, "id = ?", committeeID).Error; err != nil {
+		return nil, err
+	}
+	return committee.Members, nil
+}
+
+func (r *OrganizationRepository) GetJointTechnicalCommitteeMembers(committeeID string) ([]*models.Member, error) {
+	var committee models.JointTechnicalCommittee
+	if err := r.db.Preload("JointMembers").First(&committee, "id = ?", committeeID).Error; err != nil {
+		return nil, err
+	}
+	return committee.JointMembers, nil
+}
+
+func (r *OrganizationRepository) GetArsoCouncil() ([]models.ARSOCouncil, error) {
+	var committees []models.ARSOCouncil
+	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, err
+	}
+	return committees, nil
+}
+
+func (r *OrganizationRepository) GetJointAdvisoryGroups() ([]models.JointAdvisoryGroup, error) {
+	var committees []models.JointAdvisoryGroup
+	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, err
+	}
+	return committees, nil
+}
+
+func (r *OrganizationRepository) GetStandardsManagementCommittees() ([]models.StandardsManagementCommittee, error) {
+	var committees []models.StandardsManagementCommittee
+	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, err
+	}
+	return committees, nil
+}
+
+func (r *OrganizationRepository) GetTechnicalCommittees() ([]models.TechnicalCommittee, error) {
+	var committees []models.TechnicalCommittee
+	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, err
+	}
+	return committees, nil
+}
+
+func (r *OrganizationRepository) GetSpecializedCommittees() ([]models.SpecializedCommittee, error) {
+	var committees []models.SpecializedCommittee
+	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, err
+	}
+	return committees, nil
+}
+
+func (r *OrganizationRepository) GetJointTechnicalCommittees() ([]models.JointTechnicalCommittee, error) {
+	var committees []models.JointTechnicalCommittee
+	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, err
+	}
+	return committees, nil
 }
 
 // Technical Committee Specific Methods
