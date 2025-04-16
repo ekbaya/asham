@@ -201,8 +201,8 @@ func (r *BallotingRepository) CheckAcceptanceCriteria(projectID string) (*models
 	}
 
 	// If no votes, criteria not met
-	if result.TotalVotes == 0 {
-		result.Message = "No votes recorded for this project."
+	if result.TotalVotes < 3 {
+		result.Message = "At least three votes are required."
 		return result, nil
 	}
 
