@@ -23,7 +23,6 @@ func NewLibraryHandler(libraryService services.LibraryService) *LibraryHandler {
 }
 
 func (h *LibraryHandler) FindStandards(c *gin.Context) {
-	// Parse query parameters
 	params := make(map[string]any)
 
 	if sector := c.Query("sector"); sector != "" {
@@ -62,7 +61,6 @@ func (h *LibraryHandler) FindStandards(c *gin.Context) {
 		}
 	}
 
-	// Pagination
 	limit := 10
 	offset := 0
 
@@ -74,7 +72,7 @@ func (h *LibraryHandler) FindStandards(c *gin.Context) {
 
 	if offsetStr := c.Query("page"); offsetStr != "" {
 		if val, err := strconv.Atoi(offsetStr); err == nil && val > 0 {
-			offset = (val - 1) * limit // Convert page to offset
+			offset = (val - 1) * limit
 		}
 	}
 
@@ -181,24 +179,6 @@ func (h *LibraryHandler) CountStandards(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"count": count})
 }
 
-func (h *LibraryHandler) ListCommittees(c *gin.Context) {
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
-	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
-
-	committees, total, err := h.libraryService.ListCommittees(limit, offset)
-	if err != nil {
-		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"committees": committees,
-		"total":      total,
-		"limit":      limit,
-		"offset":     offset,
-	})
-}
-
 func (h *LibraryHandler) GetCommitteeByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -229,6 +209,24 @@ func (h *LibraryHandler) GetCommitteeByCode(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, committee)
+}
+
+func (h *LibraryHandler) ListCommittees(c *gin.Context) {
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+
+	committees, total, err := h.libraryService.ListCommittees(limit, offset)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"committees": committees,
+		"total":      total,
+		"limit":      limit,
+		"offset":     offset,
+	})
 }
 
 func (h *LibraryHandler) SearchCommittees(c *gin.Context) {
@@ -276,5 +274,17 @@ func (h *LibraryHandler) GetStandardsByCommittee(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"standards": projects,
 		"total":     len(projects),
+	})
+}
+func (h *LibraryHandler) GetSectors(c *gin.Context) {
+	sectors, err := h.libraryService.GetSectors()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"sectors": sectors,
+		"total":   len(sectors),
 	})
 }
