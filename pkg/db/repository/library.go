@@ -32,6 +32,116 @@ func (r *LibraryRepository) GetUserByEmail(email string) (*models.User, error) {
 	}
 	return &user, nil
 }
+
+func (r *LibraryRepository) GetTopStandards(limit, offset int) ([]models.ProjectDTO, int64, error) {
+	var projects []models.ProjectDTO
+	var total int64
+
+	query := r.db.Model(&models.Project{})
+	query.Count(&total)
+
+	result := query.
+		Select("id, title, reference, published, created_at, updated_at").
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&projects)
+	if result.Error != nil {
+		return nil, 0, result.Error
+	}
+	return projects, total, nil
+}
+
+func (r *LibraryRepository) GetLatestStandards(limit, offset int) ([]models.ProjectDTO, int64, error) {
+	return r.GetTopStandards(limit, offset)
+}
+
+func (r *LibraryRepository) GetTopCommittees(limit, offset int) ([]models.CommitteeDTO, int64, error) {
+	var technicalCommittees []models.TechnicalCommittee
+	var total int64
+
+	// Count total committees
+	if err := r.db.Model(&models.TechnicalCommittee{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Fetch committees with preloaded Chairperson
+	result := r.db.
+		Preload("Chairperson.NationalStandardBody").
+		Limit(limit).
+		Offset(offset).
+		Order("created_at DESC").
+		Find(&technicalCommittees)
+	if result.Error != nil {
+		return nil, 0, result.Error
+	}
+
+	// Convert to CommitteeDTO and compute counts
+	committeeDTOs := make([]models.CommitteeDTO, len(technicalCommittees))
+	for i, committee := range technicalCommittees {
+		// Count working groups
+		var workingGroupCount int64
+		if err := r.db.Model(&models.WorkingGroup{}).
+			Where("parent_tc_id = ?", committee.ID).
+			Count(&workingGroupCount).Error; err != nil {
+			return nil, 0, err
+		}
+
+		// Count current members
+		var memberCount int64
+		if err := r.db.Model(&models.Member{}).
+			Joins("JOIN current_members cm ON cm.member_id = members.id").
+			Where("cm.technical_committee_id = ?", committee.ID).
+			Count(&memberCount).Error; err != nil {
+			return nil, 0, err
+		}
+
+		// Count working group experts (distinct)
+		var workingMemberCount int64
+		if err := r.db.Model(&models.Member{}).
+			Joins("JOIN working_group_experts wge ON wge.member_id = members.id").
+			Joins("JOIN working_groups wg ON wge.working_group_id = wg.id").
+			Where("wg.parent_tc_id = ?", committee.ID).
+			Distinct("members.id").
+			Count(&workingMemberCount).Error; err != nil {
+			return nil, 0, err
+		}
+
+		// Count active projects
+		var activeProjectCount int64
+		if err := r.db.Model(&models.Project{}).
+			Where("technical_committee_id = ? AND published = ? AND cancelled = ?", committee.ID, true, false).
+			Count(&activeProjectCount).Error; err != nil {
+			return nil, 0, err
+		}
+
+		// Map Chairperson to MemberMinified
+		var chairpersonMinified *models.MemberMinified
+		if committee.Chairperson != nil {
+			chairpersonMinified = &models.MemberMinified{
+				ID:                     committee.Chairperson.ID,
+				FirstName:              committee.Chairperson.FirstName,
+				LastName:               committee.Chairperson.LastName,
+				NationalStandardBodyID: committee.Chairperson.NationalStandardBodyID,
+				NationalStandardBody:   committee.Chairperson.NationalStandardBody,
+			}
+		}
+
+		committeeDTOs[i] = models.CommitteeDTO{
+			ID:                 committee.ID,
+			Name:               committee.Name,
+			Code:               committee.Code,
+			ChairpersonId:      committee.ChairpersonId,
+			Chairperson:        chairpersonMinified,
+			WorkingGroupCount:  workingGroupCount,
+			MemberCount:        memberCount,
+			WorkingMemberCount: workingMemberCount,
+			ActiveProjectCount: activeProjectCount,
+		}
+	}
+
+	return committeeDTOs, total, nil
+}
 func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset int) ([]models.ProjectDTO, int64, error) {
 	var standards []models.ProjectDTO
 	var total int64
