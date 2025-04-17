@@ -1,6 +1,10 @@
 package handlers
 
 import (
+	"bytes"
+	"github.com/go-playground/validator/v10"
+	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -20,6 +24,82 @@ func NewLibraryHandler(libraryService services.LibraryService) *LibraryHandler {
 	return &LibraryHandler{
 		libraryService: libraryService,
 	}
+}
+
+func (h *LibraryHandler) RegisterMember(c *gin.Context) {
+	// Read and log request body for debugging
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Printf("Error reading request body: %v", err)
+		utilities.ShowMessage(c, http.StatusBadRequest, "Failed to read request body")
+		return
+	}
+	log.Printf("Request body: %s", string(body))
+
+	// Restore request body for ShouldBindJSON
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	var payload models.User
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		log.Printf("Error binding JSON: %v", err)
+		if err.Error() == "EOF" {
+			utilities.ShowMessage(c, http.StatusBadRequest, "Empty or invalid request body")
+			return
+		}
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			return
+		}
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.libraryService.RegisterMember(&payload)
+	if err != nil {
+		log.Printf("Error registering user: %v", err)
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "User registered successfully")
+}
+
+func (h *LibraryHandler) Login(c *gin.Context) {
+	var req struct {
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("Error binding JSON for login: %v", err)
+		if err.Error() == "EOF" {
+			utilities.ShowMessage(c, http.StatusBadRequest, "Empty or invalid request body")
+			return
+		}
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			return
+		}
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	token, refreshToken, err := h.libraryService.Login(req.Username, req.Password)
+	if err != nil {
+		log.Printf("Error logging in: %v", err)
+		utilities.ShowMessage(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"access_token":  token,
+		"refresh_token": refreshToken,
+		"expires_in":    86400,
+	})
 }
 
 func (h *LibraryHandler) FindStandards(c *gin.Context) {

@@ -11,6 +11,7 @@ var AllowedOrigins = []string{
 	"http://127.0.0.1",
 	"http://192.168.100.43",
 	"http://192.168.100.43:5173",
+	"http://41.80.113.26",
 	"http://localhost:5173",
 }
 
