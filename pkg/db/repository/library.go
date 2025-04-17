@@ -17,8 +17,8 @@ func NewLibraryRepository(db *gorm.DB) *LibraryRepository {
 	return &LibraryRepository{db: db}
 }
 
-func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset int) ([]models.Project, int64, error) {
-	var standards []models.Project
+func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset int) ([]models.ProjectDTO, int64, error) {
+	var standards []models.ProjectDTO
 	var total int64
 
 	query := r.db.Model(&models.Project{}).Where("published = ?", true)
@@ -51,15 +51,11 @@ func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset i
 		query = query.Where("is_emergency = ?", emergency)
 	}
 
-	// Count total before pagination
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Apply pagination and preload
 	result := query.Limit(limit).Offset(offset).
-		Preload("Standard").Preload("TechnicalCommittee").Preload("WorkingGroup").
-		Preload("Stage").Preload("WorkingDraft").Preload("CommitteeDraft").
 		Order("created_at DESC").
 		Find(&standards)
 
@@ -140,73 +136,298 @@ func (r *LibraryRepository) CountProjects() (int64, error) {
 	return count, err
 }
 
-func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.Committee, error) {
-	var committee models.Committee
-	result := r.db.Preload("Chairperson").Preload("Secretary").First(&committee, "id = ?", id)
+func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCommitteeDTO, error) {
+	var committee models.TechnicalCommittee
+	result := r.db.Preload("Chairperson").Preload("Secretary").
+		Preload("WorkingGroups").Preload("SubCommittees").Preload("CurrentMembers").
+		First(&committee, "id = ?", id)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, errors.New("committee not found")
 		}
 		return nil, result.Error
 	}
-	return &committee, nil
+
+	// Count working groups
+	var workingGroupCount int64
+	if err := r.db.Model(&models.WorkingGroup{}).Where("parent_tc_id = ?", id).Count(&workingGroupCount).Error; err != nil {
+		return nil, err
+	}
+
+	// Count active projects
+	var activeProjectCount int64
+	if err := r.db.Model(&models.Project{}).
+		Where("technical_committee_id = ? AND published = ? AND cancelled = ?", id, true, false).
+		Count(&activeProjectCount).Error; err != nil {
+		return nil, err
+	}
+
+	// Map Chairperson to MemberMinified
+	var chairpersonMinified *models.MemberMinified
+	if committee.Chairperson != nil {
+		chairpersonMinified = &models.MemberMinified{
+			ID:                     committee.Chairperson.ID,
+			FirstName:              committee.Chairperson.FirstName,
+			LastName:               committee.Chairperson.LastName,
+			NationalStandardBodyID: committee.Chairperson.NationalStandardBodyID,
+			NationalStandardBody:   committee.Chairperson.NationalStandardBody,
+		}
+	}
+	// Map CurrentMembers to MemberMinified
+	currentMembersMinified := make([]*models.MemberMinified, len(committee.CurrentMembers))
+	for i, member := range committee.CurrentMembers {
+		currentMembersMinified[i] = &models.MemberMinified{
+			ID:                     member.ID,
+			FirstName:              member.FirstName,
+			LastName:               member.LastName,
+			NationalStandardBodyID: member.NationalStandardBodyID,
+			NationalStandardBody:   member.NationalStandardBody,
+		}
+	}
+
+	// Map to TechnicalCommitteeDTO
+	committeeDTO := &models.TechnicalCommitteeDTO{
+		CommitteeDTO: models.CommitteeDTO{
+			ID:                 committee.ID,
+			Name:               committee.Name,
+			Code:               committee.Code,
+			Chairperson:        chairpersonMinified,
+			ChairpersonId:      committee.ChairpersonId,
+			WorkingGroupCount:  workingGroupCount,
+			ActiveProjectCount: activeProjectCount,
+		},
+		Scope:       committee.Scope,
+		WorkProgram: committee.WorkProgram,
+	}
+
+	return committeeDTO, nil
 }
 
-func (r *LibraryRepository) GetCommitteeByCode(code string) (*models.Committee, error) {
-	var committee models.Committee
-	result := r.db.Preload("Chairperson").Preload("Secretary").First(&committee, "code = ?", code)
+func (r *LibraryRepository) GetCommitteeByCode(code string) (*models.TechnicalCommitteeDTO, error) {
+	var committee models.TechnicalCommittee
+	result := r.db.Preload("Chairperson").Preload("Secretary").
+		Preload("WorkingGroups").Preload("SubCommittees").Preload("CurrentMembers").
+		First(&committee, "code = ?", code)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, errors.New("committee not found")
 		}
 		return nil, result.Error
 	}
-	return &committee, nil
+
+	// Count working groups
+	var workingGroupCount int64
+	if err := r.db.Model(&models.WorkingGroup{}).Where("parent_tc_id = ?", committee.ID).Count(&workingGroupCount).Error; err != nil {
+		return nil, err
+	}
+
+	// Count active projects
+	var activeProjectCount int64
+	if err := r.db.Model(&models.Project{}).
+		Where("technical_committee_id = ? AND published = ? AND cancelled = ?", committee.ID, true, false).
+		Count(&activeProjectCount).Error; err != nil {
+		return nil, err
+	}
+
+	// Map Chairperson to MemberMinified
+	var chairpersonMinified *models.MemberMinified
+	if committee.Chairperson != nil {
+		chairpersonMinified = &models.MemberMinified{
+			ID:                     committee.Chairperson.ID,
+			FirstName:              committee.Chairperson.FirstName,
+			LastName:               committee.Chairperson.LastName,
+			NationalStandardBodyID: committee.Chairperson.NationalStandardBodyID,
+			NationalStandardBody:   committee.Chairperson.NationalStandardBody,
+		}
+	}
+
+	// Map CurrentMembers to MemberMinified
+	currentMembersMinified := make([]*models.MemberMinified, len(committee.CurrentMembers))
+	for i, member := range committee.CurrentMembers {
+		currentMembersMinified[i] = &models.MemberMinified{
+			ID:                     member.ID,
+			FirstName:              member.FirstName,
+			LastName:               member.LastName,
+			NationalStandardBodyID: member.NationalStandardBodyID,
+			NationalStandardBody:   member.NationalStandardBody,
+		}
+	}
+
+	// Map to TechnicalCommitteeDTO
+	committeeDTO := &models.TechnicalCommitteeDTO{
+		CommitteeDTO: models.CommitteeDTO{
+			ID:                 committee.ID,
+			Name:               committee.Name,
+			Code:               committee.Code,
+			Chairperson:        chairpersonMinified,
+			ChairpersonId:      committee.ChairpersonId,
+			WorkingGroupCount:  workingGroupCount,
+			ActiveProjectCount: activeProjectCount,
+		},
+		Scope:       committee.Scope,
+		WorkProgram: committee.WorkProgram,
+	}
+
+	return committeeDTO, nil
 }
 
-func (r *LibraryRepository) ListCommittees(limit, offset int) ([]models.Committee, int64, error) {
-	var committees []models.Committee
+func (r *LibraryRepository) ListCommittees(limit, offset int) ([]models.TechnicalCommitteeDTO, int64, error) {
+	var committees []models.TechnicalCommittee
 	var total int64
 
-	if err := r.db.Model(&models.Committee{}).Count(&total).Error; err != nil {
+	err := r.db.Model(&models.TechnicalCommittee{}).Count(&total).Error
+	if err != nil {
 		return nil, 0, err
 	}
 
 	result := r.db.Preload("Chairperson").Preload("Secretary").
+		Preload("WorkingGroups").Preload("SubCommittees").Preload("CurrentMembers").
 		Limit(limit).Offset(offset).Order("created_at DESC").
 		Find(&committees)
 	if result.Error != nil {
-		return nil, 0, result.Error
+		return nil, 0, err
 	}
 
-	return committees, total, nil
+	// Convert to TechnicalCommitteeDTO and fetch counts
+	committeeDTOs := make([]models.TechnicalCommitteeDTO, len(committees))
+	for i, committee := range committees {
+		// Count working groups
+		var workingGroupCount int64
+		if err := r.db.Model(&models.WorkingGroup{}).Where("parent_tc_id = ?", committee.ID).Count(&workingGroupCount).Error; err != nil {
+			return nil, 0, err
+		}
+
+		// Count active projects
+		var activeProjectCount int64
+		if err := r.db.Model(&models.Project{}).
+			Where("technical_committee_id = ? AND published = ? AND cancelled = ?", committee.ID, true, false).
+			Count(&activeProjectCount).Error; err != nil {
+			return nil, 0, err
+		}
+
+		// Map Chairperson to MemberMinified
+		var chairpersonMinified *models.MemberMinified
+		if committee.Chairperson != nil {
+			chairpersonMinified = &models.MemberMinified{
+				ID:                     committee.Chairperson.ID,
+				FirstName:              committee.Chairperson.FirstName,
+				LastName:               committee.Chairperson.LastName,
+				NationalStandardBodyID: committee.Chairperson.NationalStandardBodyID,
+				NationalStandardBody:   committee.Chairperson.NationalStandardBody,
+			}
+		}
+		// Map CurrentMembers to MemberMinified
+		currentMembersMinified := make([]*models.MemberMinified, len(committee.CurrentMembers))
+		for j, member := range committee.CurrentMembers {
+			currentMembersMinified[j] = &models.MemberMinified{
+				ID:                     member.ID,
+				FirstName:              member.FirstName,
+				LastName:               member.LastName,
+				NationalStandardBodyID: member.NationalStandardBodyID,
+				NationalStandardBody:   member.NationalStandardBody,
+			}
+		}
+
+		committeeDTOs[i] = models.TechnicalCommitteeDTO{
+			CommitteeDTO: models.CommitteeDTO{
+				ID:                 committee.ID,
+				Name:               committee.Name,
+				Code:               committee.Code,
+				Chairperson:        chairpersonMinified,
+				ChairpersonId:      committee.ChairpersonId,
+				WorkingGroupCount:  workingGroupCount,
+				ActiveProjectCount: activeProjectCount,
+			},
+			Scope:       committee.Scope,
+			WorkProgram: committee.WorkProgram,
+		}
+	}
+
+	return committeeDTOs, total, nil
 }
 
-func (r *LibraryRepository) SearchCommittees(query string, limit, offset int) ([]models.Committee, int64, error) {
-	var committees []models.Committee
+func (r *LibraryRepository) SearchCommittees(query string, limit, offset int) ([]models.TechnicalCommitteeDTO, int64, error) {
+	var committees []models.TechnicalCommittee
 	var total int64
 	searchQuery := "%" + query + "%"
 
-	countQuery := r.db.Model(&models.Committee{}).
+	countQuery := r.db.Model(&models.TechnicalCommittee{}).
 		Where("name ILIKE ? OR code ILIKE ?", searchQuery, searchQuery)
-	if err := countQuery.Count(&total).Error; err != nil {
+	err := countQuery.Count(&total).Error
+	if err != nil {
 		return nil, 0, err
 	}
 
 	result := r.db.Preload("Chairperson").Preload("Secretary").
+		Preload("WorkingGroups").Preload("SubCommittees").Preload("CurrentMembers").
 		Where("name ILIKE ? OR code ILIKE ?", searchQuery, searchQuery).
 		Limit(limit).Offset(offset).Order("created_at DESC").
 		Find(&committees)
 	if result.Error != nil {
-		return nil, 0, result.Error
+		return nil, 0, err
 	}
 
-	return committees, total, nil
+	// Convert to TechnicalCommitteeDTO and fetch counts
+	committeeDTOs := make([]models.TechnicalCommitteeDTO, len(committees))
+	for i, committee := range committees {
+		// Count working groups
+		var workingGroupCount int64
+		if err := r.db.Model(&models.WorkingGroup{}).Where("parent_tc_id = ?", committee.ID).Count(&workingGroupCount).Error; err != nil {
+			return nil, 0, err
+		}
+
+		// Count active projects
+		var activeProjectCount int64
+		if err := r.db.Model(&models.Project{}).
+			Where("technical_committee_id = ? AND published = ? AND cancelled = ?", committee.ID, true, false).
+			Count(&activeProjectCount).Error; err != nil {
+			return nil, 0, err
+		}
+
+		// Map Chairperson to MemberMinified
+		var chairpersonMinified *models.MemberMinified
+		if committee.Chairperson != nil {
+			chairpersonMinified = &models.MemberMinified{
+				ID:                     committee.Chairperson.ID,
+				FirstName:              committee.Chairperson.FirstName,
+				LastName:               committee.Chairperson.LastName,
+				NationalStandardBodyID: committee.Chairperson.NationalStandardBodyID,
+				NationalStandardBody:   committee.Chairperson.NationalStandardBody,
+			}
+		}
+		// Map CurrentMembers to MemberMinified
+		currentMembersMinified := make([]*models.MemberMinified, len(committee.CurrentMembers))
+		for j, member := range committee.CurrentMembers {
+			currentMembersMinified[j] = &models.MemberMinified{
+				ID:                     member.ID,
+				FirstName:              member.FirstName,
+				LastName:               member.LastName,
+				NationalStandardBodyID: member.NationalStandardBodyID,
+				NationalStandardBody:   member.NationalStandardBody,
+			}
+		}
+
+		committeeDTOs[i] = models.TechnicalCommitteeDTO{
+			CommitteeDTO: models.CommitteeDTO{
+				ID:                 committee.ID,
+				Name:               committee.Name,
+				Code:               committee.Code,
+				Chairperson:        chairpersonMinified,
+				ChairpersonId:      committee.ChairpersonId,
+				WorkingGroupCount:  workingGroupCount,
+				ActiveProjectCount: activeProjectCount,
+			},
+			Scope:       committee.Scope,
+			WorkProgram: committee.WorkProgram,
+		}
+	}
+
+	return committeeDTOs, total, nil
 }
 
 func (r *LibraryRepository) CountCommittees() (int64, error) {
 	var count int64
-	err := r.db.Model(&models.Committee{}).Count(&count).Error
+	err := r.db.Model(&models.TechnicalCommittee{}).Count(&count).Error
 	return count, err
 }
 
@@ -221,4 +442,19 @@ func (r *LibraryRepository) GetProjectsByCommitteeID(committeeID string) ([]mode
 		return nil, result.Error
 	}
 	return projects, nil
+}
+func (r *LibraryRepository) GetSectors() ([]models.ProjectSector, error) {
+	return []models.ProjectSector{
+		models.Health,
+		models.IT,
+		models.Management,
+		models.Safety,
+		models.Transport,
+		models.Energy,
+		models.Diversity,
+		models.Environment,
+		models.Food,
+		models.Building,
+		models.Engineering,
+	}, nil
 }

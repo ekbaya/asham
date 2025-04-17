@@ -19,3 +19,10 @@ type Member struct {
 	HashedPassword         string                `json:"-" gorm:"column:password"`
 	CreatedAt              time.Time
 }
+type MemberMinified struct {
+	ID                     uuid.UUID             `json:"id"`
+	FirstName              string                `json:"first_name" binding:"required"`
+	LastName               string                `json:"last_name" binding:"required"`
+	NationalStandardBodyID *string               `json:"nsb_id" binding:"required"`
+	NationalStandardBody   *NationalStandardBody `json:"nsb"`
+}
