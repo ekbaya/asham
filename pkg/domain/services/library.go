@@ -16,10 +16,9 @@ type LibraryService struct {
 	memberService *MemberService
 }
 
-func NewLibraryService(repo *repository.LibraryRepository, memberService *MemberService) *LibraryService {
+func NewLibraryService(repo *repository.LibraryRepository) *LibraryService {
 	return &LibraryService{
-		repo:          repo,
-		memberService: memberService,
+		repo: repo,
 	}
 }
 
