@@ -10,3 +10,10 @@ type TechnicalCommittee struct {
 	MinimumMembers int             `json:"minimum_members" gorm:"default:5"`
 	CurrentMembers []*Member       `gorm:"many2many:current_members;"`
 }
+
+// TechnicalCommitteeDTO represents a DTO for TechnicalCommittee
+type TechnicalCommitteeDTO struct {
+	CommitteeDTO
+	Scope       string `json:"scope"`
+	WorkProgram string `json:"work_program"`
+}
