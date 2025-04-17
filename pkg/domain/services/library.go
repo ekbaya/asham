@@ -16,7 +16,7 @@ func NewLibraryService(repo *repository.LibraryRepository) *LibraryService {
 	return &LibraryService{repo: repo}
 }
 
-func (s *LibraryService) FindStandards(params map[string]any, limit, offset int) ([]models.Project, int64, error) {
+func (s *LibraryService) FindStandards(params map[string]any, limit, offset int) ([]models.ProjectDTO, int64, error) {
 	return s.repo.FindStandards(params, limit, offset)
 }
 
@@ -40,19 +40,19 @@ func (s *LibraryService) CountProjects() (int64, error) {
 	return s.repo.CountProjects()
 }
 
-func (s *LibraryService) GetCommitteeByID(id uuid.UUID) (*models.Committee, error) {
+func (s *LibraryService) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCommitteeDTO, error) {
 	return s.repo.GetCommitteeByID(id)
 }
 
-func (s *LibraryService) GetCommitteeByCode(code string) (*models.Committee, error) {
+func (s *LibraryService) GetCommitteeByCode(code string) (*models.TechnicalCommitteeDTO, error) {
 	return s.repo.GetCommitteeByCode(code)
 }
 
-func (s *LibraryService) ListCommittees(limit, offset int) ([]models.Committee, int64, error) {
+func (s *LibraryService) ListCommittees(limit, offset int) ([]models.TechnicalCommitteeDTO, int64, error) {
 	return s.repo.ListCommittees(limit, offset)
 }
 
-func (s *LibraryService) SearchCommittees(query string, limit, offset int) ([]models.Committee, int64, error) {
+func (s *LibraryService) SearchCommittees(query string, limit, offset int) ([]models.TechnicalCommitteeDTO, int64, error) {
 	return s.repo.SearchCommittees(query, limit, offset)
 }
 
@@ -62,4 +62,7 @@ func (s *LibraryService) CountCommittees() (int64, error) {
 
 func (s *LibraryService) GetProjectsByCommittee(committeeID string) ([]models.Project, error) {
 	return s.repo.GetProjectsByCommitteeID(committeeID)
+}
+func (s *LibraryService) GetSectors() ([]models.ProjectSector, error) {
+	return s.repo.GetSectors()
 }

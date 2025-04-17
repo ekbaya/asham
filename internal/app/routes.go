@@ -305,12 +305,13 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		library.GET("/standards/search", libraryHandler.SearchStandards)
 		library.GET("/standards/date-range", libraryHandler.GetStandardsByDateRange)
 		library.GET("/standards/count", libraryHandler.CountStandards)
-		library.GET("/committees/list", libraryHandler.ListCommittees)
+		library.GET("/committees", libraryHandler.ListCommittees)
 		library.GET("/committees/:id", libraryHandler.GetCommitteeByID)
 		library.GET("/committees/code/:code", libraryHandler.GetCommitteeByCode)
 		library.GET("/committees/search", libraryHandler.SearchCommittees)
 		library.GET("/committees/count", libraryHandler.CountCommittees)
 		library.GET("/standards/committee/:id", libraryHandler.GetStandardsByCommittee)
+		library.GET("/sectors", libraryHandler.GetSectors)
 	}
 
 	return router, nil
