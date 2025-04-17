@@ -113,7 +113,7 @@ func (service *OrganizationService) UpdateCommitteeSecretary(committeeType strin
 }
 
 func (service *OrganizationService) UpdateCommitteeChairperson(committeeType string, committeeID string, newChairpersonID string) error {
-	return service.repo.UpdateCommitteeChairperson(committeeID, committeeType, newChairpersonID)
+	return service.repo.UpdateCommitteeChairperson(committeeType, committeeID, newChairpersonID)
 }
 
 func (service *OrganizationService) AddMemberToARSOCouncil(id string, memberID string) error {
