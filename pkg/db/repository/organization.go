@@ -52,7 +52,7 @@ func (r *OrganizationRepository) CreateCommittee(committee any) error {
 }
 
 func (r *OrganizationRepository) GetCommitteeByID(id string, committee any) (any, error) {
-	err := r.db.Preload(clause.Associations).First(committee, "id = ?", id).Error
+	err := r.db.Where("id = ?", id).Preload(clause.Associations).First(&committee).Error
 	if err != nil {
 		return nil, err
 	}
