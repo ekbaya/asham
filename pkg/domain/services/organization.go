@@ -109,7 +109,7 @@ func (service *OrganizationService) FetchMemberStates() (*[]models.MemberState, 
 }
 
 func (service *OrganizationService) UpdateCommitteeSecretary(committeeType string, committeeID string, newSecretaryID string) error {
-	return service.repo.UpdateCommitteeSecretary(committeeID, committeeType, newSecretaryID)
+	return service.repo.UpdateCommitteeSecretary(committeeType, committeeID, newSecretaryID)
 }
 
 func (service *OrganizationService) UpdateCommitteeChairperson(committeeType string, committeeID string, newChairpersonID string) error {
