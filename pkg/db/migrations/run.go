@@ -41,5 +41,6 @@ func RunMigrations(db *gorm.DB) error {
 		&models.Balloting{},
 		&models.Vote{},
 		&models.Meeting{},
+		&models.User{},
 	)
 }

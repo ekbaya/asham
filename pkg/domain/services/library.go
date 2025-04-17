@@ -1,6 +1,9 @@
 package services
 
 import (
+	"errors"
+	"fmt"
+	"github.com/ekbaya/asham/pkg/utilities"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/db/repository"
@@ -9,11 +12,67 @@ import (
 )
 
 type LibraryService struct {
-	repo *repository.LibraryRepository
+	repo          *repository.LibraryRepository
+	memberService *MemberService
 }
 
-func NewLibraryService(repo *repository.LibraryRepository) *LibraryService {
-	return &LibraryService{repo: repo}
+func NewLibraryService(repo *repository.LibraryRepository, memberService *MemberService) *LibraryService {
+	return &LibraryService{
+		repo:          repo,
+		memberService: memberService,
+	}
+}
+
+func (s *LibraryService) RegisterMember(user *models.User) error {
+	// Validate password
+	if len(user.Password) < 8 {
+		return errors.New("password must be at least 8 characters long")
+	}
+
+	// Hash password
+	hashedPassword, err := utilities.HashPassword(user.Password)
+	if err != nil {
+		return errors.New("failed to hash password")
+	}
+
+	// Create user
+	user.HashedPassword = hashedPassword
+	user.ID = uuid.New()
+	user.CreatedAt = time.Now()
+	err = s.repo.CreateUser(user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *LibraryService) Login(email, password string) (string, string, error) {
+	user, err := s.repo.GetUserByEmail(email)
+	if err != nil {
+		fmt.Print("User Not Found: ", err)
+		return "", "", errors.New("invalid credentials")
+	}
+
+	// Verify password
+	if !utilities.CheckPasswordHash(password, user.HashedPassword) {
+		fmt.Print("Wrong Username Or Password")
+		return "", "", errors.New("invalid credentials")
+	}
+
+	// Generate JWT token
+	token, err := models.GenerateJWT(user.ID.String())
+	if err != nil {
+		return "", "", errors.New("failed to generate token")
+	}
+
+	// Generate JWT refresh token
+	refreshToken, err := models.GenerateRefreshToken(user.ID.String())
+	if err != nil {
+		return "", "", errors.New("failed to generate refresh token")
+	}
+
+	return token, refreshToken, nil
 }
 
 func (s *LibraryService) FindStandards(params map[string]any, limit, offset int) ([]models.ProjectDTO, int64, error) {

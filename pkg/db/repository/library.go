@@ -17,6 +17,21 @@ func NewLibraryRepository(db *gorm.DB) *LibraryRepository {
 	return &LibraryRepository{db: db}
 }
 
+func (r *LibraryRepository) CreateUser(user *models.User) error {
+	return r.db.Create(user).Error
+}
+
+func (r *LibraryRepository) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	result := r.db.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.New("user not found")
+		}
+		return nil, result.Error
+	}
+	return &user, nil
+}
 func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset int) ([]models.ProjectDTO, int64, error) {
 	var standards []models.ProjectDTO
 	var total int64
