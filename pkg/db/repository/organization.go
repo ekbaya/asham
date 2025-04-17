@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -152,7 +153,7 @@ func (r *OrganizationRepository) UpdateCommitteeChairperson(committeeType string
 			Update("chairperson_id", newChairpersonID).Error
 
 	default:
-		return errors.New("unknown committee type")
+		return fmt.Errorf("unknown committee type: %s", committeeType)
 	}
 }
 
