@@ -47,7 +47,7 @@ type Project struct {
 	ID                   uuid.UUID             `json:"id"`
 	MemberID             *string               `json:"-"`
 	Member               *Member               `json:"creator"`
-	Sector               ProjectSector         `json:"sector" default:"Food and Agriculture"`
+	Sector               ProjectSector         `json:"sector" binding:"required"`
 	Number               int64                 `json:"number"`
 	PartNo               int64                 `json:"part_number"`
 	EditionNo            int64                 `json:"edition_number"`
