@@ -728,3 +728,27 @@ func (r *OrganizationRepository) RemoveTCFromTCEquivalentCommittees(id string, e
 
 	return r.db.Model(&tc).Association("EquivalentCommittees").Delete(&equivalent_committee)
 }
+
+func (r *OrganizationRepository) GetTCProjects(id string) ([]*models.Project, error) {
+	var tc models.TechnicalCommittee
+	if err := r.db.Where("id = ?", id).Preload("Projects").First(&tc).Error; err != nil {
+		return nil, err
+	}
+	return tc.Projects, nil
+}
+
+func (r *OrganizationRepository) GetTCWorkingGroups(id string) ([]*models.WorkingGroup, error) {
+	var tc models.TechnicalCommittee
+	if err := r.db.Where("id = ?", id).Preload("WorkingGroups").First(&tc).Error; err != nil {
+		return nil, err
+	}
+	return tc.WorkingGroups, nil
+}
+
+func (r *OrganizationRepository) GetCommitteeMeetings(id string) ([]models.Meeting, error) {
+	var meetings []models.Meeting
+	if err := r.db.Where("committee_id = ?", id).Preload(clause.Associations).Find(&meetings).Error; err != nil {
+		return nil, err
+	}
+	return meetings, nil
+}

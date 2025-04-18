@@ -136,6 +136,9 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.PATCH("/technical_committees/participating_countries/:id", organizationHandler.RemoveMemberStateFromTCParticipatingCountries)
 		organization.PATCH("/technical_committees/observer_countries/:id", organizationHandler.RemoveMemberStateFromTCObserverCountries)
 		organization.PATCH("/technical_committees/equivalent_committees/:id", organizationHandler.RemoveTCFromTCEquivalentCommittees)
+		organization.GET("/technical_committees/projects/:id", organizationHandler.GetTCProjects)
+		organization.GET("/committees/meetings/:id", organizationHandler.GetCommitteeMeetings) // id can be TC,SC or WG
+		organization.GET("/technical_committees/working_groups/:id", organizationHandler.GetTCWorkingGroups)
 
 	}
 

@@ -1188,3 +1188,33 @@ func (h *OrganizationHandler) RemoveTCFromTCEquivalentCommittees(c *gin.Context)
 
 	utilities.ShowMessage(c, http.StatusOK, "TC removed from equivalent committees")
 }
+
+func (h *OrganizationHandler) GetTCProjects(c *gin.Context) {
+	projects, err := h.organizationService.GetTCProjects(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"projects": projects})
+}
+
+func (h *OrganizationHandler) GetTCWorkingGroups(c *gin.Context) {
+	wgs, err := h.organizationService.GetTCWorkingGroups(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"wgs": wgs})
+}
+
+func (h *OrganizationHandler) GetCommitteeMeetings(c *gin.Context) {
+	meetings, err := h.organizationService.GetCommitteeMeetings(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"meetings": meetings})
+}

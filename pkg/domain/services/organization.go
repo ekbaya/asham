@@ -275,3 +275,15 @@ func (service *OrganizationService) RemoveMemberStateFromTCObserverCountries(id 
 func (service *OrganizationService) RemoveTCFromTCEquivalentCommittees(id string, equivalentTCId string) error {
 	return service.repo.RemoveTCFromTCEquivalentCommittees(id, equivalentTCId)
 }
+
+func (service *OrganizationService) GetTCProjects(id string) ([]*models.Project, error) {
+	return service.repo.GetTCProjects(id)
+}
+
+func (service *OrganizationService) GetTCWorkingGroups(id string) ([]*models.WorkingGroup, error) {
+	return service.repo.GetTCWorkingGroups(id)
+}
+
+func (service *OrganizationService) GetCommitteeMeetings(id string) ([]models.Meeting, error) {
+	return service.repo.GetCommitteeMeetings(id)
+}
