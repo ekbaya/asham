@@ -686,3 +686,45 @@ func (r *OrganizationRepository) GetTCEquivalentCommittees(id string) ([]*models
 	}
 	return tc.EquivalentCommittees, nil
 }
+
+func (r *OrganizationRepository) RemoveMemberStateFromTCParticipatingCountries(id string, stateId string) error {
+	var tc models.TechnicalCommittee
+	if err := r.db.First(&tc, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var state models.MemberState
+	if err := r.db.First(&state, "id = ?", stateId).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&tc).Association("ParticipatingCountries").Delete(&state)
+}
+
+func (r *OrganizationRepository) RemoveMemberStateFromTCObserverCountries(id string, stateId string) error {
+	var tc models.TechnicalCommittee
+	if err := r.db.First(&tc, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var state models.MemberState
+	if err := r.db.First(&state, "id = ?", stateId).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&tc).Association("ObserverCountries").Delete(&state)
+}
+
+func (r *OrganizationRepository) RemoveTCFromTCEquivalentCommittees(id string, equivalentTCId string) error {
+	var tc models.TechnicalCommittee
+	if err := r.db.First(&tc, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var equivalent_committee models.TechnicalCommittee
+	if err := r.db.First(&equivalent_committee, "id = ?", equivalentTCId).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&tc).Association("EquivalentCommittees").Delete(&equivalent_committee)
+}

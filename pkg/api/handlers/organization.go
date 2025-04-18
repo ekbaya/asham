@@ -1134,3 +1134,57 @@ func (h *OrganizationHandler) GetTCEquivalentCommittees(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"committees": committees})
 }
+
+func (h *OrganizationHandler) RemoveMemberStateFromTCParticipatingCountries(c *gin.Context) {
+	var payload struct {
+		StateID string `json:"state_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.RemoveMemberStateFromTCParticipatingCountries(id, payload.StateID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member State removed from tc")
+}
+
+func (h *OrganizationHandler) RemoveMemberStateFromTCObserverCountries(c *gin.Context) {
+	var payload struct {
+		StateID string `json:"state_id"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.RemoveMemberStateFromTCObserverCountries(id, payload.StateID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member State removed from tc")
+}
+
+func (h *OrganizationHandler) RemoveTCFromTCEquivalentCommittees(c *gin.Context) {
+	var payload struct {
+		TCToBeRemoved string `json:"tc_to_remove"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid input")
+		return
+	}
+
+	id := c.Param("id")
+	if err := h.organizationService.RemoveTCFromTCEquivalentCommittees(id, payload.TCToBeRemoved); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "TC removed from equivalent committees")
+}
