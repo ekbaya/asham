@@ -54,7 +54,7 @@ type Project struct {
 	Reference            string                `json:"reference"`
 	ReferenceSuffix      string                `json:"reference_suffix"`
 	Title                string                `json:"title" binding:"required"`
-	Description          string                `json:"description" binding:"required" gorm:"default:Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"`
+	Description          string                `json:"description" binding:"required"`
 	TechnicalCommitteeID string                `json:"technical_committee_id" binding:"required"`
 	TechnicalCommittee   *TechnicalCommittee   `json:"committee"`
 	WorkingGroupID       *string               `json:"working_group_id"`
