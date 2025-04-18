@@ -8,7 +8,7 @@ import (
 type Committee struct {
 	ID            uuid.UUID `json:"id"`
 	Name          string    `json:"name" binding:"required"`
-	Code          string    `json:"code" binding:"required"`
+	Code          string    `json:"code"`
 	Description   string    `json:"description"`
 	ChairpersonId *string   `json:"chairperson_id"`
 	Chairperson   *Member   `json:"chairperson"`
