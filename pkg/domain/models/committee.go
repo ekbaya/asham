@@ -21,6 +21,7 @@ type CommitteeDTO struct {
 	ID                 uuid.UUID       `json:"id"`
 	Name               string          `json:"name"`
 	Code               string          `json:"code"`
+	Description        string          `json:"description"`
 	Chairperson        *MemberMinified `json:"chairperson"`
 	ChairpersonId      *string         `json:"chairperson_id"`
 	WorkingGroupCount  int64           `json:"working_group_count"`

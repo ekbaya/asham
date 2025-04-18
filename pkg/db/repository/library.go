@@ -131,6 +131,7 @@ func (r *LibraryRepository) GetTopCommittees(limit, offset int) ([]models.Commit
 			ID:                 committee.ID,
 			Name:               committee.Name,
 			Code:               committee.Code,
+			Description:        committee.Description,
 			ChairpersonId:      committee.ChairpersonId,
 			Chairperson:        chairpersonMinified,
 			WorkingGroupCount:  workingGroupCount,
