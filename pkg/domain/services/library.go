@@ -73,6 +73,17 @@ func (s *LibraryService) Login(email, password string) (string, string, error) {
 
 	return token, refreshToken, nil
 }
+func (s *LibraryService) GetTopStandards(limit, offset int) ([]models.ProjectDTO, int64, error) {
+	return s.repo.GetTopStandards(limit, offset)
+}
+
+func (s *LibraryService) GetLatestStandards(limit, offset int) ([]models.ProjectDTO, int64, error) {
+	return s.repo.GetLatestStandards(limit, offset)
+}
+
+func (s *LibraryService) GetTopCommittees(limit, offset int) ([]models.CommitteeDTO, int64, error) {
+	return s.repo.GetTopCommittees(limit, offset)
+}
 
 func (s *LibraryService) FindStandards(params map[string]any, limit, offset int) ([]models.ProjectDTO, int64, error) {
 	return s.repo.FindStandards(params, limit, offset)

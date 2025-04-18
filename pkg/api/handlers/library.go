@@ -25,7 +25,77 @@ func NewLibraryHandler(libraryService services.LibraryService) *LibraryHandler {
 		libraryService: libraryService,
 	}
 }
+func (h *LibraryHandler) GetTopStandards(c *gin.Context) {
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "3"))
+	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if limit <= 0 {
+		log.Printf("Invalid limit parameter: %d", limit)
+		utilities.ShowMessage(c, http.StatusBadRequest, "limit must be a positive integer")
+		return
+	}
 
+	standards, total, err := h.libraryService.GetTopStandards(limit, offset)
+	if err != nil {
+		log.Printf("Error fetching top standards: %v", err)
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"standards": standards,
+		"total":     total,
+		"limit":     limit,
+		"offset":    offset,
+	})
+}
+
+func (h *LibraryHandler) GetLatestStandards(c *gin.Context) {
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "3"))
+	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if limit <= 0 {
+		log.Printf("Invalid limit parameter: %d", limit)
+		utilities.ShowMessage(c, http.StatusBadRequest, "limit must be a positive integer")
+		return
+	}
+
+	standards, total, err := h.libraryService.GetLatestStandards(limit, offset)
+	if err != nil {
+		log.Printf("Error fetching latest standards: %v", err)
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"standards": standards,
+		"total":     total,
+		"limit":     limit,
+		"offset":    offset,
+	})
+}
+
+func (h *LibraryHandler) GetTopCommittees(c *gin.Context) {
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "3"))
+	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if limit <= 0 {
+		log.Printf("Invalid limit parameter: %d", limit)
+		utilities.ShowMessage(c, http.StatusBadRequest, "limit must be a positive integer")
+		return
+	}
+
+	committees, total, err := h.libraryService.GetTopCommittees(limit, offset)
+	if err != nil {
+		log.Printf("Error fetching top committees: %v", err)
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"committees": committees,
+		"total":      total,
+		"limit":      limit,
+		"offset":     offset,
+	})
+}
 func (h *LibraryHandler) RegisterMember(c *gin.Context) {
 	// Read and log request body for debugging
 	body, err := io.ReadAll(c.Request.Body)

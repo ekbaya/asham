@@ -303,6 +303,9 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	// library Route
 	library := api.Group("library")
 	{
+		library.GET("/top_standards", libraryHandler.GetTopStandards)
+		library.GET("/latest_standards", libraryHandler.GetLatestStandards)
+		library.GET("/top_committee", libraryHandler.GetTopCommittees)
 		library.POST("/register", libraryHandler.RegisterMember)
 		library.POST("/login", libraryHandler.Login)
 		library.GET("/standards", libraryHandler.FindStandards)
