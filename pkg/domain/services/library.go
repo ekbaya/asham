@@ -112,7 +112,7 @@ func (s *LibraryService) CountProjects() (int64, error) {
 	return s.repo.CountProjects()
 }
 
-func (s *LibraryService) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCommitteeDTO, error) {
+func (s *LibraryService) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCommitteeDetailDTO, error) {
 	return s.repo.GetCommitteeByID(id)
 }
 
