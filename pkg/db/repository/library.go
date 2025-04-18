@@ -405,8 +405,13 @@ func (r *LibraryRepository) ListCommittees(limit, offset int) ([]models.Technica
 		return nil, 0, err
 	}
 
-	result := r.db.Preload("Chairperson").Preload("Secretary").
-		Preload("WorkingGroups").Preload("SubCommittees").Preload("CurrentMembers").
+	result := r.db.Preload("Chairperson").
+		Preload("Chairperson.NationalStandardBody").
+		Preload("Secretary").
+		Preload("Secretary.NationalStandardBody").
+		Preload("WorkingGroups").
+		Preload("SubCommittees").
+		Preload("CurrentMembers").
 		Limit(limit).Offset(offset).Order("created_at DESC").
 		Find(&committees)
 	if result.Error != nil {
