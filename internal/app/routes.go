@@ -127,6 +127,10 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.GET("/committees/specialized", organizationHandler.GetSpecializedCommittees)
 		organization.GET("/committees/joint_technical", organizationHandler.GetJointTechnicalCommittees)
 
+		organization.POST("/technical_committees/participating_countries", organizationHandler.AddMemberStateToTCParticipatingCountries)
+		organization.POST("/technical_committees/observer_countries", organizationHandler.AddMemberStateToTCObserverCountries)
+		organization.POST("/technical_committees/equivalent_committees", organizationHandler.AddTCToTCEquivalentCommittees)
+
 	}
 
 	// documents Route

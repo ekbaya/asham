@@ -1044,3 +1044,63 @@ func (h *OrganizationHandler) GetJointTechnicalCommittees(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"committees": committees})
 }
+
+func (h *OrganizationHandler) AddMemberStateToTCParticipatingCountries(c *gin.Context) {
+	var payload struct {
+		TechnicalCommitteeID string `json:"technicalCommitteeId" binding:"required"`
+		MemberState          string `json:"memberStateId" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.organizationService.AddMemberStateToTCParticipatingCountries(payload.TechnicalCommitteeID, payload.MemberState)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to add member state")
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member state added successfully")
+}
+
+func (h *OrganizationHandler) AddMemberStateToTCObserverCountries(c *gin.Context) {
+	var payload struct {
+		TechnicalCommitteeID string `json:"technicalCommitteeId" binding:"required"`
+		MemberState          string `json:"memberStateId" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.organizationService.AddMemberStateToTCObserverCountries(payload.TechnicalCommitteeID, payload.MemberState)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to add member state")
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Member state added successfully")
+}
+
+func (h *OrganizationHandler) AddTCToTCEquivalentCommittees(c *gin.Context) {
+	var payload struct {
+		TechnicalCommitteeID string `json:"technicalCommitteeId" binding:"required"`
+		TCToBeAdded          string `json:"newTechnicalCommitteeId" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.organizationService.AddTCToTCEquivalentCommittees(payload.TechnicalCommitteeID, payload.TCToBeAdded)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to add technical committee")
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "TC added successfully")
+}

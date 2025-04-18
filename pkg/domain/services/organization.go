@@ -239,3 +239,15 @@ func (service *OrganizationService) GetSpecializedCommittees() ([]models.Special
 func (service *OrganizationService) GetJointTechnicalCommittees() ([]models.JointTechnicalCommittee, error) {
 	return service.repo.GetJointTechnicalCommittees()
 }
+
+func (service *OrganizationService) AddMemberStateToTCParticipatingCountries(id string, stateId string) error {
+	return service.repo.AddMemberStateToTCParticipatingCountries(id, stateId)
+}
+
+func (service *OrganizationService) AddMemberStateToTCObserverCountries(id string, stateId string) error {
+	return service.repo.AddMemberStateToTCObserverCountries(id, stateId)
+}
+
+func (service *OrganizationService) AddTCToTCEquivalentCommittees(id string, equivalentTCId string) error {
+	return service.repo.AddTCToTCEquivalentCommittees(id, equivalentTCId)
+}
