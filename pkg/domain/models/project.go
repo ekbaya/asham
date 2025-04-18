@@ -54,7 +54,7 @@ type Project struct {
 	Reference            string                `json:"reference"`
 	ReferenceSuffix      string                `json:"reference_suffix"`
 	Title                string                `json:"title" binding:"required"`
-	Description          string                `json:"description" binding:"required"`
+	Description          string                `json:"description" binding:"required" gorm:"default:Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"`
 	TechnicalCommitteeID string                `json:"technical_committee_id" binding:"required"`
 	TechnicalCommittee   *TechnicalCommittee   `json:"committee"`
 	WorkingGroupID       *string               `json:"working_group_id"`
@@ -113,10 +113,12 @@ type Project struct {
 
 // ProjectDTO represents a subset of Project fields for repository queries
 type ProjectDTO struct {
-	ID        uuid.UUID `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
-	Title     string    `json:"title"`
-	Reference string    `json:"reference"`
-	Published bool      `json:"published"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID          uuid.UUID `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	Title       string    `json:"title"`
+	Reference   string    `json:"reference"`
+	Sector      string    `json:"sector"`
+	Description string    `json:"description"`
+	Published   bool      `json:"published"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
