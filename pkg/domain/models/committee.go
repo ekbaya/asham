@@ -9,7 +9,7 @@ type Committee struct {
 	ID            uuid.UUID `json:"id"`
 	Name          string    `json:"name" binding:"required"`
 	Code          string    `json:"code"`
-	Description   string    `json:"description"`
+	Description   string    `json:"description" gorm:"default:Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem."`
 	ChairpersonId *string   `json:"chairperson_id"`
 	Chairperson   *Member   `json:"chairperson"`
 	SecretaryId   *string   `json:"secretary_id"`
