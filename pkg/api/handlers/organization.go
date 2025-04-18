@@ -1104,3 +1104,33 @@ func (h *OrganizationHandler) AddTCToTCEquivalentCommittees(c *gin.Context) {
 
 	utilities.ShowMessage(c, http.StatusOK, "TC added successfully")
 }
+
+func (h *OrganizationHandler) GetTCParticipatingCountries(c *gin.Context) {
+	countries, err := h.organizationService.GetTCParticipatingCountries(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"countries": countries})
+}
+
+func (h *OrganizationHandler) GetTCObserverCountries(c *gin.Context) {
+	countries, err := h.organizationService.GetTCObserverCountries(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"countries": countries})
+}
+
+func (h *OrganizationHandler) GetTCEquivalentCommittees(c *gin.Context) {
+	committees, err := h.organizationService.GetTCEquivalentCommittees(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"committees": committees})
+}

@@ -130,6 +130,9 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.POST("/technical_committees/participating_countries", organizationHandler.AddMemberStateToTCParticipatingCountries)
 		organization.POST("/technical_committees/observer_countries", organizationHandler.AddMemberStateToTCObserverCountries)
 		organization.POST("/technical_committees/equivalent_committees", organizationHandler.AddTCToTCEquivalentCommittees)
+		organization.GET("/technical_committees/participating_countries/:id", organizationHandler.GetTCParticipatingCountries)
+		organization.GET("/technical_committees/observer_countries/:id", organizationHandler.GetTCObserverCountries)
+		organization.GET("/technical_committees/equivalent_committees/:id", organizationHandler.GetTCEquivalentCommittees)
 
 	}
 

@@ -251,3 +251,15 @@ func (service *OrganizationService) AddMemberStateToTCObserverCountries(id strin
 func (service *OrganizationService) AddTCToTCEquivalentCommittees(id string, equivalentTCId string) error {
 	return service.repo.AddTCToTCEquivalentCommittees(id, equivalentTCId)
 }
+
+func (service *OrganizationService) GetTCParticipatingCountries(id string) ([]*models.MemberState, error) {
+	return service.repo.GetTCParticipatingCountries(id)
+}
+
+func (service *OrganizationService) GetTCObserverCountries(id string) ([]*models.MemberState, error) {
+	return service.repo.GetTCObserverCountries(id)
+}
+
+func (service *OrganizationService) GetTCEquivalentCommittees(id string) ([]*models.TechnicalCommittee, error) {
+	return service.repo.GetTCEquivalentCommittees(id)
+}

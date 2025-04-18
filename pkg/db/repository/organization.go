@@ -662,3 +662,27 @@ func (r *OrganizationRepository) AddTCToTCEquivalentCommittees(id string, equiva
 
 	return r.db.Model(&tc).Association("EquivalentCommittees").Append(&equivalent_committee)
 }
+
+func (r *OrganizationRepository) GetTCParticipatingCountries(id string) ([]*models.MemberState, error) {
+	var tc models.TechnicalCommittee
+	if err := r.db.Where("id = ?", id).Preload("ParticipatingCountries").First(&tc).Error; err != nil {
+		return nil, err
+	}
+	return tc.ParticipatingCountries, nil
+}
+
+func (r *OrganizationRepository) GetTCObserverCountries(id string) ([]*models.MemberState, error) {
+	var tc models.TechnicalCommittee
+	if err := r.db.Preload("ObserverCountries").Where("id = ?", id).First(&tc).Error; err != nil {
+		return nil, err
+	}
+	return tc.ObserverCountries, nil
+}
+
+func (r *OrganizationRepository) GetTCEquivalentCommittees(id string) ([]*models.TechnicalCommittee, error) {
+	var tc models.TechnicalCommittee
+	if err := r.db.Where("id = ?", id).Preload("EquivalentCommittees").First(&tc).Error; err != nil {
+		return nil, err
+	}
+	return tc.EquivalentCommittees, nil
+}
