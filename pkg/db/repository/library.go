@@ -142,6 +142,7 @@ func (r *LibraryRepository) GetTopCommittees(limit, offset int) ([]models.Commit
 
 	return committeeDTOs, total, nil
 }
+
 func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset int) ([]models.ProjectDTO, int64, error) {
 	var standards []models.ProjectDTO
 	var total int64
@@ -568,6 +569,7 @@ func (r *LibraryRepository) GetProjectsByCommitteeID(committeeID string) ([]mode
 	}
 	return projects, nil
 }
+
 func (r *LibraryRepository) GetSectors() ([]models.ProjectSector, error) {
 	return []models.ProjectSector{
 		models.Health,
@@ -582,4 +584,8 @@ func (r *LibraryRepository) GetSectors() ([]models.ProjectSector, error) {
 		models.Building,
 		models.Engineering,
 	}, nil
+}
+
+func (r *LibraryRepository) GetBaseQuery() *gorm.DB {
+	return r.db
 }

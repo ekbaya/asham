@@ -3,12 +3,14 @@ package services
 import (
 	"errors"
 	"fmt"
-	"github.com/ekbaya/asham/pkg/utilities"
 	"time"
+
+	"github.com/ekbaya/asham/pkg/utilities"
 
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type LibraryService struct {
@@ -73,6 +75,7 @@ func (s *LibraryService) Login(email, password string) (string, string, error) {
 
 	return token, refreshToken, nil
 }
+
 func (s *LibraryService) GetTopStandards(limit, offset int) ([]models.ProjectDTO, int64, error) {
 	return s.repo.GetTopStandards(limit, offset)
 }
@@ -132,6 +135,11 @@ func (s *LibraryService) CountCommittees() (int64, error) {
 func (s *LibraryService) GetProjectsByCommittee(committeeID string) ([]models.Project, error) {
 	return s.repo.GetProjectsByCommitteeID(committeeID)
 }
+
 func (s *LibraryService) GetSectors() ([]models.ProjectSector, error) {
 	return s.repo.GetSectors()
+}
+
+func (s *LibraryService) GetBaseQuery() *gorm.DB {
+	return s.repo.GetBaseQuery()
 }
