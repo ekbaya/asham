@@ -52,6 +52,10 @@ func (r *DocumentRepository) UploadStandard(doc *models.Document, project *model
 
 	project.StandardID = &docId
 	project.Published = true
+	project.ApprovedForPublication = true
+	project.VisibleOnLibrary = true
+	project.PWIApproved = true
+	project.IsConsensusReached = true
 	project.StageID = stage.ID.String()
 
 	if err := tx.Create(&doc).Error; err != nil {
