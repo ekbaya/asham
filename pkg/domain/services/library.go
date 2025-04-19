@@ -122,11 +122,12 @@ func (s *LibraryService) FindStandards(params map[string]any, limit, offset int)
 			standard := map[string]any{
 				"id":          project.ID,
 				"title":       project.Title,
+				"reference":   project.Reference,
 				"description": project.Description,
 				"sector":      project.Sector,
 				"committee":   code,
 				"language":    project.Language,
-				"published":   project.PublishedDate,
+				"published":   project.Published,
 				"pages":       pageCount,
 				"created_at":  project.CreatedAt,
 				"updated_at":  project.UpdatedAt,
