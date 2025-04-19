@@ -592,7 +592,7 @@ func (h *DocumentHandler) UploadStandard(c *gin.Context) {
 	year, _ := strconv.Atoi(c.PostForm("year"))
 
 	// Validate required fields
-	if payload.Title == "" || payload.Reference == "" || payload.Description == "" || sector == "" || language == "" || tc == "" || year != 0 {
+	if payload.Title == "" || payload.Reference == "" || payload.Description == "" || sector == "" || language == "" || tc == "" {
 		utilities.ShowMessage(c, http.StatusBadRequest, "Title, reference, description, sector, language,year, and technical committee are required fields")
 		return
 	}
