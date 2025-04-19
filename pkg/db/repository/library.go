@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -175,6 +176,7 @@ func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset i
 	}
 
 	if year, ok := params["year"].(string); ok && year != "" {
+		fmt.Println("YEAR********:", year)
 		query = query.Where("EXTRACT(YEAR FROM published_date) = ?", year).Where("published_date IS NOT NULL")
 	}
 
