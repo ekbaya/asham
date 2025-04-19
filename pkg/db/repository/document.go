@@ -44,11 +44,9 @@ func (r *DocumentRepository) UploadStandard(doc *models.Document, project *model
 	}()
 
 	docId := doc.ID.String()
-	now := time.Now()
 
 	project.StandardID = &docId
 	project.Published = true
-	project.PublishedDate = &now
 
 	if err := tx.Create(doc).Error; err != nil {
 		tx.Rollback()
