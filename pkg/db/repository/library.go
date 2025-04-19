@@ -39,7 +39,7 @@ func (r *LibraryRepository) GetTopStandards(limit, offset int) ([]models.Project
 	var projects []models.ProjectDTO
 	var total int64
 
-	query := r.db.Model(&models.Project{})
+	query := r.db.Model(&models.Project{}).Where("published = ?", true)
 	query.Count(&total)
 
 	result := query.
@@ -272,6 +272,7 @@ func (r *LibraryRepository) CountProjects() (int64, error) {
 	err := r.db.Model(&models.Project{}).Where("published = ?", true).Count(&count).Error
 	return count, err
 }
+
 func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCommitteeDetailDTO, error) {
 	var committee models.TechnicalCommittee
 	result := r.db.Preload(clause.Associations).
