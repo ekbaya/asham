@@ -589,7 +589,12 @@ func (h *DocumentHandler) UploadStandard(c *gin.Context) {
 	sector := c.PostForm("sector")
 	language := c.PostForm("language")
 	tc := c.PostForm("tc")
-	year, _ := strconv.Atoi(c.PostForm("year"))
+	year, err := strconv.Atoi(c.PostForm("year"))
+
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid year format: "+err.Error())
+		return
+	}
 
 	// Validate required fields
 	if payload.Title == "" || payload.Reference == "" || payload.Description == "" || sector == "" || language == "" || tc == "" {
