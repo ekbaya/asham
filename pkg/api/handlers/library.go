@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"bytes"
-	"github.com/go-playground/validator/v10"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/go-playground/validator/v10"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/ekbaya/asham/pkg/domain/services"
@@ -364,8 +365,9 @@ func (h *LibraryHandler) GetCommitteeByCode(c *gin.Context) {
 func (h *LibraryHandler) ListCommittees(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	query := c.DefaultQuery("query", "")
 
-	committees, total, err := h.libraryService.ListCommittees(limit, offset)
+	committees, total, err := h.libraryService.ListCommittees(limit, offset, query)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return

@@ -397,16 +397,24 @@ func (r *LibraryRepository) GetCommitteeByCode(code string) (*models.TechnicalCo
 	return committeeDTO, nil
 }
 
-func (r *LibraryRepository) ListCommittees(limit, offset int) ([]models.TechnicalCommitteeDTO, int64, error) {
+func (r *LibraryRepository) ListCommittees(limit, offset int, query string) ([]models.TechnicalCommitteeDTO, int64, error) {
 	var committees []models.TechnicalCommittee
 	var total int64
 
-	err := r.db.Model(&models.TechnicalCommittee{}).Count(&total).Error
+	dbQuery := r.db.Model(&models.TechnicalCommittee{})
+
+	// Apply search filter if query is not empty
+	if query != "" {
+		searchQuery := "%" + query + "%"
+		dbQuery = dbQuery.Where("name ILIKE ? OR code ILIKE ?", searchQuery, searchQuery)
+	}
+
+	err := dbQuery.Count(&total).Error
 	if err != nil {
 		return nil, 0, err
 	}
 
-	result := r.db.Preload("Chairperson").
+	result := dbQuery.Preload("Chairperson").
 		Preload("Chairperson.NationalStandardBody").
 		Preload("Secretary").
 		Preload("Secretary.NationalStandardBody").

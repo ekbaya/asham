@@ -3,8 +3,9 @@ package services
 import (
 	"errors"
 	"fmt"
-	"github.com/ekbaya/asham/pkg/utilities"
 	"time"
+
+	"github.com/ekbaya/asham/pkg/utilities"
 
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -117,8 +118,8 @@ func (s *LibraryService) GetCommitteeByCode(code string) (*models.TechnicalCommi
 	return s.repo.GetCommitteeByCode(code)
 }
 
-func (s *LibraryService) ListCommittees(limit, offset int) ([]models.TechnicalCommitteeDTO, int64, error) {
-	return s.repo.ListCommittees(limit, offset)
+func (s *LibraryService) ListCommittees(limit, offset int, query string) ([]models.TechnicalCommitteeDTO, int64, error) {
+	return s.repo.ListCommittees(limit, offset, query)
 }
 
 func (s *LibraryService) SearchCommittees(query string, limit, offset int) ([]models.TechnicalCommitteeDTO, int64, error) {
