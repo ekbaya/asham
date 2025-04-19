@@ -2,8 +2,9 @@ package repository
 
 import (
 	"errors"
-	"gorm.io/gorm/clause"
 	"time"
+
+	"gorm.io/gorm/clause"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/google/uuid"
@@ -318,7 +319,7 @@ func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCom
 			MemberCount:        int64(len(committee.CurrentMembers)),
 			ActiveProjectCount: activeProjectCount,
 		},
-		Scope:          committee.Scope,
+		Scope:          string(committee.Scope),
 		WorkProgram:    committee.WorkProgram,
 		WorkingGroups:  committee.WorkingGroups,
 		SubCommittees:  committee.SubCommittees,
