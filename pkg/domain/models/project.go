@@ -45,9 +45,10 @@ type ProjectStageHistory struct {
 
 type Project struct {
 	ID                   uuid.UUID             `json:"id"`
-	MemberID             *string               `json:"-"`
+	MemberID             string                `json:"-"`
 	Member               *Member               `json:"creator"`
-	Sector               ProjectSector         `json:"sector" binding:"required"`
+	ProjectSectorID      *string               `json:"-"`
+	ProjectSector        *Sector               `json:"project_sector"`
 	Number               int64                 `json:"number"`
 	PartNo               int64                 `json:"part_number"`
 	EditionNo            int64                 `json:"edition_number"`

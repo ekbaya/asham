@@ -31,6 +31,38 @@ func (r *DocumentRepository) Create(doc *models.Document) error {
 	return r.db.Create(doc).Error
 }
 
+func (r *DocumentRepository) UploadStandard(doc *models.Document, project *models.Project) error {
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r) // rethrow
+		}
+	}()
+
+	docId := doc.ID.String()
+	now := time.Now()
+
+	project.StandardID = &docId
+	project.Published = true
+	project.PublishedDate = &now
+
+	if err := tx.Create(doc).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Create(project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
 func (r *DocumentRepository) UpdateProjectDoc(projectId, docType, fileURL, member string) error {
 	tx := r.db.Begin() // Start a transaction
 	defer func() {

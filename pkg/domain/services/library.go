@@ -124,7 +124,7 @@ func (s *LibraryService) FindStandards(params map[string]any, limit, offset int)
 				"title":          project.Title,
 				"reference":      project.Reference,
 				"description":    project.Description,
-				"sector":         project.Sector,
+				"sector":         "Pending",
 				"committee":      code,
 				"language":       project.Language,
 				"published":      project.Published,

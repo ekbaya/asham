@@ -24,6 +24,14 @@ func (service *DocumentService) Create(doc *models.Document) error {
 	return service.repo.Create(doc)
 }
 
+func (service *DocumentService) UploadStandard(doc *models.Document, project *models.Project) error {
+	doc.ID = uuid.New()
+	doc.CreatedAt = time.Now()
+	project.ID = uuid.New()
+	doc.CreatedAt = time.Now()
+	return service.repo.UploadStandard(doc, project)
+}
+
 func (service *DocumentService) UpdateProjectDoc(project, docType, fileURL, member string) error {
 	return service.repo.UpdateProjectDoc(project, docType, fileURL, member)
 }

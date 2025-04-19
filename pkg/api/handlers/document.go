@@ -566,3 +566,94 @@ func (h *DocumentHandler) UploadRelatedDocument(c *gin.Context) {
 
 	utilities.ShowMessage(c, http.StatusCreated, fmt.Sprintf("%s added successfully", docTitle))
 }
+
+func (h *DocumentHandler) UploadStandard(c *gin.Context) {
+	if err := c.Request.ParseMultipartForm(100 << 20); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Unable to parse form: "+err.Error())
+		return
+	}
+
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utilities.ShowMessage(c, http.StatusUnauthorized, "User not authenticated")
+		return
+	}
+
+	var payload models.Document
+	payload.Title = c.PostForm("title")
+	payload.Reference = c.PostForm("reference")
+	payload.Description = c.PostForm("description")
+	payload.CreatedByID = userID.(string)
+
+	sector := c.PostForm("sector")
+	language := c.PostForm("language")
+	description := c.PostForm("description")
+	tc := c.PostForm("tc")
+
+	project := models.Project{
+		MemberID:             payload.CreatedByID,
+		ProjectSectorID:      &sector,
+		Reference:            payload.Reference,
+		Title:                payload.Title,
+		Language:             language,
+		Description:          description,
+		TechnicalCommitteeID: tc,
+	}
+
+	if payload.Title == "" || payload.Reference == "" {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Title and reference are required fields")
+		return
+	}
+
+	exists, err := h.documentService.Exists(uuid.Nil, payload.Reference, payload.Title)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if exists {
+		utilities.ShowMessage(c, http.StatusConflict, "Document with the same reference or title already exists")
+		return
+	}
+
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Error retrieving file: "+err.Error())
+		return
+	}
+	defer file.Close()
+
+	assetsDir := "../assets/documents"
+	if err := os.MkdirAll(assetsDir, 0755); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create assets directory: "+err.Error())
+		return
+	}
+
+	filename := uuid.New().String() + filepath.Ext(header.Filename)
+	filepath := filepath.Join(assetsDir, filename)
+
+	dst, err := os.Create(filepath)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create destination file: "+err.Error())
+		return
+	}
+	defer dst.Close()
+
+	if _, err = io.Copy(dst, file); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to save file: "+err.Error())
+		return
+	}
+
+	// Set the file URL in the document
+	// For local storage, we'll use a relative path
+	// This we will change to an S3 URL later
+	payload.FileURL = "/" + filepath // prepend with slash for URL format
+
+	err = h.documentService.UploadStandard(&payload, &project)
+	if err != nil {
+		os.Remove(filepath)
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.Show(c, http.StatusCreated, "Document added successfully", payload)
+}
