@@ -114,12 +114,17 @@ func (s *LibraryService) FindStandards(params map[string]any, limit, offset int)
 				}
 			}
 
+			code := ""
+			if project.TechnicalCommittee != nil {
+				code = project.TechnicalCommittee.Code
+			}
+
 			standard := map[string]any{
 				"id":          project.ID,
 				"title":       project.Title,
 				"description": project.Description,
 				"sector":      project.Sector,
-				"committee":   project.TechnicalCommittee.Code,
+				"committee":   code,
 				"language":    project.Language,
 				"published":   project.PublishedDate,
 				"pages":       pageCount,
