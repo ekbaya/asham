@@ -599,7 +599,6 @@ func (h *DocumentHandler) UploadStandard(c *gin.Context) {
 
 	project := models.Project{
 		MemberID:             payload.CreatedByID,
-		ProjectSectorID:      &sector,
 		Reference:            payload.Reference,
 		Title:                payload.Title,
 		Language:             language,
