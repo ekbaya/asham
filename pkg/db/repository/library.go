@@ -312,18 +312,13 @@ func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCom
 			Name:          committee.Name,
 			Code:          committee.Code,
 			ChairpersonId: committee.ChairpersonId,
-			Chairperson: func() *models.MemberMinified {
-				if committee.Chairperson != nil {
-					return &models.MemberMinified{
-						ID:                     committee.Chairperson.ID,
-						FirstName:              committee.Chairperson.FirstName,
-						LastName:               committee.Chairperson.LastName,
-						NationalStandardBodyID: committee.Chairperson.NationalStandardBodyID,
-						NationalStandardBody:   committee.Chairperson.NationalStandardBody,
-					}
-				}
-				return nil
-			}(),
+			Chairperson: &models.MemberMinified{
+				ID:                     committee.Chairperson.ID,
+				FirstName:              committee.Chairperson.FirstName,
+				LastName:               committee.Chairperson.LastName,
+				NationalStandardBodyID: committee.Chairperson.NationalStandardBodyID,
+				NationalStandardBody:   committee.Chairperson.NationalStandardBody,
+			},
 			WorkingGroupCount:  workingGroupCount,
 			MemberCount:        int64(len(committee.CurrentMembers)),
 			ActiveProjectCount: activeProjectCount,
