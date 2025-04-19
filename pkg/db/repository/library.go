@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"gorm.io/gorm/clause"
@@ -166,15 +167,34 @@ func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset i
 	}
 
 	if sector, ok := params["sector"].(string); ok && sector != "" {
-		query = query.Where("sector = ?", models.ProjectSector(sector))
+		query = query.Where("LOWER(sector) = ?", strings.ToLower(string(models.ProjectSector(sector))))
 	}
 
 	if language, ok := params["language"].(string); ok && language != "" {
-		query = query.Where("language = ?", language)
+		query = query.Where("LOWER(language) = ?", strings.ToLower(language))
 	}
 
 	if year, ok := params["year"].(string); ok && year != "" {
 		query = query.Where("EXTRACT(YEAR FROM published_date) = ?", year).Where("published_date IS NOT NULL")
+	}
+
+	if sortBy, ok := params["sortBy"].(string); ok && sortBy != "" {
+		switch sortBy {
+		case "mostRecentAsc":
+			query = query.Order("published_date ASC")
+		case "mostRecentDesc":
+			query = query.Order("published_date DESC")
+		case "titleAsc":
+			query = query.Order("title ASC")
+		case "titleDesc":
+			query = query.Order("title DESC")
+		case "numberAsc":
+			query = query.Order("reference ASC")
+		case "numberDesc":
+			query = query.Order("reference DESC")
+		default:
+			query = query.Order("published_date DESC")
+		}
 	}
 
 	// Count filtered standards

@@ -192,6 +192,10 @@ func (h *LibraryHandler) FindStandards(c *gin.Context) {
 		params["year"] = year
 	}
 
+	if sortBy := c.Query("sortBy"); sortBy != "" {
+		params["sortBy"] = sortBy
+	}
+
 	limit := 10
 	offset := 0
 
