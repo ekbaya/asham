@@ -228,7 +228,7 @@ func (s *LibraryService) GetProjectsByCommittee(committeeID string) ([]models.Pr
 	return s.repo.GetProjectsByCommitteeID(committeeID)
 }
 
-func (s *LibraryService) GetSectors() ([]models.ProjectSector, error) {
+func (s *LibraryService) GetSectors() ([]models.Sector, error) {
 	return s.repo.GetSectors()
 }
 

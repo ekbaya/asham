@@ -13,6 +13,7 @@ func RunMigrations(db *gorm.DB) error {
 		return fmt.Errorf("failed to create uuid-ossp extension: %w", err)
 	}
 	return db.AutoMigrate(
+		&models.Sector{},
 		&models.Document{},
 		&models.MemberState{},
 		&models.NationalStandardBody{},

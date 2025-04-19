@@ -14,6 +14,7 @@ import (
 type SeedData struct {
 	AdminUser models.Member
 	Stages    []models.Stage
+	Sectors   []string
 }
 
 func GetDefaultSeedData() SeedData {
@@ -24,6 +25,7 @@ func GetDefaultSeedData() SeedData {
 			Phone:     "254712345678",
 			Email:     "support@arso.com",
 		},
+		Sectors: []string{"Animal-Related Expenses", "Farm Operation Costs", "Equipment and Machinery", "Facilities and Infrastructure", "Milk Production and Processing", "Regulatory and Compliance", "Marketing and Sales", "Miscellaneous"},
 		Stages: []models.Stage{
 			{
 				ID:           uuid.New(),
@@ -133,6 +135,31 @@ func SeedDatabase(db *gorm.DB) error {
 
 	if err := seedStages(db, seedData.Stages); err != nil {
 		return fmt.Errorf("failed to seed stages: %w", err)
+	}
+
+	if err := seedSectors(db, seedData.Sectors); err != nil {
+		return fmt.Errorf("failed to seed sectors: %w", err)
+	}
+
+	return nil
+}
+
+func seedSectors(db *gorm.DB, sectorsList []string) error {
+	var count int64
+	if err := db.Model(&models.Sector{}).Count(&count).Error; err != nil {
+		return fmt.Errorf("failed to check sectors: %w", err)
+	}
+
+	if count == 0 {
+		statuses := make([]models.Sector, len(sectorsList))
+		for i, status := range sectorsList {
+			statuses[i] = models.Sector{Title: status}
+		}
+
+		if err := db.Create(&statuses).Error; err != nil {
+			return fmt.Errorf("failed to create payment statuses: %w", err)
+		}
+		log.Printf("Created %d payment statuses", len(sectorsList))
 	}
 
 	return nil

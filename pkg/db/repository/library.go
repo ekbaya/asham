@@ -594,20 +594,10 @@ func (r *LibraryRepository) GetProjectsByCommitteeID(committeeID string) ([]mode
 	return projects, nil
 }
 
-func (r *LibraryRepository) GetSectors() ([]models.ProjectSector, error) {
-	return []models.ProjectSector{
-		models.Health,
-		models.IT,
-		models.Management,
-		models.Safety,
-		models.Transport,
-		models.Energy,
-		models.Diversity,
-		models.Environment,
-		models.Food,
-		models.Building,
-		models.Engineering,
-	}, nil
+func (r *LibraryRepository) GetSectors() ([]models.Sector, error) {
+	var sectors []models.Sector
+	err := r.db.Find(&sectors).Error
+	return sectors, err
 }
 
 func (r *LibraryRepository) GetBaseQuery() *gorm.DB {
