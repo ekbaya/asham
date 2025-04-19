@@ -193,7 +193,7 @@ func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset i
 	}
 
 	// Apply pagination
-	result := query.Limit(limit).Offset(offset).Preload("Standard").Preload("TechnicalCommittee").Find(&standards)
+	result := query.Limit(limit).Offset(offset).Preload(clause.Associations).Find(&standards)
 
 	if result.Error != nil {
 		return nil, 0, result.Error
