@@ -300,7 +300,7 @@ func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCom
 	// Count active projects
 	var activeProjectCount int64
 	if err := r.db.Model(&models.Project{}).
-		Where("technical_committee_id = ? AND published = ? AND cancelled = ?", id, true, false).
+		Where("technical_committee_id = ? AND published = ? AND cancelled = ?", id, false, false).
 		Count(&activeProjectCount).Error; err != nil {
 		return nil, err
 	}
