@@ -47,7 +47,7 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 	}
 
 	userIDStr := userID.(string)
-	payload.MemberID = &userIDStr
+	payload.MemberID = userIDStr
 
 	err := h.projectService.CreateProject(&payload)
 	if err != nil {
