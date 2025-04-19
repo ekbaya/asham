@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"gorm.io/gorm/clause"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -143,6 +144,7 @@ func (r *LibraryRepository) GetTopCommittees(limit, offset int) ([]models.Commit
 
 	return committeeDTOs, total, nil
 }
+
 func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset int) ([]models.ProjectDTO, int64, error) {
 	var standards []models.ProjectDTO
 	var total int64
@@ -195,8 +197,9 @@ func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset i
 func (r *LibraryRepository) GetProjectByID(id uuid.UUID) (*models.Project, error) {
 	var project models.Project
 	result := r.db.Preload("Standard").Preload("TechnicalCommittee").Preload("WorkingGroup").
-		Preload("Stage").Preload("WorkingDraft").Preload("CommitteeDraft").
+		Preload("Stage").Preload("WorkingDraft").Preload("CommitteeDraft").Preload(clause.Associations).
 		First(&project, "id = ?", id)
+
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, errors.New("project not found")
@@ -261,12 +264,16 @@ func (r *LibraryRepository) CountProjects() (int64, error) {
 	err := r.db.Model(&models.Project{}).Where("published = ?", true).Count(&count).Error
 	return count, err
 }
-
-func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCommitteeDTO, error) {
+func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCommitteeDetailDTO, error) {
 	var committee models.TechnicalCommittee
-	result := r.db.Preload("Chairperson").Preload("Secretary").
-		Preload("WorkingGroups").Preload("SubCommittees").Preload("CurrentMembers").
+	result := r.db.Preload(clause.Associations).
+		Preload("Chairperson").
+		Preload("Secretary").
+		Preload("WorkingGroups").
+		Preload("SubCommittees").
+		Preload("CurrentMembers.NationalStandardBody").
 		First(&committee, "id = ?", id)
+
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, errors.New("committee not found")
@@ -288,42 +295,34 @@ func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCom
 		return nil, err
 	}
 
-	// Map Chairperson to MemberMinified
-	var chairpersonMinified *models.MemberMinified
-	if committee.Chairperson != nil {
-		chairpersonMinified = &models.MemberMinified{
-			ID:                     committee.Chairperson.ID,
-			FirstName:              committee.Chairperson.FirstName,
-			LastName:               committee.Chairperson.LastName,
-			NationalStandardBodyID: committee.Chairperson.NationalStandardBodyID,
-			NationalStandardBody:   committee.Chairperson.NationalStandardBody,
-		}
-	}
-	// Map CurrentMembers to MemberMinified
-	currentMembersMinified := make([]*models.MemberMinified, len(committee.CurrentMembers))
-	for i, member := range committee.CurrentMembers {
-		currentMembersMinified[i] = &models.MemberMinified{
-			ID:                     member.ID,
-			FirstName:              member.FirstName,
-			LastName:               member.LastName,
-			NationalStandardBodyID: member.NationalStandardBodyID,
-			NationalStandardBody:   member.NationalStandardBody,
-		}
-	}
-
-	// Map to TechnicalCommitteeDTO
-	committeeDTO := &models.TechnicalCommitteeDTO{
+	// Build CommitteeDTO
+	committeeDTO := &models.TechnicalCommitteeDetailDTO{
 		CommitteeDTO: models.CommitteeDTO{
-			ID:                 committee.ID,
-			Name:               committee.Name,
-			Code:               committee.Code,
-			Chairperson:        chairpersonMinified,
-			ChairpersonId:      committee.ChairpersonId,
+			ID:            committee.ID,
+			Name:          committee.Name,
+			Code:          committee.Code,
+			ChairpersonId: committee.ChairpersonId,
+			Chairperson: func() *models.MemberMinified {
+				if committee.Chairperson != nil {
+					return &models.MemberMinified{
+						ID:                     committee.Chairperson.ID,
+						FirstName:              committee.Chairperson.FirstName,
+						LastName:               committee.Chairperson.LastName,
+						NationalStandardBodyID: committee.Chairperson.NationalStandardBodyID,
+						NationalStandardBody:   committee.Chairperson.NationalStandardBody,
+					}
+				}
+				return nil
+			}(),
 			WorkingGroupCount:  workingGroupCount,
+			MemberCount:        int64(len(committee.CurrentMembers)),
 			ActiveProjectCount: activeProjectCount,
 		},
-		Scope:       committee.Scope,
-		WorkProgram: committee.WorkProgram,
+		Scope:          committee.Scope,
+		WorkProgram:    committee.WorkProgram,
+		WorkingGroups:  committee.WorkingGroups,
+		SubCommittees:  committee.SubCommittees,
+		CurrentMembers: committee.CurrentMembers,
 	}
 
 	return committeeDTO, nil
@@ -582,6 +581,7 @@ func (r *LibraryRepository) GetProjectsByCommitteeID(committeeID string) ([]mode
 	}
 	return projects, nil
 }
+
 func (r *LibraryRepository) GetSectors() ([]models.ProjectSector, error) {
 	return []models.ProjectSector{
 		models.Health,
@@ -596,4 +596,8 @@ func (r *LibraryRepository) GetSectors() ([]models.ProjectSector, error) {
 		models.Building,
 		models.Engineering,
 	}, nil
+}
+
+func (r *LibraryRepository) GetBaseQuery() *gorm.DB {
+	return r.db
 }
