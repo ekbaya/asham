@@ -32,25 +32,33 @@ func (r *DocumentRepository) Create(doc *models.Document) error {
 }
 
 func (r *DocumentRepository) UploadStandard(doc *models.Document, project *models.Project) error {
-	// First, create the document
-	if err := r.db.Create(&doc).Error; err != nil {
-		return err
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r) // rethrow
+		}
+	}()
 
-	// Update project with document reference
 	docId := doc.ID.String()
+
 	project.StandardID = &docId
 	project.Published = true
 
-	// Try to save the project
-	if err := r.db.Save(&project).Error; err != nil {
-		// If project save fails, delete the document and return error
-		r.db.Delete(&doc)
+	if err := tx.Create(&doc).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	// Both operations succeeded
-	return nil
+	if err := tx.Create(&project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }
 
 func (r *DocumentRepository) UpdateProjectDoc(projectId, docType, fileURL, member string) error {
