@@ -607,16 +607,6 @@ func (h *DocumentHandler) UploadStandard(c *gin.Context) {
 		PublishedDate:        &publishedDate,
 	}
 
-	exists, err := h.documentService.Exists(uuid.Nil, payload.Reference, payload.Title)
-	if err != nil {
-		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	if exists {
-		utilities.ShowMessage(c, http.StatusConflict, "Document with the same reference or title already exists")
-		return
-	}
-
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusBadRequest, "Error retrieving file: "+err.Error())

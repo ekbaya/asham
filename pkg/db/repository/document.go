@@ -48,12 +48,12 @@ func (r *DocumentRepository) UploadStandard(doc *models.Document, project *model
 	project.StandardID = &docId
 	project.Published = true
 
-	if err := tx.Create(doc).Error; err != nil {
+	if err := tx.Create(&doc).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err := tx.Create(project).Error; err != nil {
+	if err := tx.Create(&project).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
