@@ -280,6 +280,8 @@ func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCom
 		Preload("WorkingGroups").
 		Preload("SubCommittees").
 		Preload("CurrentMembers.NationalStandardBody").
+		Preload("Chairperson.NationalStandardBody").
+		Preload("Secretary.NationalStandardBody").
 		First(&committee, "id = ?", id)
 
 	if result.Error != nil {
