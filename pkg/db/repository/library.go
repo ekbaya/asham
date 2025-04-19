@@ -305,20 +305,26 @@ func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCom
 		return nil, err
 	}
 
+	// Map Chairperson to MemberMinified if not null
+	var chairpersonMinified *models.MemberMinified
+	if committee.Chairperson != nil {
+		chairpersonMinified = &models.MemberMinified{
+			ID:                     committee.Chairperson.ID,
+			FirstName:              committee.Chairperson.FirstName,
+			LastName:               committee.Chairperson.LastName,
+			NationalStandardBodyID: committee.Chairperson.NationalStandardBodyID,
+			NationalStandardBody:   committee.Chairperson.NationalStandardBody,
+		}
+	}
+
 	// Build CommitteeDTO
 	committeeDTO := &models.TechnicalCommitteeDetailDTO{
 		CommitteeDTO: models.CommitteeDTO{
-			ID:            committee.ID,
-			Name:          committee.Name,
-			Code:          committee.Code,
-			ChairpersonId: committee.ChairpersonId,
-			Chairperson: &models.MemberMinified{
-				ID:                     committee.Chairperson.ID,
-				FirstName:              committee.Chairperson.FirstName,
-				LastName:               committee.Chairperson.LastName,
-				NationalStandardBodyID: committee.Chairperson.NationalStandardBodyID,
-				NationalStandardBody:   committee.Chairperson.NationalStandardBody,
-			},
+			ID:                 committee.ID,
+			Name:               committee.Name,
+			Code:               committee.Code,
+			ChairpersonId:      committee.ChairpersonId,
+			Chairperson:        chairpersonMinified,
 			WorkingGroupCount:  workingGroupCount,
 			MemberCount:        int64(len(committee.CurrentMembers)),
 			ActiveProjectCount: activeProjectCount,
