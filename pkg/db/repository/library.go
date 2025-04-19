@@ -159,32 +159,22 @@ func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset i
 
 	query := baseQuery
 
+	if keyword, ok := params["query"].(string); ok && keyword != "" {
+		// Global search if query is not null
+		searchQuery := "%" + keyword + "%"
+		query = query.Where("title ILIKE ? OR description ILIKE ? OR reference ILIKE ?", searchQuery, searchQuery, searchQuery)
+	}
+
 	if sector, ok := params["sector"].(string); ok && sector != "" {
 		query = query.Where("sector = ?", models.ProjectSector(sector))
 	}
 
-	if title, ok := params["title"].(string); ok && title != "" {
-		query = query.Where("title ILIKE ?", "%"+title+"%")
+	if language, ok := params["language"].(string); ok && language != "" {
+		query = query.Where("language = ?", language)
 	}
 
-	if projectType, ok := params["type"].(models.ProjectType); ok && projectType != "" {
-		query = query.Where("type = ?", projectType)
-	}
-
-	if committeeID, ok := params["committee_id"].(uuid.UUID); ok && committeeID != uuid.Nil {
-		query = query.Where("technical_committee_id = ?", committeeID)
-	}
-
-	if workingGroupID, ok := params["working_group_id"].(uuid.UUID); ok && workingGroupID != uuid.Nil {
-		query = query.Where("working_group_id = ?", workingGroupID)
-	}
-
-	if visible, ok := params["visible_on_library"].(bool); ok {
-		query = query.Where("visible_on_library = ?", visible)
-	}
-
-	if emergency, ok := params["is_emergency"].(bool); ok {
-		query = query.Where("is_emergency = ?", emergency)
+	if year, ok := params["year"].(string); ok && year != "" {
+		query = query.Where("EXTRACT(YEAR FROM published_date) = ?", year).Where("published_date IS NOT NULL")
 	}
 
 	// Count filtered standards

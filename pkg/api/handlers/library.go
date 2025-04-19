@@ -180,36 +180,16 @@ func (h *LibraryHandler) FindStandards(c *gin.Context) {
 		params["sector"] = sector
 	}
 
-	if title := c.Query("title"); title != "" {
-		params["title"] = title
+	if query := c.Query("query"); query != "" {
+		params["query"] = query
 	}
 
-	if typeStr := c.Query("type"); typeStr != "" {
-		params["type"] = models.ProjectType(typeStr)
+	if language := c.Query("language"); language != "" {
+		params["language"] = language
 	}
 
-	if committeeID := c.Query("committee_id"); committeeID != "" {
-		if id, err := uuid.Parse(committeeID); err == nil {
-			params["committee_id"] = id
-		}
-	}
-
-	if workingGroupID := c.Query("working_group_id"); workingGroupID != "" {
-		if id, err := uuid.Parse(workingGroupID); err == nil {
-			params["working_group_id"] = id
-		}
-	}
-
-	if visibleStr := c.Query("visible_on_library"); visibleStr != "" {
-		if visible, err := strconv.ParseBool(visibleStr); err == nil {
-			params["visible_on_library"] = visible
-		}
-	}
-
-	if emergencyStr := c.Query("is_emergency"); emergencyStr != "" {
-		if emergency, err := strconv.ParseBool(emergencyStr); err == nil {
-			params["is_emergency"] = emergency
-		}
+	if year := c.Query("year"); year != "" {
+		params["year"] = year
 	}
 
 	limit := 10
