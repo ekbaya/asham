@@ -88,7 +88,7 @@ func (h *DocumentHandler) UploadDocument(c *gin.Context) {
 	// Set the file URL in the document
 	// For local storage, we'll use a relative path
 	// This we will change to an S3 URL later
-	fileURl := "/" + filepath // prepend with slash for URL format
+	fileURl := "/assets/documents/" + filename // prepend with slash for URL format
 
 	err = h.documentService.UpdateProjectDoc(project, docType, fileURl, userID.(string))
 	if err != nil {
@@ -167,7 +167,7 @@ func (h *DocumentHandler) CreateDocument(c *gin.Context) {
 	// Set the file URL in the document
 	// For local storage, we'll use a relative path
 	// This we will change to an S3 URL later
-	payload.FileURL = "/" + filepath // prepend with slash for URL format
+	payload.FileURL = "/assets/documents/" + filename // prepend with slash for URL format
 
 	err = h.documentService.Create(&payload)
 	if err != nil {
@@ -555,7 +555,7 @@ func (h *DocumentHandler) UploadRelatedDocument(c *gin.Context) {
 	// Set the file URL in the document
 	// For local storage, we'll use a relative path
 	// This we will change to an S3 URL later
-	fileURl := "/" + filepath // prepend with slash for URL format
+	fileURl := "/assets/documents/" + filename // prepend with slash for URL format
 
 	err = h.documentService.UpdateProjectRelatedDoc(project, docTitle, reference, docDesc, fileURl, userID.(string))
 	if err != nil {
@@ -636,9 +636,8 @@ func (h *DocumentHandler) UploadStandard(c *gin.Context) {
 	}
 
 	// Set the file URL in the document
-	// For local storage, we'll use a relative path
-	// This we will change to an S3 URL later
-	payload.FileURL = "/" + filepath // prepend with slash for URL format
+	// Ensure the file URL is correctly formatted
+	payload.FileURL = "/assets/documents/" + filename
 
 	err = h.documentService.UploadStandard(&payload, &project)
 	if err != nil {
