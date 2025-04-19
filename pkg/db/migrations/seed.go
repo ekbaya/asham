@@ -25,7 +25,7 @@ func GetDefaultSeedData() SeedData {
 			Phone:     "254712345678",
 			Email:     "support@arso.com",
 		},
-		Sectors: []string{"Animal-Related Expenses", "Farm Operation Costs", "Equipment and Machinery", "Facilities and Infrastructure", "Milk Production and Processing", "Regulatory and Compliance", "Marketing and Sales", "Miscellaneous"},
+		Sectors: []string{"Health", "IT and Related Services", "Management and Related Services", "Safety, Security and Risk Services", "Transport", "Energy", "Diversity and Inclusion", "Environment and Sustainability", "Food and Agriculture", "Building and Construction", "Engineering"},
 		Stages: []models.Stage{
 			{
 				ID:           uuid.New(),
