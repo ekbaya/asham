@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -588,14 +589,15 @@ func (h *DocumentHandler) UploadStandard(c *gin.Context) {
 	sector := c.PostForm("sector")
 	language := c.PostForm("language")
 	tc := c.PostForm("tc")
-	year := c.PostForm("year")
-	publishedDate := time.Date(time.Now().Year(), time.January, 1, 0, 0, 0, 0, time.UTC)
+	year, _ := strconv.Atoi(c.PostForm("year"))
 
 	// Validate required fields
-	if payload.Title == "" || payload.Reference == "" || payload.Description == "" || sector == "" || language == "" || tc == "" || year == "" {
+	if payload.Title == "" || payload.Reference == "" || payload.Description == "" || sector == "" || language == "" || tc == "" || year != 0 {
 		utilities.ShowMessage(c, http.StatusBadRequest, "Title, reference, description, sector, language,year, and technical committee are required fields")
 		return
 	}
+
+	publishedDate := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
 
 	project := models.Project{
 		MemberID:             payload.CreatedByID,
