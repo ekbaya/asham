@@ -587,8 +587,13 @@ func (h *DocumentHandler) UploadStandard(c *gin.Context) {
 
 	sector := c.PostForm("sector")
 	language := c.PostForm("language")
-	description := c.PostForm("description")
 	tc := c.PostForm("tc")
+
+	// Validate required fields
+	if payload.Title == "" || payload.Reference == "" || payload.Description == "" || sector == "" || language == "" || tc == "" {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Title, reference, description, sector, language, and technical committee are required fields")
+		return
+	}
 
 	project := models.Project{
 		MemberID:             payload.CreatedByID,
@@ -596,13 +601,8 @@ func (h *DocumentHandler) UploadStandard(c *gin.Context) {
 		Reference:            payload.Reference,
 		Title:                payload.Title,
 		Language:             language,
-		Description:          description,
+		Description:          payload.Description,
 		TechnicalCommitteeID: tc,
-	}
-
-	if payload.Title == "" || payload.Reference == "" {
-		utilities.ShowMessage(c, http.StatusBadRequest, "Title and reference are required fields")
-		return
 	}
 
 	exists, err := h.documentService.Exists(uuid.Nil, payload.Reference, payload.Title)

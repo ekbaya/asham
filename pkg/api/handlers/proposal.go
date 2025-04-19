@@ -576,10 +576,6 @@ func (h *ProposalHandler) TransferProposal(c *gin.Context) {
 	}
 
 	newProjectID := payload.ProjectID
-	if err != nil {
-		utilities.ShowMessage(c, http.StatusBadRequest, "Invalid project ID format")
-		return
-	}
 
 	// Verify proposal exists
 	proposal, err := h.proposalService.GetByID(proposalID)

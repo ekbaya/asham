@@ -148,6 +148,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	{
 		document.POST("/", documentHandler.CreateDocument)
 		document.POST("/upload", documentHandler.UploadDocument)
+		document.POST("/standards", documentHandler.UploadStandard)
 		document.POST("/project", documentHandler.UploadRelatedDocument)
 		document.GET("/:id", documentHandler.GetDocumentByID)
 		document.POST("/reference/:reference", documentHandler.GetDocumentByReference)
