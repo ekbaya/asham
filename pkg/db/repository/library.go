@@ -146,11 +146,18 @@ func (r *LibraryRepository) GetTopCommittees(limit, offset int) ([]models.Commit
 	return committeeDTOs, total, nil
 }
 
-func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset int) ([]models.ProjectDTO, int64, error) {
-	var standards []models.ProjectDTO
-	var total int64
+func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset int) ([]models.Project, int64, error) {
+	var standards []models.Project
+	var total, filteredTotal int64
 
-	query := r.db.Model(&models.Project{}).Where("published = ?", true)
+	baseQuery := r.db.Model(&models.Project{}).Where("published = ?", true)
+
+	// Count total standards before applying filters
+	if err := baseQuery.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	query := baseQuery
 
 	if sector, ok := params["sector"].(string); ok && sector != "" {
 		query = query.Where("sector = ?", models.ProjectSector(sector))
@@ -180,13 +187,13 @@ func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset i
 		query = query.Where("is_emergency = ?", emergency)
 	}
 
-	if err := query.Count(&total).Error; err != nil {
+	// Count filtered standards
+	if err := query.Count(&filteredTotal).Error; err != nil {
 		return nil, 0, err
 	}
 
-	result := query.Limit(limit).Offset(offset).
-		Order("created_at DESC").
-		Find(&standards)
+	// Apply pagination
+	result := query.Limit(limit).Offset(offset).Preload("Standard").Preload("TechnicalCommittee").Find(&standards)
 
 	if result.Error != nil {
 		return nil, 0, result.Error
