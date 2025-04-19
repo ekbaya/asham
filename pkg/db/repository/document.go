@@ -45,8 +45,14 @@ func (r *DocumentRepository) UploadStandard(doc *models.Document, project *model
 
 	docId := doc.ID.String()
 
+	var stage models.Stage
+	if err := tx.Where("number = ?", 6).First(&stage).Error; err != nil {
+		return err
+	}
+
 	project.StandardID = &docId
 	project.Published = true
+	project.StageID = stage.ID.String()
 
 	if err := tx.Create(&doc).Error; err != nil {
 		tx.Rollback()
