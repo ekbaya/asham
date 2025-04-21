@@ -256,6 +256,7 @@ func (h *LibraryHandler) GetPreviewStandard(c *gin.Context) {
 	}
 
 	path := project.Standard.FileURL
+	// assets/documenets/regahsagafahgsha.png
 
 	fmt.Print(path)
 

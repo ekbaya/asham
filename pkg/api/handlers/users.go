@@ -123,6 +123,42 @@ func (h *UsersHandler) Login(c *gin.Context) {
 	})
 }
 
+func (h *UsersHandler) PublicLogin(c *gin.Context) {
+	var req struct {
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+
+	// Bind and validate the request payload
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			// Convert validation errors into human-readable messages
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
+			return
+		}
+
+		// For non-validation errors
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Authenticate user and generate tokens
+	token, refreshToken, err := h.userService.Login(req.Username, req.Password)
+	if err != nil {
+		// Handle authentication errors (e.g., invalid credentials)
+		utilities.ShowMessage(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	utilities.Show(c, http.StatusOK, "success", map[string]any{
+		"access_token":  token,
+		"refresh_token": refreshToken,
+		"expires_in":    86400,
+	})
+}
+
 func (h *UsersHandler) GenerateRefreshToken(c *gin.Context) {
 	// Retrieve user_id from the context
 	userID, exists := c.Get("user_id")
