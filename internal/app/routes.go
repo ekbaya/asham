@@ -37,7 +37,6 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	auth := api.Group("auth")
 	{
 		auth.POST("/register", authHandler.RegisterMember)
-		auth.POST("/create", authHandler.RegisterPublicMember)
 		auth.POST("/login", authHandler.Login)
 
 		protected := auth.Group("/")
@@ -317,7 +316,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		library.GET("/top_standards", libraryHandler.GetTopStandards)
 		library.GET("/latest_standards", libraryHandler.GetLatestStandards)
 		library.GET("/top_committee", libraryHandler.GetTopCommittees)
-		library.POST("/register", libraryHandler.RegisterMember)
+		library.POST("/register", authHandler.RegisterPublicMember)
 		library.POST("/login", libraryHandler.Login)
 		library.GET("/standards", libraryHandler.FindStandards)
 		library.GET("/standards/:id", libraryHandler.GetStandardByID)
