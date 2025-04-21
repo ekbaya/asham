@@ -289,6 +289,8 @@ func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCom
 		Preload("Chairperson").
 		Preload("Secretary").
 		Preload("WorkingGroups").
+		Preload("WorkingGroups.Convenor").
+		Preload("WorkingGroups.Convenor.Experts").
 		Preload("SubCommittees").
 		Preload("CurrentMembers.NationalStandardBody").
 		Preload("Chairperson.NationalStandardBody").
