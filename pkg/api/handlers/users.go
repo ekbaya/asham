@@ -177,14 +177,14 @@ func (h *UsersHandler) GenerateRefreshToken(c *gin.Context) {
 	// Generate a new access token
 	accessToken, err := models.GenerateJWT(user.ID.String())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to generate access token"})
 		return
 	}
 
 	// Generate a new refresh token
 	refreshToken, err := models.GenerateRefreshToken(user.ID.String())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to generate refresh token"})
 		return
 	}
 
@@ -200,13 +200,13 @@ func (h *UsersHandler) GenerateRefreshToken(c *gin.Context) {
 func (h *UsersHandler) Account(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
 	user, err := h.userService.AccountWithResponsibilities(userID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -216,13 +216,13 @@ func (h *UsersHandler) Account(c *gin.Context) {
 func (h *UsersHandler) PublicAccount(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
 	user, err := h.userService.AccountWithResponsibilities(userID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -233,13 +233,13 @@ func (h *UsersHandler) GetUserDetails(c *gin.Context) {
 	// Retrieve user_id from context
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
 	user, err := h.userService.AccountWithResponsibilities(userID.(string))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -252,7 +252,7 @@ func (h *UsersHandler) UpdateUser(c *gin.Context) {
 
 	err := h.userService.UpdateMember(&payload)
 	if err != nil {
-		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		utilities.ShowMessage(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -262,7 +262,7 @@ func (h *UsersHandler) UpdateUser(c *gin.Context) {
 func (h *UsersHandler) GetAllUsers(c *gin.Context) {
 	members, err := h.userService.GetAllMembers()
 	if err != nil {
-		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		utilities.ShowMessage(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, members)
@@ -271,7 +271,7 @@ func (h *UsersHandler) GetAllUsers(c *gin.Context) {
 func (h *UsersHandler) DeleteMember(c *gin.Context) {
 	err := h.userService.DeleteMember(c.Param("id"))
 	if err != nil {
-		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		utilities.ShowMessage(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 	utilities.ShowMessage(c, http.StatusNoContent, "Member deleted successfully")
