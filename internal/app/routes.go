@@ -318,7 +318,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		library.GET("/top_committee", libraryHandler.GetTopCommittees)
 		library.POST("/register", authHandler.RegisterPublicMember)
 		library.POST("/login", authHandler.PublicLogin)
-		library.GET("/account", middleware.AuthMiddleware(), authHandler.Account)
+		library.GET("/account", middleware.AuthMiddleware(), authHandler.PublicAccount)
 		library.GET("/standards", libraryHandler.FindStandards)
 		library.GET("/standards/:id", libraryHandler.GetStandardByID)
 		library.GET("/standards/preview/:id", middleware.AuthMiddleware(), libraryHandler.GetPreviewStandard)

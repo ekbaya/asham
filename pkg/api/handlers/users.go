@@ -213,6 +213,22 @@ func (h *UsersHandler) Account(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+func (h *UsersHandler) PublicAccount(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	user, err := h.userService.AccountWithResponsibilities(userID.(string))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	utilities.Show(c, http.StatusOK, "account", user)
+}
+
 func (h *UsersHandler) GetUserDetails(c *gin.Context) {
 	// Retrieve user_id from context
 	userID, exists := c.Get("user_id")
