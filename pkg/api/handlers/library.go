@@ -120,7 +120,7 @@ func (h *LibraryHandler) RegisterMember(c *gin.Context) {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
@@ -152,7 +152,7 @@ func (h *LibraryHandler) Login(c *gin.Context) {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())

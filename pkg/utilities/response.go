@@ -30,10 +30,10 @@ func ShowMessage(c *gin.Context, code int, msg interface{}) {
 	})
 }
 
-func ShowError(c *gin.Context, code int, errors []string) {
+func ShowError(c *gin.Context, code int, msg interface{}) {
 	c.JSON(code, gin.H{
 		"success":     false,
 		"status_code": code,
-		"error":       errors,
+		"error":       msg,
 	})
 }

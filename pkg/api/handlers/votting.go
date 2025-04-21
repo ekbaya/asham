@@ -31,7 +31,7 @@ func (h *VoteHandler) CreateVote(c *gin.Context) {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
@@ -140,7 +140,7 @@ func (h *VoteHandler) UpdateVote(c *gin.Context) {
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		if validationErrors, ok := err.(validator.ValidationErrors); ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())

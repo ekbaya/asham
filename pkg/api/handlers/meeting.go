@@ -30,7 +30,7 @@ func (h *MeetingHandler) CreateMeeting(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -198,7 +198,7 @@ func (h *MeetingHandler) UpdateMeeting(c *gin.Context) {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 

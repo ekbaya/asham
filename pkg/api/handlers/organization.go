@@ -29,7 +29,7 @@ func (h *OrganizationHandler) CreateMemberState(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -63,7 +63,7 @@ func (h *OrganizationHandler) CreateNSB(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -91,7 +91,7 @@ func (h *OrganizationHandler) UpdateNationalTCSecretary(c *gin.Context) {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
@@ -126,7 +126,7 @@ func (h *OrganizationHandler) CreateCommittee(c *gin.Context) {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
@@ -180,7 +180,7 @@ func (h *OrganizationHandler) CreateCommittee(c *gin.Context) {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
@@ -236,7 +236,7 @@ func (h *OrganizationHandler) UpdateCommittee(c *gin.Context) {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
@@ -284,7 +284,7 @@ func (h *OrganizationHandler) UpdateCommittee(c *gin.Context) {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())

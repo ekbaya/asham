@@ -31,7 +31,7 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -69,7 +69,7 @@ func (h *ProjectHandler) ApproveProject(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -148,7 +148,7 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -490,7 +490,7 @@ func (h *ProjectHandler) ReviewWD(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -528,7 +528,7 @@ func (h *ProjectHandler) ReviewCD(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -567,7 +567,7 @@ func (h *ProjectHandler) ReviewDARS(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -604,7 +604,7 @@ func (h *ProjectHandler) ApproveFDARS(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -641,7 +641,7 @@ func (h *ProjectHandler) ApproveFDRSForPublication(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 

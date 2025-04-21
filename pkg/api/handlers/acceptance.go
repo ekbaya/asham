@@ -27,7 +27,7 @@ func (h *AcceptanceHandler) CreateNSBResponse(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -78,7 +78,7 @@ func (h *AcceptanceHandler) UpdateNSBResponse(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -139,7 +139,7 @@ func (h *AcceptanceHandler) UpdateAcceptance(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -191,7 +191,7 @@ func (h *AcceptanceHandler) SetNSBResponseacceptanceApproval(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 

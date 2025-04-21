@@ -30,7 +30,7 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 		if ok {
 			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 
@@ -93,7 +93,7 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		if validationErrors, ok := err.(validator.ValidationErrors); ok {
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
