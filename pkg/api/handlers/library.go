@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -256,11 +257,29 @@ func (h *LibraryHandler) GetPreviewStandard(c *gin.Context) {
 	}
 
 	path := project.Standard.FileURL
-	// assets/documenets/regahsagafahgsha.png
 
-	fmt.Print(path)
+	// Open the file
+	file, err := os.Open(path)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "failed to open file")
+		return
+	}
+	defer file.Close()
 
-	c.JSON(http.StatusOK, project)
+	// Get file info (for file name and size)
+	fileInfo, err := file.Stat()
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "failed to get file info")
+		return
+	}
+
+	// Set headers for file download
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileInfo.Name()))
+	c.Header("Content-Type", "application/octet-stream")
+	c.Header("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
+
+	// Serve the file
+	c.File(path)
 }
 
 func (h *LibraryHandler) GetStandardByReference(c *gin.Context) {
