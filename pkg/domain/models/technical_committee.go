@@ -30,5 +30,6 @@ type TechnicalCommitteeDetailDTO struct {
 	WorkingGroups  []*WorkingGroup `gorm:"foreignKey:ParentTCID"`
 	SubCommittees  []*SubCommittee `gorm:"foreignKey:ParentTCID"`
 	MinimumMembers int             `json:"minimum_members" gorm:"default:5"`
-	CurrentMembers []*Member       `gorm:"many2many:current_members;"`
+	CurrentMembers []*Member
+	Projects       []*Project
 }

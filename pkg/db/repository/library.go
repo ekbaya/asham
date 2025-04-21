@@ -285,7 +285,7 @@ func (r *LibraryRepository) CountProjects() (int64, error) {
 
 func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCommitteeDetailDTO, error) {
 	var committee models.TechnicalCommittee
-	result := r.db.Preload(clause.Associations).
+	result := r.db.
 		Preload("Chairperson").
 		Preload("Secretary").
 		Preload("WorkingGroups").
@@ -293,6 +293,7 @@ func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCom
 		Preload("CurrentMembers.NationalStandardBody").
 		Preload("Chairperson.NationalStandardBody").
 		Preload("Secretary.NationalStandardBody").
+		Preload("Projects", "published = ?", true).
 		First(&committee, "id = ?", id)
 
 	if result.Error != nil {
@@ -331,7 +332,6 @@ func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCom
 	// Build CommitteeDTO
 	committeeDTO := &models.TechnicalCommitteeDetailDTO{
 		CommitteeDTO: models.CommitteeDTO{
-			ID:                 committee.ID,
 			Name:               committee.Name,
 			Code:               committee.Code,
 			ChairpersonId:      committee.ChairpersonId,
@@ -345,6 +345,7 @@ func (r *LibraryRepository) GetCommitteeByID(id uuid.UUID) (*models.TechnicalCom
 		WorkingGroups:  committee.WorkingGroups,
 		SubCommittees:  committee.SubCommittees,
 		CurrentMembers: committee.CurrentMembers,
+		Projects:       committee.Projects,
 	}
 
 	return committeeDTO, nil
