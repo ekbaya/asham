@@ -37,6 +37,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	auth := api.Group("auth")
 	{
 		auth.POST("/register", authHandler.RegisterMember)
+		auth.POST("/create", authHandler.RegisterPublicMember)
 		auth.POST("/login", authHandler.Login)
 
 		protected := auth.Group("/")
