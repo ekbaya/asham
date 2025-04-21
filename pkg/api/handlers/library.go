@@ -256,6 +256,18 @@ func (h *LibraryHandler) GetPreviewStandard(c *gin.Context) {
 		return
 	}
 
+	// Check if Standard is nil
+	if project.Standard == nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "standard not found")
+		return
+	}
+
+	// Check if FileURL is empty
+	if project.Standard.FileURL == "" {
+		utilities.ShowMessage(c, http.StatusNotFound, "no file available for download")
+		return
+	}
+
 	path := project.Standard.FileURL
 
 	// Open the file
@@ -266,19 +278,17 @@ func (h *LibraryHandler) GetPreviewStandard(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Get file info (for file name and size)
+	// Get file info
 	fileInfo, err := file.Stat()
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, "failed to get file info")
 		return
 	}
 
-	// Set headers for file download
+	// Set headers and send file
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileInfo.Name()))
 	c.Header("Content-Type", "application/octet-stream")
 	c.Header("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
-
-	// Serve the file
 	c.File(path)
 }
 
