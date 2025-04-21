@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -237,6 +238,26 @@ func (h *LibraryHandler) GetStandardByID(c *gin.Context) {
 		utilities.ShowMessage(c, http.StatusNotFound, err.Error())
 		return
 	}
+
+	c.JSON(http.StatusOK, project)
+}
+
+func (h *LibraryHandler) GetPreviewStandard(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "invalid ID format")
+		return
+	}
+
+	project, err := h.libraryService.GetProjectByID(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	path := project.Standard.FileURL
+
+	fmt.Print(path)
 
 	c.JSON(http.StatusOK, project)
 }
