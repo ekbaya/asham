@@ -21,6 +21,46 @@ func NewUsersHandler(userService services.MemberService) *UsersHandler {
 	}
 }
 
+func (h *UsersHandler) RegisterPublicMember(c *gin.Context) {
+	var payload struct {
+		FirstName    string `json:"first_name" binding:"required"`
+		Lastname     string `json:"last_name" binding:"required"`
+		Email        string `json:"email" binding:"required"`
+		Organization string `json:"organization" binding:"required"`
+		Country      string `json:"country" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			// Convert validation errors into human-readable messages
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.Show(c, http.StatusBadRequest, "errors", formattedErrors)
+			return
+		}
+
+		// For non-validation errors
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	member := models.Member{
+		FirstName:    payload.FirstName,
+		LastName:     payload.Lastname,
+		Email:        payload.Email,
+		Type:         models.External,
+		Country:      payload.Country,
+		Organization: payload.Organization,
+	}
+
+	err := h.userService.CreateMember(&member)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "User registered successfully")
+}
+
 func (h *UsersHandler) RegisterMember(c *gin.Context) {
 	var payload models.Member
 	if err := c.ShouldBindJSON(&payload); err != nil {

@@ -8,6 +8,13 @@ import (
 	"github.com/google/uuid"
 )
 
+type UserType string
+
+const (
+	Internal UserType = "internal"
+	External UserType = "external"
+)
+
 // Member represents a member state in the organization
 type Member struct {
 	ID                     uuid.UUID             `json:"id"`
@@ -19,6 +26,9 @@ type Member struct {
 	NationalStandardBodyID *string               `json:"nsb_id" binding:"required"`
 	NationalStandardBody   *NationalStandardBody `json:"nsb"`
 	HashedPassword         string                `json:"-" gorm:"column:password"`
+	Organization           string                `json:"organization" `
+	Country                string                `json:"country"`
+	Type                   UserType              `json:"type" gorm:"default:internal"`
 	CreatedAt              time.Time
 }
 type MemberMinified struct {
