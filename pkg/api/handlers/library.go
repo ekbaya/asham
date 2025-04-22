@@ -258,7 +258,6 @@ func (h *LibraryHandler) GetStandardByID(c *gin.Context) {
 		"pages":          45,
 	})
 
-	c.JSON(http.StatusOK, project)
 }
 
 func (h *LibraryHandler) GetPreviewStandard(c *gin.Context) {
