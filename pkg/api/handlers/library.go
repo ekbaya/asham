@@ -240,23 +240,28 @@ func (h *LibraryHandler) GetStandardByID(c *gin.Context) {
 		return
 	}
 
-	utilities.Show(c, http.StatusOK, "standard", map[string]any{
-		"id":          project.ID,
-		"reference":   project.Reference,
-		"title":       project.Title,
-		"description": project.Description,
-		"language":    project.Language,
-		"version":     "1.0",
-		"committee": map[string]any{
+	committee := map[string]any{}
+	if project.TechnicalCommittee != nil {
+		committee = map[string]any{
 			"id":   project.TechnicalCommitteeID,
+			"code": project.TechnicalCommittee.Code,
 			"name": project.TechnicalCommittee.Name,
-		},
+		}
+	}
+
+	utilities.Show(c, http.StatusOK, "standard", map[string]any{
+		"id":             project.ID,
+		"reference":      project.Reference,
+		"title":          project.Title,
+		"description":    project.Description,
+		"language":       project.Language,
+		"version":        "1.0",
+		"committee":      committee,
 		"published_date": project.PublishedDate,
-		"sector":         "Manufaturing",
+		"sector":         "Manufacturing",
 		"file_url":       project.Standard.FileURL,
 		"pages":          45,
 	})
-
 }
 
 func (h *LibraryHandler) GetPreviewStandard(c *gin.Context) {
