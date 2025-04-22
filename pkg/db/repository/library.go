@@ -214,8 +214,8 @@ func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset i
 
 func (r *LibraryRepository) GetProjectByID(id uuid.UUID) (*models.Project, error) {
 	var project models.Project
-	result := r.db.Where("published = ?", true).Preload("Standard").Preload("TechnicalCommittee").
-		First(&project, "id = ?", id)
+	result := r.db.Where("id = ? AND published = ?", id, true).Preload("Standard").Preload("TechnicalCommittee").
+		First(&project)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
