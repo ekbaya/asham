@@ -240,6 +240,24 @@ func (h *LibraryHandler) GetStandardByID(c *gin.Context) {
 		return
 	}
 
+	utilities.Show(c, http.StatusOK, "standard", map[string]any{
+		"id":          project.ID,
+		"reference":   project.Reference,
+		"title":       project.Title,
+		"description": project.Description,
+		"language":    project.Language,
+		"version":     "1.0",
+		"committee": map[string]any{
+			"id":   project.TechnicalCommitteeID,
+			"code": project.TechnicalCommittee.Code,
+			"name": project.TechnicalCommittee.Name,
+		},
+		"published_date": project.PublishedDate,
+		"sector":         "Manufaturing",
+		"file_url":       project.Standard.FileURL,
+		"pages":          45,
+	})
+
 	c.JSON(http.StatusOK, project)
 }
 

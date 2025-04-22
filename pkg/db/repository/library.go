@@ -214,7 +214,7 @@ func (r *LibraryRepository) FindStandards(params map[string]any, limit, offset i
 
 func (r *LibraryRepository) GetProjectByID(id uuid.UUID) (*models.Project, error) {
 	var project models.Project
-	result := r.db.Preload("Standard").Preload("TechnicalCommittee").Preload("WorkingGroup").
+	result := r.db.Where("published = ?", true).Preload("Standard").Preload("TechnicalCommittee").Preload("WorkingGroup").
 		Preload("Stage").Preload("WorkingDraft").Preload("CommitteeDraft").Preload(clause.Associations).
 		First(&project, "id = ?", id)
 
