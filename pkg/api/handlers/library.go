@@ -269,6 +269,9 @@ func (h *LibraryHandler) GetPreviewStandard(c *gin.Context) {
 	}
 
 	path := project.Standard.FileURL
+	if len(path) > 0 && path[0] == '/' {
+		path = path[1:]
+	}
 
 	// Open the file
 	file, err := os.Open(path)
