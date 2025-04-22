@@ -320,7 +320,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		library.POST("/login", authHandler.PublicLogin)
 		library.GET("/account", middleware.AuthMiddleware(), authHandler.PublicAccount)
 		library.GET("/standards", libraryHandler.FindStandards)
-		library.GET("/standards/:id", libraryHandler.GetStandardByID)
+		library.GET("/standards/:id", middleware.AuthMiddleware(), libraryHandler.GetStandardByID)
 		library.GET("/standards/preview/:id", middleware.AuthMiddleware(), libraryHandler.GetPreviewStandard)
 		library.GET("/standards/reference/:reference", libraryHandler.GetStandardByReference)
 		library.GET("/standards/search", libraryHandler.SearchStandards)
