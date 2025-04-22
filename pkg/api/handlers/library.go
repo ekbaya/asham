@@ -249,7 +249,6 @@ func (h *LibraryHandler) GetStandardByID(c *gin.Context) {
 		"version":     "1.0",
 		"committee": map[string]any{
 			"id":   project.TechnicalCommitteeID,
-			"code": project.TechnicalCommittee.Code,
 			"name": project.TechnicalCommittee.Name,
 		},
 		"published_date": project.PublishedDate,
