@@ -19,13 +19,11 @@ func GetPDFPageCount(pdfURL string) (int, error) {
 	// Handle local file path (for assets directory)
 	if parsedURL.Scheme == "" || parsedURL.Scheme == "file" {
 		// Assuming this is a local file path
-		if !os.IsPathSeparator(pdfURL[0]) { // Check if it's a relative path
-			// Prepend the base path to make it absolute
-			basePath := "/home/ubuntu/projects/asham"
-			if pdfURL[0] != '/' {
-				pdfURL = "/" + pdfURL
-			}
-			pdfURL = basePath + pdfURL
+		basePath := "/home/ubuntu/projects/asham"
+		if os.IsPathSeparator(pdfURL[0]) { // Check if it starts with a separator
+			pdfURL = basePath + pdfURL[1:] // Avoid double "/"
+		} else {
+			pdfURL = basePath + "/" + pdfURL
 		}
 		return api.PageCountFile(pdfURL)
 	}
