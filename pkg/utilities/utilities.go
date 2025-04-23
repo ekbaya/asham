@@ -20,7 +20,7 @@ func GetPDFPageCount(pdfURL string) (int, error) {
 	// Handle local file path (for assets directory)
 	if parsedURL.Scheme == "" || parsedURL.Scheme == "file" {
 		// Assuming this is a local file path
-		return api.PageCountFile("assets/documents/f60d7556-1ece-41f9-866b-fa78d57f5fb9.pdf")
+		return api.PageCountFile("/home/ubuntu/projects/asham/assets/documents/f60d7556-1ece-41f9-866b-fa78d57f5fb9.pdf")
 	}
 
 	// For remote URLs, download the file temporarily
