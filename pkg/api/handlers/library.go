@@ -300,8 +300,11 @@ func (h *LibraryHandler) GetPreviewStandard(c *gin.Context) {
 	}
 
 	path := project.Standard.FileURL
-	if len(path) > 0 && path[0] == '/' {
-		path = path[1:]
+	basePath := "/home/ubuntu/projects/asham"
+	if path[0] == '/' {
+		path = basePath + path
+	} else {
+		path = basePath + "/" + path
 	}
 
 	// Open the file
