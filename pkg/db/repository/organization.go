@@ -43,7 +43,10 @@ func (r *OrganizationRepository) UpdateNationalTCSecretary(nsbID, newSecretaryID
 
 func (r *OrganizationRepository) FetchNSBs() (*[]models.NationalStandardBody, error) {
 	var nsbs []models.NationalStandardBody
-	err := r.db.Preload(clause.Associations).Find(&nsbs).Error
+	err := r.db.
+		Preload("MemberState").
+		Preload("NationalTCSecretary").
+		Find(&nsbs).Error
 	return &nsbs, err
 }
 
