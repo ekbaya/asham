@@ -276,3 +276,19 @@ func (h *UsersHandler) DeleteMember(c *gin.Context) {
 	}
 	utilities.ShowMessage(c, http.StatusNoContent, "Member deleted successfully")
 }
+
+func (h *UsersHandler) LogoutAll(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	err := h.userService.LogoutAll(userID.(string))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "User logged out")
+}
