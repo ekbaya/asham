@@ -5,14 +5,13 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 )
 
 func GetPDFPageCount(pdfURL string) (int, error) {
 	// Parse the URL
-	parsedURL, err := url.Parse(strings.TrimPrefix(pdfURL, "/"))
+	parsedURL, err := url.Parse(pdfURL)
 	if err != nil {
 		return 0, err
 	}
@@ -20,7 +19,12 @@ func GetPDFPageCount(pdfURL string) (int, error) {
 	// Handle local file path (for assets directory)
 	if parsedURL.Scheme == "" || parsedURL.Scheme == "file" {
 		// Assuming this is a local file path
-		return api.PageCountFile("/home/ubuntu/projects/asham/assets/documents/f60d7556-1ece-41f9-866b-fa78d57f5fb9.pdf")
+		if !os.IsPathSeparator(pdfURL[0]) { // Check if it's a relative path
+			// Prepend the base path to make it absolute
+			basePath := "/home/ubuntu/projects/asham"
+			pdfURL = basePath + pdfURL
+		}
+		return api.PageCountFile(pdfURL)
 	}
 
 	// For remote URLs, download the file temporarily
