@@ -134,3 +134,37 @@ func (service *MemberService) DeleteMember(memberID string) error {
 func (service *MemberService) GetAllMembers() (*[]models.Member, error) {
 	return service.repo.GetAllMembers()
 }
+
+func (service *MemberService) Logout(accessToken, refreshToken string) error {
+	// Validate the access token to make sure it's not already invalid
+	claims, err := models.ValidateJWT(accessToken)
+	if err != nil {
+		return nil
+	}
+
+	// Use Redis to blacklist the tokens
+	err = models.Logout(accessToken, refreshToken)
+	if err != nil {
+		return errors.New("failed to invalidate tokens: " + err.Error())
+	}
+
+	// log this activity
+	userID := claims.UserID
+	service.logUserActivity(userID, "logout")
+
+	return nil
+}
+
+func (service *MemberService) LogoutAll(userID string) error {
+	err := models.LogoutUser(userID)
+	if err != nil {
+		return errors.New("failed to invalidate all tokens: " + err.Error())
+	}
+
+	service.logUserActivity(userID, "logout-all-devices")
+	return nil
+}
+
+func (service *MemberService) logUserActivity(userID, activity string) {
+	fmt.Printf("User %s: %s at %s\n", userID, activity, time.Now().Format(time.RFC3339))
+}
