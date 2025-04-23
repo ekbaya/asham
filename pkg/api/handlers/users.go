@@ -278,13 +278,7 @@ func (h *UsersHandler) DeleteMember(c *gin.Context) {
 }
 
 func (h *UsersHandler) LogoutAll(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	err := h.userService.LogoutAll(userID.(string))
+	err := h.userService.LogoutAll(c.Param("userId"))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
