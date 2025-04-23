@@ -26,7 +26,7 @@ func (r *OrganizationRepository) CreateMemberState(state *models.MemberState) er
 
 func (r *OrganizationRepository) FetchMemberStates() (*[]models.MemberState, error) {
 	var states []models.MemberState
-	err := r.db.Find(&states).Error
+	err := r.db.Preload(clause.Associations).Find(&states).Error
 	return &states, err
 }
 
@@ -43,7 +43,7 @@ func (r *OrganizationRepository) UpdateNationalTCSecretary(nsbID, newSecretaryID
 
 func (r *OrganizationRepository) FetchNSBs() (*[]models.NationalStandardBody, error) {
 	var nsbs []models.NationalStandardBody
-	err := r.db.Find(&nsbs).Error
+	err := r.db.Preload(clause.Associations).Find(&nsbs).Error
 	return &nsbs, err
 }
 
