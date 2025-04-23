@@ -249,6 +249,16 @@ func (h *LibraryHandler) GetStandardByID(c *gin.Context) {
 		}
 	}
 
+	pageCount := 20
+	if project.Standard != nil && project.Standard.FileURL != "" {
+		calculatedPages, err := utilities.GetPDFPageCount(project.Standard.FileURL)
+		if err == nil {
+			pageCount = calculatedPages
+		} else {
+			log.Printf("Error calculating PDF pages for standard ID %v: %v", project.ID, err)
+		}
+	}
+
 	utilities.Show(c, http.StatusOK, "standard", map[string]any{
 		"id":             project.ID,
 		"reference":      project.Reference,
@@ -260,7 +270,7 @@ func (h *LibraryHandler) GetStandardByID(c *gin.Context) {
 		"published_date": project.PublishedDate,
 		"sector":         "Manufacturing",
 		"file_url":       project.Standard.FileURL,
-		"pages":          45,
+		"pages":          pageCount,
 	})
 }
 
