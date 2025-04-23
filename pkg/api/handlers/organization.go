@@ -217,7 +217,6 @@ func (h *OrganizationHandler) GetCommitteeByID(c *gin.Context) {
 	case models.Joint_Technical_Committee:
 		model = &models.JointTechnicalCommittee{}
 	}
-
 	committee, err := h.organizationService.GetCommitteeByID(id, model)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())

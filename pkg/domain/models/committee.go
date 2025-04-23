@@ -10,10 +10,10 @@ type Committee struct {
 	Name          string    `json:"name" binding:"required"`
 	Code          string    `json:"code"`
 	Description   string    `json:"description" gorm:"default:Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem."`
-	ChairpersonId *string   `json:"chairperson_id"`
-	Chairperson   *Member   `json:"chairperson"`
-	SecretaryId   *string   `json:"secretary_id"`
-	Secretary     *Member   `json:"Secretary"`
+	ChairpersonId *string   `json:"chairperson_id" gorm:"column:chairperson_id;type:uuid;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Chairperson   *Member   `json:"chairperson" gorm:"foreignKey:ChairpersonId;references:ID"`
+	SecretaryId   *string   `json:"secretary_id" gorm:"column:secretary_id;type:uuid;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Secretary     *Member   `json:"secretary" gorm:"foreignKey:SecretaryId;references:ID"`
 }
 
 // CommitteeDTO includes committee details, members, and counts
