@@ -1,14 +1,39 @@
 package models
 
 import (
+	"context"
 	"errors"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/redis/go-redis/v9"
 )
 
-var jwtSecret = []byte(getSecretKey()) // Secret key for signing and verifying JWTs, retrieved from environment variable
+var jwtSecret = []byte(getSecretKey()) // Secret key for signing and verifying JWTs
+var redisClient *redis.Client
+
+// Initialize Redis client
+func InitRedis() {
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "localhost:6379" // Default Redis address
+	}
+
+	redisDB := 0
+	if dbStr := os.Getenv("REDIS_DB"); dbStr != "" {
+		if db, err := strconv.Atoi(dbStr); err == nil {
+			redisDB = db
+		}
+	}
+
+	redisClient = redis.NewClient(&redis.Options{
+		Addr:     redisAddr,
+		Password: os.Getenv("REDIS_PASSWORD"), // No password by default
+		DB:       redisDB,                     // Default DB
+	})
+}
 
 // Claims represents the custom claims for JWT
 type Claims struct {
@@ -28,7 +53,7 @@ func getSecretKey() string {
 	return secret
 }
 
-// GenerateJWT generates a JWT token for a user with the given ID and role
+// GenerateJWT generates a JWT token for a user with the given ID
 func GenerateJWT(userID string) (string, error) {
 	claims := &Claims{
 		UserID: userID,
@@ -60,7 +85,7 @@ func GenerateRefreshToken(userID string) (string, error) {
 func ValidateJWT(tokenStr string) (*Claims, error) {
 	// Parse and validate the token
 	claims := &Claims{}
-	_, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
 
@@ -76,11 +101,25 @@ func ValidateJWT(tokenStr string) (*Claims, error) {
 		return nil, err
 	}
 
+	// Check if token has been invalidated
+	ctx := context.Background()
+	val, err := redisClient.Get(ctx, "blacklist:"+tokenStr).Result()
+	if err != redis.Nil {
+		// Token exists in blacklist or there was an error
+		if err == nil && val == "1" {
+			return nil, errors.New("token has been invalidated")
+		}
+		// If it's any other error, log it and continue (option to be strict here)
+	}
+
 	// Return the claims from the validated token
-	return claims, nil
+	if token.Valid {
+		return claims, nil
+	}
+	return nil, errors.New("invalid token")
 }
 
-// ValidateRefreshToken validates a refresh token and returns the claims, skipping the expiration check
+// ValidateRefreshToken validates a refresh token and returns the claims
 func ValidateRefreshToken(tokenStr string) (*Claims, error) {
 	claims := &Claims{}
 	_, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
@@ -92,12 +131,105 @@ func ValidateRefreshToken(tokenStr string) (*Claims, error) {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			// Ignore expiration errors for refresh tokens
 			if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				return claims, nil // Expired tokens are acceptable for refresh tokens
+				// Even for expired tokens, check if they're blacklisted
+				ctx := context.Background()
+				val, redisErr := redisClient.Get(ctx, "blacklist:"+tokenStr).Result()
+				if redisErr != redis.Nil {
+					if redisErr == nil && val == "1" {
+						return nil, errors.New("refresh token has been invalidated")
+					}
+				}
+				return claims, nil // Expired tokens are acceptable for refresh tokens if not blacklisted
 			}
 			return nil, errors.New("invalid token")
 		}
 		return nil, err
 	}
 
+	// Check if token has been invalidated
+	ctx := context.Background()
+	val, redisErr := redisClient.Get(ctx, "blacklist:"+tokenStr).Result()
+	if redisErr != redis.Nil {
+		if redisErr == nil && val == "1" {
+			return nil, errors.New("refresh token has been invalidated")
+		}
+	}
+
 	return claims, nil
+}
+
+// Logout invalidates both access token and refresh token by adding them to Redis blacklist
+func Logout(accessToken string, refreshToken string) error {
+	ctx := context.Background()
+
+	// Parse tokens to get their expiration time
+	accessClaims := &Claims{}
+	_, err := jwt.ParseWithClaims(accessToken, accessClaims, func(t *jwt.Token) (any, error) {
+		return jwtSecret, nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	refreshClaims := &Claims{}
+	_, err = jwt.ParseWithClaims(refreshToken, refreshClaims, func(t *jwt.Token) (any, error) {
+		return jwtSecret, nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// Calculate TTL for Redis blacklist entries (use token's remaining lifetime)
+	accessTTL := time.Until(accessClaims.ExpiresAt.Time)
+	if accessTTL < 0 {
+		accessTTL = time.Hour // Default 1 hour if already expired
+	}
+
+	refreshTTL := time.Until(refreshClaims.ExpiresAt.Time)
+	if refreshTTL < 0 {
+		refreshTTL = time.Hour // Default 1 hour if already expired
+	}
+
+	// Add tokens to blacklist with their respective TTLs
+	if err := redisClient.Set(ctx, "blacklist:"+accessToken, "1", accessTTL).Err(); err != nil {
+		return err
+	}
+
+	if err := redisClient.Set(ctx, "blacklist:"+refreshToken, "1", refreshTTL).Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// LogoutUser invalidates all tokens for a specific user
+func LogoutUser(userID string) error {
+	// This is a more advanced implementation
+	// It requires storing user->token mapping when tokens are created
+	// We won't implement the full logic here, but this shows the pattern
+
+	ctx := context.Background()
+
+	// Get all tokens for user (from a hypothetical storage)
+	userTokensKey := "user:tokens:" + userID
+	tokens, err := redisClient.SMembers(ctx, userTokensKey).Result()
+	if err != nil && err != redis.Nil {
+		return err
+	}
+
+	// Add all tokens to blacklist
+	for _, token := range tokens {
+		// Add to blacklist with a long TTL (e.g., 30 days)
+		if err := redisClient.Set(ctx, "blacklist:"+token, "1", 30*24*time.Hour).Err(); err != nil {
+			return err
+		}
+	}
+
+	// Remove the user's token set
+	if err := redisClient.Del(ctx, userTokensKey).Err(); err != nil {
+		return err
+	}
+
+	return nil
 }
