@@ -22,6 +22,9 @@ func GetPDFPageCount(pdfURL string) (int, error) {
 		if !os.IsPathSeparator(pdfURL[0]) { // Check if it's a relative path
 			// Prepend the base path to make it absolute
 			basePath := "/home/ubuntu/projects/asham"
+			if pdfURL[0] != '/' {
+				pdfURL = "/" + pdfURL
+			}
 			pdfURL = basePath + pdfURL
 		}
 		return api.PageCountFile(pdfURL)
