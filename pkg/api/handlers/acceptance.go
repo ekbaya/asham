@@ -220,10 +220,6 @@ func (h *AcceptanceHandler) SetNSBResponseacceptanceApproval(c *gin.Context) {
 }
 
 func (h *AcceptanceHandler) GetAcceptanceResults(c *gin.Context) {
-	results, err := h.AcceptanceService.GetAcceptanceResults(c.Param("id"))
-	if err != nil {
-		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
-		return
-	}
+	results, _ := h.AcceptanceService.GetAcceptanceResults(c.Param("id"))
 	c.JSON(http.StatusOK, results)
 }
