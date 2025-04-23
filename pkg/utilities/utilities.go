@@ -20,7 +20,7 @@ func GetPDFPageCount(pdfURL string) (int, error) {
 	if parsedURL.Scheme == "" || parsedURL.Scheme == "file" {
 		// Assuming this is a local file path
 		basePath := "/home/ubuntu/projects/asham"
-		if os.IsPathSeparator(pdfURL[0]) { // Check if it starts with a separator
+		if pdfURL[0] == '/' { // Check if it starts with a forward slash
 			pdfURL = basePath + pdfURL // Preserve the leading "/"
 		} else {
 			pdfURL = basePath + "/" + pdfURL
