@@ -29,7 +29,7 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 			return err
 		}
 
-		if member.NationalStandardBody.NationalTCSecretaryID != &response.ResponderID {
+		if member.NationalStandardBody != nil && member.NationalStandardBody.NationalTCSecretaryID != &response.ResponderID {
 			tx.Rollback()
 			return errors.New("user is not a National TC secretary of the responding NSB")
 		}
