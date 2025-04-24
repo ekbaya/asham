@@ -447,7 +447,7 @@ func (r *LibraryRepository) ListCommittees(limit, offset int, query string) ([]m
 		Preload("WorkingGroups").
 		Preload("SubCommittees").
 		Preload("CurrentMembers").
-		Limit(limit).Offset(offset).Order("created_at DESC").
+		Limit(limit).Offset(offset).Order("minimum_members DESC").
 		Find(&committees)
 	if result.Error != nil {
 		return nil, 0, err
