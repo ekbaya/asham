@@ -38,21 +38,35 @@ func (r *LibraryRepository) GetUserByEmail(email string) (*models.User, error) {
 
 func (r *LibraryRepository) GetTopStandards(limit, offset int) ([]models.ProjectDTO, int64, error) {
 	var projects []models.ProjectDTO
+	var standards []models.Project
 	var total int64
 
 	query := r.db.Model(&models.Project{}).Where("published = ?", true)
 	query.Count(&total)
 
 	result := query.
-		Preload("ProjectSector").
-		Select("id, title, reference, description, project_sector_id, published, created_at, updated_at").
+		Preload(clause.Associations).
 		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).
-		Find(&projects)
+		Find(&standards)
+
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
+
+	for _, standard := range standards {
+		projects = append(projects, models.ProjectDTO{
+			ID:          standard.ID,
+			Title:       standard.Title,
+			Reference:   standard.Reference,
+			Published:   standard.Published,
+			Description: standard.Description,
+			CreatedAt:   standard.CreatedAt,
+			UpdatedAt:   standard.UpdatedAt,
+		})
+	}
+
 	return projects, total, nil
 }
 
