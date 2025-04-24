@@ -44,7 +44,8 @@ func (r *LibraryRepository) GetTopStandards(limit, offset int) ([]models.Project
 	query.Count(&total)
 
 	result := query.
-		Select("id, title, reference, description, published, created_at, updated_at").
+		Preload("ProjectSector").
+		Select("id, title, reference, description, project_sector_id, published, created_at, updated_at").
 		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).
