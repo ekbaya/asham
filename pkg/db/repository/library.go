@@ -44,7 +44,7 @@ func (r *LibraryRepository) GetTopStandards(limit, offset int) ([]models.Project
 	query.Count(&total)
 
 	result := query.
-		Select("id, title, reference, description, project_sector, published, created_at, updated_at").
+		Select("id, title, reference, description, published, created_at, updated_at").
 		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).
@@ -73,7 +73,7 @@ func (r *LibraryRepository) GetTopCommittees(limit, offset int) ([]models.Commit
 		Preload("Chairperson.NationalStandardBody").
 		Limit(limit).
 		Offset(offset).
-		Order("created_at DESC").
+		Order("minimum_members DESC").
 		Find(&technicalCommittees)
 	if result.Error != nil {
 		return nil, 0, result.Error
