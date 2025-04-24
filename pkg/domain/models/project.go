@@ -115,12 +115,13 @@ type Project struct {
 
 // ProjectDTO represents a subset of Project fields for repository queries
 type ProjectDTO struct {
-	ID          uuid.UUID `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
-	Title       string    `json:"title"`
-	Reference   string    `json:"reference"`
-	Sector      string    `json:"sector"`
-	Description string    `json:"description"`
-	Published   bool      `json:"published"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID              uuid.UUID `json:"id" gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	Title           string    `json:"title"`
+	Reference       string    `json:"reference"`
+	ProjectSectorID *string   `json:"-"`
+	ProjectSector   *Sector   `json:"project_sector"`
+	Description     string    `json:"description"`
+	Published       bool      `json:"published"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
