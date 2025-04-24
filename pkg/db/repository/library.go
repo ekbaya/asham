@@ -73,7 +73,7 @@ func (r *LibraryRepository) GetTopCommittees(limit, offset int) ([]models.Commit
 		Preload("Chairperson.NationalStandardBody").
 		Limit(limit).
 		Offset(offset).
-		Order("created_at DESC").
+		Order("minimum_members DESC").
 		Find(&technicalCommittees)
 	if result.Error != nil {
 		return nil, 0, result.Error
