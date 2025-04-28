@@ -23,7 +23,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	voteHandler := handlers.NewVoteHandler(*&services.BallotingService)
 	ballotingHandler := handlers.NewBallotingHandler(*&services.BallotingService)
 	meetingHandler := handlers.NewMeetingHandler(*services.MeetingService)
-	libraryHandler := handlers.NewLibraryHandler(*services.LibraryService)
+	libraryHandler := handlers.NewLibraryHandler(*services.LibraryService, *services.MemberService)
 
 	api := router.Group("/api")
 

@@ -21,11 +21,13 @@ import (
 
 type LibraryHandler struct {
 	libraryService services.LibraryService
+	memberService  services.MemberService
 }
 
-func NewLibraryHandler(libraryService services.LibraryService) *LibraryHandler {
+func NewLibraryHandler(libraryService services.LibraryService, memberService services.MemberService) *LibraryHandler {
 	return &LibraryHandler{
 		libraryService: libraryService,
+		memberService:  memberService,
 	}
 }
 func (h *LibraryHandler) GetTopStandards(c *gin.Context) {
@@ -278,6 +280,23 @@ func (h *LibraryHandler) GetPreviewStandard(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusBadRequest, "invalid ID format")
+		return
+	}
+
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utilities.ShowMessage(c, http.StatusBadRequest, "invalid ID format")
+		return
+	}
+
+	user, err := h.memberService.Account(userID.(string))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !user.CanPreviewStandard {
+		utilities.ShowMessage(c, http.StatusForbidden, "user is not authorized to perform this operation")
 		return
 	}
 
