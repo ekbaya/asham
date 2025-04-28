@@ -29,6 +29,8 @@ type Member struct {
 	Organization           string                `json:"organization" `
 	Country                string                `json:"country"`
 	Type                   UserType              `json:"type" gorm:"default:internal"`
+	CanPreviewStandard     bool                  `json:"can_preview_standard" gorm:"default:true"`
+	CanDownloadStandard    bool                  `json:"can_download_standard" gorm:"default:true"`
 	CreatedAt              time.Time
 }
 type MemberMinified struct {
@@ -61,6 +63,9 @@ type MemberResponse struct {
 	PhotoUrl               string                `json:"photo_url"`
 	NationalStandardBodyID *string               `json:"nsb_id"`
 	NationalStandardBody   *NationalStandardBody `json:"nsb,omitempty"`
+	CanPreviewStandard     bool                  `json:"can_preview_standard"`
+	CanDownloadStandard    bool                  `json:"can_download_standard"`
+	Type                   string                `json:"type"`
 	CreatedAt              time.Time             `json:"created_at"`
 }
 
@@ -119,6 +124,9 @@ func (m *Member) ToSecureResponse() MemberResponse {
 		PhotoUrl:               m.PhotoUrl,
 		NationalStandardBodyID: m.NationalStandardBodyID,
 		NationalStandardBody:   m.NationalStandardBody,
+		Type:                   string(m.Type),
+		CanPreviewStandard:     m.CanPreviewStandard,
+		CanDownloadStandard:    m.CanDownloadStandard,
 		CreatedAt:              m.CreatedAt,
 	}
 }

@@ -44,12 +44,14 @@ func (h *UsersHandler) RegisterPublicMember(c *gin.Context) {
 	}
 
 	member := models.Member{
-		FirstName:    payload.FirstName,
-		LastName:     payload.Lastname,
-		Email:        payload.Email,
-		Type:         models.External,
-		Country:      payload.Country,
-		Organization: payload.Organization,
+		FirstName:           payload.FirstName,
+		LastName:            payload.Lastname,
+		Email:               payload.Email,
+		Type:                models.External,
+		Country:             payload.Country,
+		Organization:        payload.Organization,
+		CanPreviewStandard:  false,
+		CanDownloadStandard: false,
 	}
 
 	err := h.userService.CreateMember(&member)
