@@ -74,7 +74,7 @@ type Project struct {
 	ApprovedByID            *string               `json:"-"`
 	ApprovedBy              *Member               `json:"approved_by"`
 	Proposal                *Proposal             `json:"proposal"`
-	ProposalApproved        bool                  `json:"proposal_approved" gorm:"default:true"`
+	ProposalApproved        bool                  `json:"proposal_approved" gorm:"default:false"`
 	ProposalApprovalComment string                `json:"proposal_approval_comment"`
 	ProposalApprovedByID    *string               `json:"-"`
 	ProposalApprovedBy      *Member               `json:"proposal_approved_by"`
