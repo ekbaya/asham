@@ -44,55 +44,59 @@ type ProjectStageHistory struct {
 }
 
 type Project struct {
-	ID                   uuid.UUID             `json:"id"`
-	MemberID             string                `json:"-"`
-	Member               *Member               `json:"creator"`
-	ProjectSectorID      *string               `json:"-"`
-	ProjectSector        *Sector               `json:"project_sector"`
-	Number               int64                 `json:"number"`
-	PartNo               int64                 `json:"part_number"`
-	EditionNo            int64                 `json:"edition_number"`
-	Reference            string                `json:"reference"`
-	ReferenceSuffix      string                `json:"reference_suffix"`
-	Title                string                `json:"title" binding:"required"`
-	Language             string                `json:"language" gorm:"default:English"`
-	Description          string                `json:"description" binding:"required"`
-	TechnicalCommitteeID string                `json:"technical_committee_id" binding:"required"`
-	TechnicalCommittee   *TechnicalCommittee   `json:"committee"`
-	WorkingGroupID       *string               `json:"working_group_id"`
-	WorkingGroup         *WorkingGroup         `json:"working_group"`
-	StageID              string                `json:"stage_id"`                // Current stage ID
-	Stage                *Stage                `json:"stage"`                   // Current stage
-	StageHistory         []ProjectStageHistory `json:"stage_history,omitempty"` // History of all stages
-	Timeframe            int                   `json:"time_frame"`              // Timeframe In Months
-	Type                 ProjectType           `json:"type" binding:"required" gorm:"default:NEW"`
-	VisibleOnLibrary     bool                  `json:"visible_on_library" gorm:"default:true"`
-	PricePerPage         float64               `json:"price_per_page"`
-	IsEmergency          bool                  `json:"is_emergency" gorm:"default:false"`
-	PWIApproved          bool                  `json:"pwi_approved" gorm:"default:false"`
-	PWIApprovalComment   string                `json:"pwi_approval_comment"`
-	ApprovedByID         *string               `json:"-"`
-	ApprovedBy           *Member               `json:"approved_by"`
-	Proposal             *Proposal             `json:"proposal"`
-	Acceptance           *Acceptance           `json:"acceptance"`
-	WorkingDraftID       *string               `json:"working_draft_id"`
-	WorkingDraft         *Document             `json:"working_draft"`
-	WorkingDraftStatus   WorkingDraftStatus    `json:"wd_status" gorm:"default:UNDER_REVIEW"`
-	WDTCSecretaryID      *string               `json:"wd_tc_secretary_id" gorm:"column:wd_tc_secretary_id"`
-	WDTCSecretary        *Member               `json:"wd_tc_secretary"`
-	WorkingDraftComments string                `json:"wd_comments"`
-	CommitteeDraftID     *string               `json:"committee_draft_id"`
-	CommitteeDraft       *Document             `json:"committee_draft"`
-	Comments             []CommentObservation  `json:"comments,omitempty"`
-	CDTCSecretaryID      *string               `json:"cd_tc_secretary_id" gorm:"column:cd_tc_secretary_id"`
-	CDTCSecretary        *Member               `json:"cd_tc_secretary"`
-	IsConsensusReached   bool                  `json:"is_consensus_reached"`
-	ProposalAction       ProposalAction        `json:"proposal_action"`
-	MeetingRequired      bool                  `json:"meeting_required"`
-	SubmissionDate       *time.Time            `json:"submission_date,omitempty"`
-	DARS                 *DARS                 `json:"dars"`
-	Balloting            *Balloting            `json:"ballot"`
-	RelatedDocuments     *[]Document           `json:"project_related_documents" gorm:"many2many:project_related_documents;"`
+	ID                      uuid.UUID             `json:"id"`
+	MemberID                string                `json:"-"`
+	Member                  *Member               `json:"creator"`
+	ProjectSectorID         *string               `json:"-"`
+	ProjectSector           *Sector               `json:"project_sector"`
+	Number                  int64                 `json:"number"`
+	PartNo                  int64                 `json:"part_number"`
+	EditionNo               int64                 `json:"edition_number"`
+	Reference               string                `json:"reference"`
+	ReferenceSuffix         string                `json:"reference_suffix"`
+	Title                   string                `json:"title" binding:"required"`
+	Language                string                `json:"language" gorm:"default:English"`
+	Description             string                `json:"description" binding:"required"`
+	TechnicalCommitteeID    string                `json:"technical_committee_id" binding:"required"`
+	TechnicalCommittee      *TechnicalCommittee   `json:"committee"`
+	WorkingGroupID          *string               `json:"working_group_id"`
+	WorkingGroup            *WorkingGroup         `json:"working_group"`
+	StageID                 string                `json:"stage_id"`                // Current stage ID
+	Stage                   *Stage                `json:"stage"`                   // Current stage
+	StageHistory            []ProjectStageHistory `json:"stage_history,omitempty"` // History of all stages
+	Timeframe               int                   `json:"time_frame"`              // Timeframe In Months
+	Type                    ProjectType           `json:"type" binding:"required" gorm:"default:NEW"`
+	VisibleOnLibrary        bool                  `json:"visible_on_library" gorm:"default:true"`
+	PricePerPage            float64               `json:"price_per_page"`
+	IsEmergency             bool                  `json:"is_emergency" gorm:"default:false"`
+	PWIApproved             bool                  `json:"pwi_approved" gorm:"default:false"`
+	PWIApprovalComment      string                `json:"pwi_approval_comment"`
+	ApprovedByID            *string               `json:"-"`
+	ApprovedBy              *Member               `json:"approved_by"`
+	Proposal                *Proposal             `json:"proposal"`
+	ProposalApproved        bool                  `json:"proposal_approved" gorm:"default:true"`
+	ProposalApprovalComment string                `json:"proposal_approval_comment"`
+	ProposalApprovedByID    *string               `json:"-"`
+	ProposalApprovedBy      *Member               `json:"proposal_approved_by"`
+	Acceptance              *Acceptance           `json:"acceptance"`
+	WorkingDraftID          *string               `json:"working_draft_id"`
+	WorkingDraft            *Document             `json:"working_draft"`
+	WorkingDraftStatus      WorkingDraftStatus    `json:"wd_status" gorm:"default:UNDER_REVIEW"`
+	WDTCSecretaryID         *string               `json:"wd_tc_secretary_id" gorm:"column:wd_tc_secretary_id"`
+	WDTCSecretary           *Member               `json:"wd_tc_secretary"`
+	WorkingDraftComments    string                `json:"wd_comments"`
+	CommitteeDraftID        *string               `json:"committee_draft_id"`
+	CommitteeDraft          *Document             `json:"committee_draft"`
+	Comments                []CommentObservation  `json:"comments,omitempty"`
+	CDTCSecretaryID         *string               `json:"cd_tc_secretary_id" gorm:"column:cd_tc_secretary_id"`
+	CDTCSecretary           *Member               `json:"cd_tc_secretary"`
+	IsConsensusReached      bool                  `json:"is_consensus_reached"`
+	ProposalAction          ProposalAction        `json:"proposal_action"`
+	MeetingRequired         bool                  `json:"meeting_required"`
+	SubmissionDate          *time.Time            `json:"submission_date,omitempty"`
+	DARS                    *DARS                 `json:"dars"`
+	Balloting               *Balloting            `json:"ballot"`
+	RelatedDocuments        *[]Document           `json:"project_related_documents" gorm:"many2many:project_related_documents;"`
 	// Keep track of cancellation at ballot level
 	Cancelled                     bool       `json:"cancelled" gorm:"default:false"`
 	CancelledDate                 *time.Time `json:"cancelled_date"`

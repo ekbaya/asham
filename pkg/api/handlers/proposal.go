@@ -136,10 +136,10 @@ func (h *ProposalHandler) CreateProposal(c *gin.Context) {
 				filename := uuid.New().String() + filepath.Ext(header.Filename)
 
 				// Define upload path
-				uploadPath := "./uploads/" + filename
+				uploadPath := "/assets/documents/" + filename
 
 				// Create uploads directory if it doesn't exist
-				if err := os.MkdirAll("./uploads", 0755); err != nil {
+				if err := os.MkdirAll("../assets/documents/", 0755); err != nil {
 					utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to create upload directory: "+err.Error())
 					return
 				}
@@ -160,7 +160,7 @@ func (h *ProposalHandler) CreateProposal(c *gin.Context) {
 				}
 
 				// Set the file URL in the proposal
-				payload.DraftTextAttachmentURL = "/uploads/" + filename
+				payload.DraftTextAttachmentURL = "/assets/documents/" + filename
 				payload.IsDraftTextAttached = true
 			}
 		}
