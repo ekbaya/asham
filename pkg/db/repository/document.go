@@ -57,6 +57,7 @@ func (r *DocumentRepository) UploadStandard(doc *models.Document, project *model
 	project.PWIApproved = true
 	project.IsConsensusReached = true
 	project.StageID = stage.ID.String()
+	project.ProposalApproved = true
 
 	if err := tx.Create(&doc).Error; err != nil {
 		tx.Rollback()

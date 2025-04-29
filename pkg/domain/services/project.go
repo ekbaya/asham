@@ -106,7 +106,11 @@ func (service *ProjectService) DeleteProject(projectID uuid.UUID) error {
 }
 
 func (service *ProjectService) FindProjects(params map[string]interface{}, limit, offset int) ([]models.Project, int64, error) {
-	return service.repo.FindProjects(params, limit, offset)
+	return service.repo.FindProjects(params, limit, offset, true)
+}
+
+func (service *ProjectService) FindProjectRequests(params map[string]interface{}, limit, offset int) ([]models.Project, int64, error) {
+	return service.repo.FindProjects(params, limit, offset, false)
 }
 
 func (service *ProjectService) GetProjectsByTimeframe(startDate, endDate time.Time) ([]models.Project, error) {

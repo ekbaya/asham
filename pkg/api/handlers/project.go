@@ -255,6 +255,75 @@ func (h *ProjectHandler) FindProjects(c *gin.Context) {
 	})
 }
 
+func (h *ProjectHandler) FindProjectRequests(c *gin.Context) {
+	// Parse query parameters
+	params := make(map[string]interface{})
+
+	// String parameters
+	if title := c.Query("title"); title != "" {
+		params["title"] = title
+	}
+
+	if typeStr := c.Query("type"); typeStr != "" {
+		params["type"] = models.ProjectType(typeStr)
+	}
+
+	// UUID parameters
+	if committeeID := c.Query("committee_id"); committeeID != "" {
+		if id, err := uuid.Parse(committeeID); err == nil {
+			params["committee_id"] = id
+		}
+	}
+
+	if workingGroupID := c.Query("working_group_id"); workingGroupID != "" {
+		if id, err := uuid.Parse(workingGroupID); err == nil {
+			params["working_group_id"] = id
+		}
+	}
+
+	// Boolean parameters
+	if visibleStr := c.Query("visible_on_library"); visibleStr != "" {
+		if visible, err := strconv.ParseBool(visibleStr); err == nil {
+			params["visible_on_library"] = visible
+		}
+	}
+
+	if emergencyStr := c.Query("is_emergency"); emergencyStr != "" {
+		if emergency, err := strconv.ParseBool(emergencyStr); err == nil {
+			params["is_emergency"] = emergency
+		}
+	}
+
+	// Pagination
+	limit := 10
+	offset := 0
+
+	if limitStr := c.Query("pageSize"); limitStr != "" {
+		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
+			limit = val
+		}
+	}
+
+	if offsetStr := c.Query("page"); offsetStr != "" {
+		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
+			offset = val
+		}
+	}
+
+	projects, total, err := h.projectService.FindProjectRequests(params, limit, offset)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"projects": projects,
+		"total":    total,
+		"limit":    limit,
+		"page":     offset,
+	})
+}
+
 // GetProjectsByTimeframe handles retrieving projects within a given timeframe
 func (h *ProjectHandler) GetProjectsByTimeframe(c *gin.Context) {
 	startDateStr := c.Query("start_date")

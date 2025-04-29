@@ -331,11 +331,11 @@ func (r *ProjectRepository) DeleteProject(projectID uuid.UUID) error {
 }
 
 // FindProjects searches for projects with optional filters
-func (r *ProjectRepository) FindProjects(params map[string]any, limit, offset int) ([]models.Project, int64, error) {
+func (r *ProjectRepository) FindProjects(params map[string]any, limit, offset int, standard bool) ([]models.Project, int64, error) {
 	var projects []models.Project
 	var total int64
 
-	query := r.db.Model(&models.Project{})
+	query := r.db.Model(&models.Project{}).Where("proposal_approved = ?", standard)
 
 	// Apply filters
 	if title, ok := params["title"].(string); ok && title != "" {
