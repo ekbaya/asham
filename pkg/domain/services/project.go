@@ -77,6 +77,10 @@ func (service *ProjectService) ApproveProject(projectID string, approved bool, c
 	return service.repo.ApproveProject(projectID, approved, comment, approvedBy)
 }
 
+func (service *ProjectService) ApproveProjectProposal(projectID string, approved bool, comment, approvedBy string) error {
+	return service.repo.ApproveProjectProposal(projectID, approved, comment, approvedBy)
+}
+
 func (service *ProjectService) GetProjectWithStageHistory(projectID uuid.UUID) (*models.Project, error) {
 	return service.repo.GetProjectWithStageHistory(projectID)
 }

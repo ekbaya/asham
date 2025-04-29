@@ -226,6 +226,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		proposal.POST("/reference/:id", proposalHandler.AddReferencedStandard)
 		proposal.DELETE("/reference/:id/:documentId", proposalHandler.RemoveReferencedStandard)
 		proposal.POST("/transfer/:id", proposalHandler.TransferProposal)
+		proposal.POST("/approve", projectHandler.ApproveProjectProposal)
 	}
 
 	// Acceptance Route

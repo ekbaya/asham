@@ -283,13 +283,65 @@ func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comm
 
 	if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != approvedBy {
 		tx.Rollback()
-		return fmt.Errorf("User is not allowed to perform this action")
+		return fmt.Errorf("user is not allowed to perform this action")
 	}
 
 	// Update approval status and comment
 	project.PWIApproved = approved
 	project.PWIApprovalComment = comment
 	project.ApprovedByID = &approvedBy
+
+	// Save the updated project
+	if err := tx.Save(&project).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Update the current stage as "ended"
+	now := time.Now()
+
+	// Find the active stage and mark it as ended
+	if err := tx.Model(&models.ProjectStageHistory{}).
+		Where("project_id = ? AND stage_id = ? AND ended_at IS NULL", projectID, project.StageID).
+		Update("ended_at", now).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Update the project's current stage status
+	if err := tx.Model(&models.Project{}).
+		Where("id = ?", projectID).
+		Update("updated_at", now).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+func (r *ProjectRepository) ApproveProjectProposal(projectID string, approved bool, comment, approvedBy string) error {
+	tx := r.db.Begin() // Start a transaction
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	var project models.Project
+
+	// Retrieve the project by ID
+	if err := tx.Preload("TechnicalCommittee").First(&project, "id = ?", projectID).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != approvedBy {
+		tx.Rollback()
+		return fmt.Errorf("user is not allowed to perform this action")
+	}
+
+	// Update approval status and comment
+	project.ProposalApproved = approved
+	project.ProposalApprovalComment = comment
+	project.ProposalApprovedByID = &approvedBy
 
 	// Save the updated project
 	if err := tx.Save(&project).Error; err != nil {

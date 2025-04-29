@@ -101,6 +101,49 @@ func (h *ProjectHandler) ApproveProject(c *gin.Context) {
 	utilities.ShowMessage(c, http.StatusCreated, "Project status updated successfully")
 }
 
+func (h *ProjectHandler) ApproveProjectProposal(c *gin.Context) {
+	var payload struct {
+		Project  string `json:"project" binding:"required"`
+		Approved bool   `json:"approved"`
+		Comment  string `json:"comment"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			// Convert validation errors into human-readable messages
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
+			return
+		}
+
+		// For non-validation errors
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Add validation for mandatory comment when approved is fasle
+	if !payload.Approved && payload.Comment == "" {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Comment is required when disapproving a proposal")
+		return
+	}
+
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userIDStr := userID.(string)
+
+	err := h.projectService.ApproveProjectProposal(payload.Project, payload.Approved, payload.Comment, userIDStr)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "Project status updated successfully")
+}
+
 func (h *ProjectHandler) GetNextAvailableNumber(c *gin.Context) {
 	number, err := h.projectService.GetNextAvailableNumber()
 	if err != nil {
