@@ -237,7 +237,7 @@ func (r *AcceptanceRepository) SetAcceptanceApproval(results models.Acceptance) 
 
 		if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != *results.TCSecretaryID {
 			tx.Rollback()
-			return fmt.Errorf("User is not allowed to perform this action")
+			return fmt.Errorf("user is not allowed to perform this action")
 		}
 		var acceptance models.Acceptance
 		if err := tx.Where("project_id = ?", results.ProjectID).First(&acceptance).Error; err != nil {
