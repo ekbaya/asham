@@ -62,7 +62,7 @@ type Project struct {
 	Member                  *Member               `json:"creator"`
 	ProjectSectorID         *string               `json:"-"`
 	ProjectSector           *Sector               `json:"project_sector"`
-	Procedure               Procedure             `json:"procedure" gorm:"default:Normal"`
+	Procedure               Procedure             `json:"procedure"`
 	Number                  int64                 `json:"number"`
 	PartNo                  int64                 `json:"part_number"`
 	EditionNo               int64                 `json:"edition_number"`
