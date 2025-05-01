@@ -6,6 +6,19 @@ import (
 	"github.com/google/uuid"
 )
 
+type Procedure string
+
+const (
+	Normal                       Procedure = "Normal"
+	DraftSubmittedWithProposal   Procedure = "Draft_Submitted_With_Proposal"
+	FastTrack                    Procedure = "Fast_Track"
+	TechnicalSpecification       Procedure = "Technical_Specification"
+	TechnicalReport              Procedure = "Technical_Report"
+	PublicAvailableSpecification Procedure = "Public_Available_Specification"
+	GuidesAndGuidelines          Procedure = "Guides_And_Guidelines"
+	WorkshopAgreement            Procedure = "Workshop_Agreement"
+)
+
 type ProjectType string
 
 const (
@@ -49,6 +62,7 @@ type Project struct {
 	Member                  *Member               `json:"creator"`
 	ProjectSectorID         *string               `json:"-"`
 	ProjectSector           *Sector               `json:"project_sector"`
+	Procedure               Procedure             `json:"procedure" gorm:"default:Normal"`
 	Number                  int64                 `json:"number"`
 	PartNo                  int64                 `json:"part_number"`
 	EditionNo               int64                 `json:"edition_number"`
