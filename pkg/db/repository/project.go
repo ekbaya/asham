@@ -319,7 +319,7 @@ func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comm
 	return tx.Commit().Error
 }
 
-func (r *ProjectRepository) ApproveProjectProposal(projectID string, approved bool, comment, approvedBy string) error {
+func (r *ProjectRepository) ApproveProjectProposal(projectID string, approved bool, comment, approvedBy, procedure string) error {
 	tx := r.db.Begin() // Start a transaction
 	if tx.Error != nil {
 		return tx.Error
@@ -342,6 +342,10 @@ func (r *ProjectRepository) ApproveProjectProposal(projectID string, approved bo
 	project.ProposalApproved = approved
 	project.ProposalApprovalComment = comment
 	project.ProposalApprovedByID = &approvedBy
+
+	if approved {
+		project.Procedure = models.Procedure(procedure)
+	}
 
 	// Save the updated project
 	if err := tx.Save(&project).Error; err != nil {

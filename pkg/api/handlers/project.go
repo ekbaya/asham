@@ -141,7 +141,7 @@ func (h *ProjectHandler) ApproveProjectProposal(c *gin.Context) {
 
 	userIDStr := userID.(string)
 
-	err := h.projectService.ApproveProjectProposal(payload.Project, payload.Approved, payload.Comment, userIDStr)
+	err := h.projectService.ApproveProjectProposal(payload.Project, payload.Approved, payload.Comment, userIDStr, payload.Procedure)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
