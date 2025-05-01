@@ -37,7 +37,6 @@ func (r *ProjectRepository) CreateProject(project *models.Project) error {
 }
 
 func (r *ProjectRepository) UpdateProjectStage(projectID uuid.UUID, newStageID uuid.UUID, notes string) error {
-	// Start a transaction
 	tx := r.db.Begin()
 	if tx.Error != nil {
 		return tx.Error
