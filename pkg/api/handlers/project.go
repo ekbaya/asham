@@ -103,9 +103,10 @@ func (h *ProjectHandler) ApproveProject(c *gin.Context) {
 
 func (h *ProjectHandler) ApproveProjectProposal(c *gin.Context) {
 	var payload struct {
-		Project  string `json:"project" binding:"required"`
-		Approved bool   `json:"approved"`
-		Comment  string `json:"comment"`
+		Project   string `json:"project" binding:"required"`
+		Approved  bool   `json:"approved"`
+		Comment   string `json:"comment"`
+		Procedure string `json:"procedure"`
 	}
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		validationErrors, ok := err.(validator.ValidationErrors)
@@ -124,6 +125,11 @@ func (h *ProjectHandler) ApproveProjectProposal(c *gin.Context) {
 	// Add validation for mandatory comment when approved is fasle
 	if !payload.Approved && payload.Comment == "" {
 		utilities.ShowMessage(c, http.StatusBadRequest, "Comment is required when disapproving a proposal")
+		return
+	}
+
+	if payload.Approved && payload.Procedure == "" {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Procedure is required when approving a proposal")
 		return
 	}
 
