@@ -21,6 +21,7 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 	// Generate project ID
 	project.ID = uuid.New()
 	project.CreatedAt = time.Now()
+	project.ProposalApproved = false
 
 	number, err := service.repo.GetNextAvailableNumber()
 	if err != nil {
@@ -38,6 +39,9 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 	project.Reference = generateProjectReference(project, tc.Code)
 
 	stage, err := service.repo.GetStageByNumber(0)
+	if err != nil {
+		return err
+	}
 
 	// project is at stage 0
 	project.StageID = stage.ID.String()
