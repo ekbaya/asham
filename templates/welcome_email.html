@@ -15,7 +15,7 @@
             border-radius: 5px;
         }
         .header {
-            background-color: #007bff;
+            background-color: #ff4500; /* Orange color for header */
             color: white;
             padding: 15px;
             text-align: center;
@@ -26,12 +26,18 @@
             background-color: white;
             border-radius: 0 0 5px 5px;
         }
+        .band-name {
+            color: #1e90ff; /* Dodger blue for band name */
+            font-weight: bold;
+            font-size: 1.2em;
+        }
         .password {
             background-color: #f0f0f0;
             padding: 10px;
             border-radius: 3px;
             font-family: monospace;
             display: inline-block;
+            color: #dc143c; /* Crimson for password */
         }
         .footer {
             margin-top: 20px;
@@ -44,11 +50,12 @@
 <body>
 <div class="container">
     <div class="header">
-        <h2>Welcome to Our ASHAM!</h2>
+        <h2>Welcome to Our Service!</h2>
     </div>
     <div class="content">
         <p>Hello {{.Name}},</p>
         <p>Your account has been created successfully. We're excited to have you on board!</p>
+        <p>Check out our featured band: <span class="band-name">{{.BandName}}</span></p>
         <p>Your temporary password is: <span class="password">{{.Password}}</span></p>
         <p>Please login and change your password as soon as possible.</p>
         <p>If you have any questions, feel free to contact our support team.</p>

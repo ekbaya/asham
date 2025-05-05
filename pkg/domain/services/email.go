@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/smtp"
+	"os"
 	"text/template"
 )
 
@@ -32,10 +32,10 @@ func NewEmailService(config *EmailConfig) *EmailService {
 
 // SendWelcomeEmail sends a styled HTML welcome email to a new user with their password
 func (s *EmailService) SendWelcomeEmail(toEmail, name, password string) error {
-	subject := "Welcome to Our ASHAM"
+	subject := "Welcome to Our Service"
 
 	// Read the email template from file
-	tmpl, err := ioutil.ReadFile("templates/welcome_email.html")
+	tmpl, err := os.ReadFile("templates/welcome_email.html")
 	if err != nil {
 		return fmt.Errorf("failed to read email template: %w", err)
 	}
@@ -46,13 +46,15 @@ func (s *EmailService) SendWelcomeEmail(toEmail, name, password string) error {
 		return fmt.Errorf("failed to parse email template: %w", err)
 	}
 
-	// Prepare template data
+	// Prepare template data including band name "ASHAM"
 	data := struct {
 		Name     string
 		Password string
+		BandName string
 	}{
 		Name:     name,
 		Password: password,
+		BandName: "ASHAM",
 	}
 
 	// Execute template with data
