@@ -197,7 +197,7 @@ func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, statu
 
 		if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
 			tx.Rollback()
-			return fmt.Errorf("User is not allowed to perform this action")
+			return fmt.Errorf("you must login as Secreatary of the TC undertaking this project")
 		}
 
 		// Update fields directly on the project object
@@ -208,7 +208,11 @@ func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, statu
 		// If status is ACCEPTED, prepare additional changes
 		if status == models.ACCEPTED {
 			var stage models.Stage
-			if err := tx.Where("number = ?", 3).First(&stage).Error; err != nil {
+			nextStage := 3
+			if project.Procedure == models.WorkshopAgreement {
+				nextStage = 4 // We skip Committee and go to Enquiry
+			}
+			if err := tx.Where("number = ?", nextStage).First(&stage).Error; err != nil {
 				return err
 			}
 
@@ -282,7 +286,7 @@ func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comm
 
 	if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != approvedBy {
 		tx.Rollback()
-		return fmt.Errorf("user is not allowed to perform this action")
+		return fmt.Errorf("you must login as Secreatary of the TC undertaking this project")
 	}
 
 	// Update approval status and comment
@@ -334,7 +338,7 @@ func (r *ProjectRepository) ApproveProjectProposal(projectID string, approved bo
 
 	if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != approvedBy {
 		tx.Rollback()
-		return fmt.Errorf("user is not allowed to perform this action")
+		return fmt.Errorf("you must login as Secreatary of the TC undertaking this project")
 	}
 
 	// Update approval status and comment
@@ -625,7 +629,7 @@ func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusRea
 
 		if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
 			tx.Rollback()
-			return fmt.Errorf("User is not allowed to perform this action")
+			return fmt.Errorf("you must login as Secreatary of the TC undertaking this project")
 		}
 
 		project.IsConsensusReached = isConsensusReached
@@ -638,7 +642,11 @@ func (r *ProjectRepository) ReviewCD(secretary, projectId string, isConsensusRea
 			project.SubmissionDate = &now
 
 			var stage models.Stage
-			if err := tx.Where("number = ?", 4).First(&stage).Error; err != nil {
+			nextStage := 4
+			if project.Procedure == models.TechnicalSpecification || project.Procedure == models.TechnicalReport || project.Procedure == models.PublicAvailableSpecification {
+				nextStage = 6 // We are going directly to Approval stage
+			}
+			if err := tx.Where("number = ?", nextStage).First(&stage).Error; err != nil {
 				return err
 			}
 
@@ -691,7 +699,7 @@ func (r *ProjectRepository) ReviewDARS(secretary,
 
 		if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
 			tx.Rollback()
-			return fmt.Errorf("User is not allowed to perform this action")
+			return fmt.Errorf("you must login as Secreatary of the TC undertaking this project")
 		}
 
 		var dars models.DARS
@@ -721,7 +729,11 @@ func (r *ProjectRepository) ReviewDARS(secretary,
 		if status != "" && status == string(models.DARSApproved) {
 			dars.MoveToBalloting = true
 			var stage models.Stage
-			if err := tx.Where("number = ?", 5).First(&stage).Error; err != nil {
+			nextStage := 5
+			if project.Procedure == models.GuidesAndGuidelines || project.Procedure == models.WorkshopAgreement {
+				nextStage = 6 // Skiping balloting
+			}
+			if err := tx.Where("number = ?", nextStage).First(&stage).Error; err != nil {
 				return err
 			}
 
@@ -822,7 +834,7 @@ func (r *ProjectRepository) ApproveFDRSForPublication(secretary, projectId strin
 
 		if project.TechnicalCommittee.SecretaryId == nil || *project.TechnicalCommittee.SecretaryId != secretary {
 			tx.Rollback()
-			return fmt.Errorf("User is not allowed to perform this action")
+			return fmt.Errorf("you must login as Secreatary of the TC undertaking this project")
 		}
 
 		now := time.Now()

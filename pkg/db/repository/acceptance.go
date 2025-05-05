@@ -273,7 +273,8 @@ func (r *AcceptanceRepository) SetAcceptanceApproval(results models.Acceptance) 
 		}
 
 		var stage models.Stage
-		if err := tx.Where("number = ?", 2).First(&stage).Error; err != nil {
+		nextStage := getNextStage(project.Procedure)
+		if err := tx.Where("number = ?", nextStage).First(&stage).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -446,5 +447,16 @@ func checkIfCriteriaIsMet(internationalStandard bool, responses []models.Individ
 		}
 
 		return true, fmt.Sprintf("Criteria met: %d P-members voted and %d members willing to participate actively", totalVotingCount, generalParticipationCount), nil
+	}
+}
+
+func getNextStage(procedure models.Procedure) int {
+	switch procedure {
+	case models.Normal, models.DraftSubmittedWithProposal: // Next is Preparatory
+		return 2
+	case models.FastTrack: // Next stage is Enquiry
+		return 4
+	default:
+		return 2
 	}
 }
