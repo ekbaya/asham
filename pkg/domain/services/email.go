@@ -73,7 +73,6 @@ func (s *EmailService) sendEmail(to, subject, body string) error {
 	from := s.config.From
 	addr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
 
-	// Format the email with MIME headers for HTML content
 	message := fmt.Sprintf("From: %s\r\n"+
 		"To: %s\r\n"+
 		"Subject: %s\r\n"+
