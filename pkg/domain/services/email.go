@@ -1,9 +1,12 @@
 package services
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/smtp"
+	"text/template"
 )
 
 // EmailConfig holds the configuration for the email service
@@ -27,23 +30,38 @@ func NewEmailService(config *EmailConfig) *EmailService {
 	}
 }
 
-// SendWelcomeEmail sends a welcome email to a new user with their password
+// SendWelcomeEmail sends a styled HTML welcome email to a new user with their password
 func (s *EmailService) SendWelcomeEmail(toEmail, name, password string) error {
-	subject := "Welcome to Our Service"
-	body := fmt.Sprintf(`
-Hello %s,
+	subject := "Welcome to Our ASHAM"
 
-Welcome to our service! Your account has been created successfully.
+	// Read the email template from file
+	tmpl, err := ioutil.ReadFile("templates/welcome_email.html")
+	if err != nil {
+		return fmt.Errorf("failed to read email template: %w", err)
+	}
 
-Your temporary password is: %s
+	// Parse the template
+	t, err := template.New("welcomeEmail").Parse(string(tmpl))
+	if err != nil {
+		return fmt.Errorf("failed to parse email template: %w", err)
+	}
 
-Please login and change your password as soon as possible.
+	// Prepare template data
+	data := struct {
+		Name     string
+		Password string
+	}{
+		Name:     name,
+		Password: password,
+	}
 
-Best regards,
-The Team
-`, name, password)
+	// Execute template with data
+	var body bytes.Buffer
+	if err := t.Execute(&body, data); err != nil {
+		return fmt.Errorf("failed to execute email template: %w", err)
+	}
 
-	return s.sendEmail(toEmail, subject, body)
+	return s.sendEmail(toEmail, subject, body.String())
 }
 
 // sendEmail handles the actual email sending
@@ -53,10 +71,12 @@ func (s *EmailService) sendEmail(to, subject, body string) error {
 	from := s.config.From
 	addr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
 
-	// Format the email
+	// Format the email with MIME headers for HTML content
 	message := fmt.Sprintf("From: %s\r\n"+
 		"To: %s\r\n"+
 		"Subject: %s\r\n"+
+		"MIME-Version: 1.0\r\n"+
+		"Content-Type: text/html; charset=UTF-8\r\n"+
 		"\r\n"+
 		"%s\r\n", from, to, subject, body)
 
