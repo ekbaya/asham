@@ -83,5 +83,7 @@ type Meeting struct {
 	Comments                string    `json:"comments"`
 	MinutesApprovalDeadline time.Time `json:"minutes_approval_deadline"` // 30 days after minutes circulation
 	Attendees               *[]Member `json:"attendees,omitempty" gorm:"many2many:meeting_attendees;"`
+	MinutesDocID            *string   `json:"minutes_doc_id"`
+	MinutesDoc              *Document `json:"minutes_doc"`
 	CreatedAt               time.Time `json:"created_at"`
 }

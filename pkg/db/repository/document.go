@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
@@ -318,4 +319,43 @@ func (r *DocumentRepository) ProjectDocuments(projectId string) ([]models.Docume
 		docs = append(docs, *project.CommitteeDraft)
 	}
 	return docs, nil
+}
+
+func (r *DocumentRepository) UpdateMeetingMinutes(meetingId, fileURL, member string) error {
+	tx := r.db.Begin() // Start a transaction
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var meeting models.Meeting
+	if err := tx.Where("id = ?", meetingId).First(&meeting).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	doc := models.Document{
+		ID:          uuid.New(),
+		Reference:   fmt.Sprintf("Minutes:%s", meetingId),
+		Title:       meeting.Title,
+		FileURL:     fileURL,
+		Description: "Minutes",
+		CreatedByID: member,
+	}
+
+	if err := tx.Create(&doc).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	docID := doc.ID.String()
+	meeting.MinutesDocID = &docID
+
+	if err := tx.Save(&meeting).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }

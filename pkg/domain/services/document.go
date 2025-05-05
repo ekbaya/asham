@@ -120,3 +120,7 @@ func (service *DocumentService) ProjectDocuments(projectId string) ([]models.Doc
 func (service *DocumentService) UpdateProjectRelatedDoc(projectId, docTitle, docRef, docDescription, fileURL, member string) error {
 	return service.repo.UpdateProjectRelatedDoc(projectId, docTitle, docRef, docDescription, fileURL, member)
 }
+
+func (service *DocumentService) UpdateMeetingMinutes(meetingId, fileURL, member string) error {
+	return service.repo.UpdateMeetingMinutes(meetingId, fileURL, member)
+}
