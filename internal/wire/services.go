@@ -31,6 +31,8 @@ var ServiceSet = wire.NewSet(
 	services.NewMeetingService,
 	repository.NewLibraryRepository,
 	services.NewLibraryService,
+	repository.NewStandardRepository,
+	services.NewStandardService,
 )
 
 func GetEmailConfigurations() *services.EmailConfig {
