@@ -18,13 +18,13 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	projectHandler := handlers.NewProjectHandler(*services.ProjectService)
 	proposalHandler := handlers.NewProposalHandler(services.ProposalService, services.DocumentService, services.ProjectService)
 	acceptanceHandler := handlers.NewAcceptanceHandler(*services.AcceptanceService)
-	commentHandler := handlers.NewCommentHandler(*&services.CommentService)
-	publicCommentHandler := handlers.NewNationalConsultationHandler(*&services.NationalConsultationService)
-	voteHandler := handlers.NewVoteHandler(*&services.BallotingService)
-	ballotingHandler := handlers.NewBallotingHandler(*&services.BallotingService)
+	commentHandler := handlers.NewCommentHandler(services.CommentService)
+	publicCommentHandler := handlers.NewNationalConsultationHandler(services.NationalConsultationService)
+	voteHandler := handlers.NewVoteHandler(services.BallotingService)
+	ballotingHandler := handlers.NewBallotingHandler(services.BallotingService)
 	meetingHandler := handlers.NewMeetingHandler(*services.MeetingService)
 	libraryHandler := handlers.NewLibraryHandler(*services.LibraryService, *services.MemberService)
-	standardHandler := handlers.NewStandardHandler(*&services.StandardService)
+	standardHandler := handlers.NewStandardHandler(services.StandardService)
 
 	api := router.Group("/api")
 

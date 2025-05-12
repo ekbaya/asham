@@ -34,7 +34,8 @@ type StandardVersion struct {
 
 type StandardAuditLog struct {
 	ID         uuid.UUID `gorm:"type:uuid;primaryKey"`
-	StandardID uuid.UUID
+	StandardID uuid.UUID `gorm:"type:uuid;index"`
+	Standard   *Standard `gorm:"foreignKey:StandardID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Version    int
 	ChangedBy  string
 	ChangeDiff string `gorm:"type:text"` // Can be a long string of ASCII diff
