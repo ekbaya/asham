@@ -12,19 +12,20 @@ type Standard struct {
 	Title       string         `json:"title"`
 	Content     string         `json:"content" gorm:"type:jsonb"`
 	Version     int            `json:"version"`
-	UpdatedByID string         `json:"updated_by_id"`
-	UpdatedBy   *Member        `json:"updated_by"`
+	UpdatedByID string         `json:"updated_by_id" gorm:"index"`
+	UpdatedBy   *Member        `json:"updated_by" gorm:"foreignKey:UpdatedByID"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	CreatedAt   time.Time      `json:"created_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
 
 type StandardVersion struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	StandardID  uuid.UUID `gorm:"type:uuid;index"`
-	Content     string    `json:"content" gorm:"type:jsonb"`
-	Version     int       `json:"version"`
-	SavedByByID string    `json:"updated_by_id"`
-	SavedBy     *Member   `json:"saved_by"`
-	SavedAt     time.Time `json:"saved_at" gorm:"autoCreateTime"`
+	ID         uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	StandardID uuid.UUID `gorm:"type:uuid;index"`
+	Standard   *Standard `gorm:"foreignKey:StandardID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Content    string    `json:"content" gorm:"type:jsonb"`
+	Version    int       `json:"version"`
+	SavedByID  string    `json:"saved_by_id" gorm:"index"`
+	SavedBy    *Member   `gorm:"foreignKey:SavedByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	SavedAt    time.Time `json:"saved_at" gorm:"autoCreateTime"`
 }
