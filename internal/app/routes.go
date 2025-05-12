@@ -358,6 +358,8 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		standard.GET("/:id", standardHandler.GetStandard)
 		standard.GET("/:id/versions", standardHandler.GetStandardVersions)
 		standard.POST("/:id/restore", standardHandler.RestoreVersion)
+		standard.GET("/:id/diff", standardHandler.DiffVersions)
+		standard.GET("/:id/audit-log", standardHandler.GetAuditLogs)
 	}
 
 	return router, nil

@@ -31,3 +31,12 @@ type StandardVersion struct {
 	SavedBy    *Member   `gorm:"foreignKey:SavedByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	SavedAt    time.Time `json:"saved_at" gorm:"autoCreateTime"`
 }
+
+type StandardAuditLog struct {
+	ID         uuid.UUID `gorm:"type:uuid;primaryKey"`
+	StandardID uuid.UUID
+	Version    int
+	ChangedBy  string
+	ChangeDiff string `gorm:"type:text"` // Can be a long string of ASCII diff
+	CreatedAt  time.Time
+}

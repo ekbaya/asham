@@ -136,3 +136,48 @@ func (h *StandardHandler) RestoreVersion(c *gin.Context) {
 
 	utilities.ShowMessage(c, http.StatusOK, "Standard version restored")
 }
+
+func (h *StandardHandler) DiffVersions(c *gin.Context) {
+	id := c.Param("id")
+	from := c.Query("from")
+	to := c.Query("to")
+
+	if from == "" || to == "" {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Both from and to versions are required")
+		return
+	}
+
+	standardID := id
+
+	fromVersion, err := h.standardService.GetVersion(standardID, from)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "From version not found")
+		return
+	}
+
+	toVersion, err := h.standardService.GetVersion(standardID, to)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "To version not found")
+		return
+	}
+
+	diff, err := utilities.DiffJSON(fromVersion.Content, toVersion.Content)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to diff versions")
+		return
+	}
+
+	utilities.Show(c, http.StatusOK, "diff", diff)
+}
+
+func (h *StandardHandler) GetAuditLogs(c *gin.Context) {
+	standardID := c.Param("id")
+
+	logs, err := h.standardService.GetAuditLogs(standardID)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, "Failed to fetch audit logs")
+		return
+	}
+
+	utilities.Show(c, http.StatusOK, "logs", logs)
+}

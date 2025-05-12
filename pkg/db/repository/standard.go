@@ -70,3 +70,23 @@ func (r *StandardRepository) RestoreStandardVersion(standardID string, version i
 			"updated_by": oldVersion.SavedBy,
 		}).Error
 }
+
+func (r *StandardRepository) SaveAuditLog(log *models.StandardAuditLog) error {
+	return r.db.Create(log).Error
+}
+
+func (r *StandardRepository) SaveVersion(version *models.StandardVersion) error {
+	return r.db.Create(version).Error
+}
+
+func (r *StandardRepository) GetStandardVersion(standardID string, version int) (*models.StandardVersion, error) {
+	var versionEntry models.StandardVersion
+	err := r.db.Where("standard_id = ? AND version = ?", standardID, version).First(&versionEntry).Error
+	return &versionEntry, err
+}
+
+func (r *StandardRepository) GetAuditLogsByStandardID(standardID string) ([]models.StandardAuditLog, error) {
+	var logs []models.StandardAuditLog
+	err := r.db.Where("standard_id = ?", standardID).Order("created_at desc").Find(&logs).Error
+	return logs, err
+}

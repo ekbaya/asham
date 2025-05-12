@@ -39,8 +39,10 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
+	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	golang.org/x/arch v0.12.0 // indirect
 	golang.org/x/image v0.21.0 // indirect
 	golang.org/x/net v0.37.0 // indirect
@@ -63,6 +65,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/pdfcpu/pdfcpu v0.9.1
 	github.com/redis/go-redis/v9 v9.7.3
+	github.com/yudai/gojsondiff v1.0.0
 	golang.org/x/text v0.23.0 // indirect
 	gorm.io/driver/postgres v1.5.11
 )

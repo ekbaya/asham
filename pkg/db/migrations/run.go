@@ -46,5 +46,6 @@ func RunMigrations(db *gorm.DB) error {
 		&models.User{},
 		&models.Standard{},
 		&models.StandardVersion{},
+		&models.StandardAuditLog{},
 	)
 }
