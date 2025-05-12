@@ -16,6 +16,8 @@ type Standard struct {
 	UpdatedBy   *Member        `json:"updated_by" gorm:"foreignKey:UpdatedByID"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	CreatedAt   time.Time      `json:"created_at"`
+	ProjectID   string         `json:"project_id" gorm:"index"`
+	Project     *Project       `json:"project" gorm:"foreignKey:ProjectID"`
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
 

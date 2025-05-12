@@ -24,6 +24,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	ballotingHandler := handlers.NewBallotingHandler(*&services.BallotingService)
 	meetingHandler := handlers.NewMeetingHandler(*services.MeetingService)
 	libraryHandler := handlers.NewLibraryHandler(*services.LibraryService, *services.MemberService)
+	standardHandler := handlers.NewStandardHandler(*&services.StandardService)
 
 	api := router.Group("/api")
 
@@ -347,6 +348,16 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		library.GET("/committees/count", libraryHandler.CountCommittees)
 		library.GET("/standards/committee/:id", libraryHandler.GetStandardsByCommittee)
 		library.GET("/sectors", libraryHandler.GetSectors)
+	}
+
+	// Standard Development Route
+	standard := api.Group("standards")
+	{
+		standard.POST("/", standardHandler.CreateStandard)
+		standard.PUT("/:id/save", standardHandler.SaveStandard) // Auto-save / webhook-style
+		standard.GET("/:id", standardHandler.GetStandard)
+		standard.GET("/:id/versions", standardHandler.GetStandardVersions)
+		standard.POST("/:id/restore", standardHandler.RestoreVersion)
 	}
 
 	return router, nil
