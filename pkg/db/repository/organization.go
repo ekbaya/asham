@@ -315,6 +315,19 @@ func (r *OrganizationRepository) AddMemberToWorkingGroup(id string, memberID str
 
 	return r.db.Model(&committee).Association("Experts").Append(&member)
 }
+func (r *OrganizationRepository) AddMemberToEditingCommittee(id string, memberID string) error {
+	var committee models.EditingCommittee
+	if err := r.db.First(&committee, "id = ?", id).Error; err != nil {
+		return err
+	}
+
+	var member models.Member
+	if err := r.db.First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&committee).Association("Editors").Append(&member)
+}
 
 func (r *OrganizationRepository) RemoveMemberFromARSOCouncil(committeeID string, memberID string) error {
 	memberUUID, err := uuid.Parse(memberID)
@@ -410,6 +423,18 @@ func (r *OrganizationRepository) RemoveMemberFromJointTechnicalCommittee(committ
 		return err
 	}
 	return r.db.Model(&committee).Association("JointMembers").Delete(&models.Member{ID: memberUUID})
+}
+
+func (r *OrganizationRepository) RemoveMemberFromEditingCommittee(committeeID string, memberID string) error {
+	memberUUID, err := uuid.Parse(memberID)
+	if err != nil {
+		return err
+	}
+	var committee models.EditingCommittee
+	if err := r.db.First(&committee, "id = ?", committeeID).Error; err != nil {
+		return err
+	}
+	return r.db.Model(&committee).Association("Editors").Delete(&models.Member{ID: memberUUID})
 }
 
 func (r *OrganizationRepository) GetArsoCouncilMembers(committeeID string) ([]*models.Member, error) {

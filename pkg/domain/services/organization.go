@@ -177,6 +177,10 @@ func (service *OrganizationService) AddMemberToWorkingGroup(id string, memberID 
 	return service.repo.AddMemberToWorkingGroup(id, memberID)
 }
 
+func (service *OrganizationService) AddMemberToEditingCommittee(id string, memberID string) error {
+	return service.repo.AddMemberToEditingCommittee(id, memberID)
+}
+
 func (service *OrganizationService) RemoveMemberFromARSOCouncil(id string, memberID string) error {
 	return service.repo.RemoveMemberFromARSOCouncil(id, memberID)
 }
@@ -207,6 +211,10 @@ func (service *OrganizationService) RemoveMemberFromSpecializedCommittee(id stri
 
 func (service *OrganizationService) RemoveMemberFromJointTechnicalCommittee(id string, memberID string) error {
 	return service.repo.RemoveMemberFromJointTechnicalCommittee(id, memberID)
+}
+
+func (service *OrganizationService) RemoveMemberFromEditingCommittee(id string, memberID string) error {
+	return service.repo.RemoveMemberFromEditingCommittee(id, memberID)
 }
 
 func (service *OrganizationService) GetArsoCouncilMembers(committeeID string) ([]*models.Member, error) {

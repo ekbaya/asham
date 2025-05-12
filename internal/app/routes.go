@@ -108,6 +108,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.POST("/committees/specialized/:id/members", organizationHandler.AddMemberToSpecializedCommittee)
 		organization.POST("/committees/task_force/:id/members", organizationHandler.AddMemberToTaskForce)
 		organization.POST("/committees/working_group/:id/members", organizationHandler.AddMemberToWorkingGroup)
+		organization.POST("/committees/editing_committee/:id/members", organizationHandler.AddMemberToEditingCommittee)
 
 		// Remove members
 		organization.DELETE("/committees/arso_council/:id/members", organizationHandler.RemoveMemberFromARSOCouncil)
@@ -118,6 +119,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.DELETE("/committees/technical/:id/members", organizationHandler.RemoveMemberFromTechnicalCommittee)
 		organization.DELETE("/committees/specialized/:id/members", organizationHandler.RemoveMemberFromSpecializedCommittee)
 		organization.DELETE("/committees/joint_technical/:id/members", organizationHandler.RemoveMemberFromJointTechnicalCommittee)
+		organization.DELETE("/committees/editing_committee/:id/members", organizationHandler.RemoveMemberFromEditingCommittee)
 
 		// Get members
 		organization.GET("/committees/arso_council/:id/members", organizationHandler.GetArsoCouncilMembers)
