@@ -34,9 +34,18 @@ func (h *StandardHandler) CreateStandard(c *gin.Context) {
 		return
 	}
 
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userIDStr := userID.(string)
+
 	payload.CreatedAt = time.Now()
 	payload.UpdatedAt = payload.CreatedAt
 	payload.Version = 1
+	payload.UpdatedByID = userIDStr
 
 	if err := h.standardService.CreateStandard(&payload); err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
@@ -56,6 +65,14 @@ func (h *StandardHandler) SaveStandard(c *gin.Context) {
 		return
 	}
 
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userIDStr := userID.(string)
+
 	standard, err := h.standardService.GetStandardByID(id)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusNotFound, "Standard not found")
@@ -66,7 +83,7 @@ func (h *StandardHandler) SaveStandard(c *gin.Context) {
 	standard.UpdatedBy = payload.UpdatedBy
 	standard.UpdatedAt = time.Now()
 
-	if err := h.standardService.SaveStandard(standard); err != nil {
+	if err := h.standardService.SaveStandard(standard, userIDStr); err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}

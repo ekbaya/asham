@@ -22,9 +22,9 @@ func (service *StandardService) CreateStandard(standard *models.Standard) error 
 	return service.repo.CreateStandard(standard)
 }
 
-func (service *StandardService) SaveStandard(standard *models.Standard) error {
+func (service *StandardService) SaveStandard(standard *models.Standard, memberId string) error {
 	standard.UpdatedAt = time.Now()
-	return service.repo.SaveStandard(standard)
+	return service.repo.SaveStandard(standard, memberId)
 }
 
 func (service *StandardService) GetStandardByID(id string) (*models.Standard, error) {

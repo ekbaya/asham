@@ -19,13 +19,13 @@ func (r *StandardRepository) CreateStandard(standard *models.Standard) error {
 }
 
 // Update Standard and store version history
-func (r *StandardRepository) SaveStandard(standard *models.Standard) error {
+func (r *StandardRepository) SaveStandard(standard *models.Standard, memberId string) error {
 	// Save current content to history before updating
 	version := models.StandardVersion{
 		StandardID: standard.ID,
 		Content:    standard.Content,
 		Version:    standard.Version,
-		SavedBy:    standard.UpdatedBy,
+		SavedByID:  memberId,
 	}
 
 	if err := r.db.Create(&version).Error; err != nil {
