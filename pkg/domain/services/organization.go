@@ -51,8 +51,16 @@ func (service *OrganizationService) AddWorkingGroupToTechnicalCommittee(tc *mode
 	return service.repo.AddWorkingGroupToTechnicalCommittee(tc, wg)
 }
 
+func (service *OrganizationService) AddEditingCommitteeToTechnicalCommittee(tc *models.TechnicalCommittee, ec *models.EditingCommittee) error {
+	return service.repo.AddEditingCommitteeToTechnicalCommittee(tc, ec)
+}
+
 func (service *OrganizationService) GetCommitteeWorkingGroups(committeeID string) (*[]models.WorkingGroup, error) {
 	return service.repo.GetCommitteeWorkingGroups(committeeID)
+}
+
+func (service *OrganizationService) GetCommitteeEditingCommittee(committeeID string) (*models.EditingCommittee, error) {
+	return service.repo.GetCommitteeEditingCommittee(committeeID)
 }
 
 func (service *OrganizationService) FetchTechnicalCommittees() (*[]models.TechnicalCommittee, error) {
@@ -68,8 +76,17 @@ func (service *OrganizationService) CreateWorkingGroup(wg *models.WorkingGroup) 
 	return service.repo.CreateWorkingGroup(wg)
 }
 
+func (service *OrganizationService) CreateEditingCommittee(ec *models.EditingCommittee) error {
+	ec.ID = uuid.New()
+	return service.repo.CreateEditingCommittee(ec)
+}
+
 func (service *OrganizationService) GetWorkingGroupByID(id string) (*models.WorkingGroup, error) {
 	return service.repo.GetWorkingGroupByID(id)
+}
+
+func (service *OrganizationService) GetEditingCommitteeByID(id string) (*models.EditingCommittee, error) {
+	return service.repo.GetEditingCommitteeByID(id)
 }
 
 func (service *OrganizationService) CreateTaskForce(tf *models.TaskForce) error {
@@ -282,6 +299,10 @@ func (service *OrganizationService) GetTCProjects(id string) ([]*models.Project,
 
 func (service *OrganizationService) GetTCWorkingGroups(id string) ([]*models.WorkingGroup, error) {
 	return service.repo.GetTCWorkingGroups(id)
+}
+
+func (service *OrganizationService) GetTCEditingCommittee(id string) (*models.EditingCommittee, error) {
+	return service.repo.GetTCEditingCommittee(id)
 }
 
 func (service *OrganizationService) GetCommitteeMeetings(id string) ([]models.Meeting, error) {

@@ -78,6 +78,13 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.POST("/complete_working_group", organizationHandler.CompleteWorkingGroup)
 		organization.GET("/working_groups/tc/:id", organizationHandler.GetCommitteeWorkingGroups)
 		organization.GET("/working_groups/:id", organizationHandler.GetWorkingGroupByID)
+
+		// editing committee
+		organization.POST("/add_editing_committee_to_committee", organizationHandler.CreateEditingCommittee)
+		organization.POST("/editing_committees", organizationHandler.CreateEditingCommittee)
+		organization.GET("/editing_committees/tc/:id", organizationHandler.GetCommitteeEditingCommittee)
+		organization.GET("/editing_committees/:id", organizationHandler.GetEditingCommitteeByID)
+
 		organization.POST("/task_force", organizationHandler.CreateTaskForce)
 		organization.POST("/task_force/:id", organizationHandler.GetTaskForceByID)
 		organization.POST("/sub_commitee", organizationHandler.CreateSubCommittee)

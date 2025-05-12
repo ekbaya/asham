@@ -514,6 +514,11 @@ func (r *OrganizationRepository) AddWorkingGroupToTechnicalCommittee(tc *models.
 	return r.db.Save(wg).Error
 }
 
+func (r *OrganizationRepository) AddEditingCommitteeToTechnicalCommittee(tc *models.TechnicalCommittee, ed *models.EditingCommittee) error {
+	ed.ParentTC = tc
+	return r.db.Save(ed).Error
+}
+
 func (r *OrganizationRepository) CompleteWorkingGroup(wg *models.WorkingGroup) error {
 	now := time.Now()
 	wg.CompletedAt = &now
@@ -572,10 +577,25 @@ func (r *OrganizationRepository) GetWorkingGroupByID(id string) (*models.Working
 	return &wg, nil
 }
 
+func (r *OrganizationRepository) GetEditingCommitteeByID(id string) (*models.EditingCommittee, error) {
+	var ec models.EditingCommittee
+	result := r.db.First(&ec, "id = ?", id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &ec, nil
+}
+
 func (r *OrganizationRepository) GetCommitteeWorkingGroups(committeeID string) (*[]models.WorkingGroup, error) {
 	var wgs []models.WorkingGroup
 	err := r.db.Where("parent_tc_id = ?", committeeID).Find(&wgs).Error
 	return &wgs, err
+}
+
+func (r *OrganizationRepository) GetCommitteeEditingCommittee(committeeID string) (*models.EditingCommittee, error) {
+	var ec models.EditingCommittee
+	err := r.db.Where("parent_tc_id = ?", committeeID).First(&ec).Error
+	return &ec, err
 }
 
 // Task Force Methods
@@ -750,10 +770,22 @@ func (r *OrganizationRepository) GetTCWorkingGroups(id string) ([]*models.Workin
 	return tc.WorkingGroups, nil
 }
 
+func (r *OrganizationRepository) GetTCEditingCommittee(id string) (*models.EditingCommittee, error) {
+	var tc models.TechnicalCommittee
+	if err := r.db.Where("id = ?", id).Preload("EditingCommittee").First(&tc).Error; err != nil {
+		return nil, err
+	}
+	return tc.EditingCommittee, nil
+}
+
 func (r *OrganizationRepository) GetCommitteeMeetings(id string) ([]models.Meeting, error) {
 	var meetings []models.Meeting
 	if err := r.db.Where("committee_id = ?", id).Preload(clause.Associations).Find(&meetings).Error; err != nil {
 		return nil, err
 	}
 	return meetings, nil
+}
+
+func (r *OrganizationRepository) CreateEditingCommittee(ec *models.EditingCommittee) error {
+	return r.db.Create(ec).Error
 }

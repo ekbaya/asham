@@ -15,6 +15,7 @@ type TechnicalCommittee struct {
 	EquivalentCommittees   []*TechnicalCommittee `json:"equivalent_committees" gorm:"many2many:equivalent_committees;"`
 	ObserverCountries      []*MemberState        `json:"tc_observers" gorm:"many2many:tc_observers;"`
 	Projects               []*Project            `json:"projects"`
+	EditingCommittee       *EditingCommittee     `gorm:"foreignKey:ParentTCID"`
 }
 
 // TechnicalCommitteeDTO represents a DTO for TechnicalCommittee

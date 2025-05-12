@@ -370,6 +370,22 @@ func (h *OrganizationHandler) CreateWorkingGroup(c *gin.Context) {
 	utilities.ShowMessage(c, http.StatusCreated, "Working Group created successfully")
 }
 
+func (h *OrganizationHandler) CreateEditingCommittee(c *gin.Context) {
+	var ec models.EditingCommittee
+	if err := c.ShouldBindJSON(&ec); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.organizationService.CreateEditingCommittee(&ec)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "Editing Committee created successfully")
+}
+
 func (h *OrganizationHandler) GetWorkingGroupByID(c *gin.Context) {
 	id := c.Param("id")
 
@@ -382,6 +398,18 @@ func (h *OrganizationHandler) GetWorkingGroupByID(c *gin.Context) {
 	c.JSON(http.StatusOK, wg)
 }
 
+func (h *OrganizationHandler) GetEditingCommitteeByID(c *gin.Context) {
+	id := c.Param("id")
+
+	ec, err := h.organizationService.GetEditingCommitteeByID(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Editing Committee not found")
+		return
+	}
+
+	c.JSON(http.StatusOK, ec)
+}
+
 func (h *OrganizationHandler) GetCommitteeWorkingGroups(c *gin.Context) {
 	id := c.Param("id")
 
@@ -392,6 +420,18 @@ func (h *OrganizationHandler) GetCommitteeWorkingGroups(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, wg)
+}
+
+func (h *OrganizationHandler) GetCommitteeEditingCommittee(c *gin.Context) {
+	id := c.Param("id")
+
+	ec, err := h.organizationService.GetCommitteeEditingCommittee(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Editing Committee not found")
+		return
+	}
+
+	c.JSON(http.StatusOK, ec)
 }
 
 func (h *OrganizationHandler) FetchTechnicalCommittees(c *gin.Context) {
@@ -1208,6 +1248,16 @@ func (h *OrganizationHandler) GetTCWorkingGroups(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"wgs": wgs})
 }
 
+func (h *OrganizationHandler) GetTCEditingCommittee(c *gin.Context) {
+	ec, err := h.organizationService.GetTCEditingCommittee(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"editing_committee": ec})
+}
+
 func (h *OrganizationHandler) GetCommitteeMeetings(c *gin.Context) {
 	meetings, err := h.organizationService.GetCommitteeMeetings(c.Param("id"))
 	if err != nil {
@@ -1216,4 +1266,30 @@ func (h *OrganizationHandler) GetCommitteeMeetings(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"meetings": meetings})
+}
+
+func (h *OrganizationHandler) AddEditingCommitteeToTechnicalCommittee(c *gin.Context) {
+	var payload struct {
+		TechnicalCommitteeID string                  `json:"technicalCommitteeId" binding:"required"`
+		EditingCommittee     models.EditingCommittee `json:"editingCommittee" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	tc, err := h.organizationService.GetCommitteeByID(payload.TechnicalCommitteeID, &models.TechnicalCommittee{})
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusNotFound, "Technical Committee not found")
+		return
+	}
+
+	err = h.organizationService.AddEditingCommitteeToTechnicalCommittee(tc.(*models.TechnicalCommittee), &payload.EditingCommittee)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Working Group added successfully")
 }

@@ -23,6 +23,7 @@ func RunMigrations(db *gorm.DB) error {
 		&models.StandardsManagementCommittee{},
 		&models.TechnicalCommittee{},
 		&models.WorkingGroup{},
+		&models.EditingCommittee{},
 		&models.TaskForce{},
 		&models.SubCommittee{},
 		&models.SpecializedCommittee{},
