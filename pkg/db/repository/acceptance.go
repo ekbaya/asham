@@ -29,15 +29,15 @@ func (r *AcceptanceRepository) CreateNSBResponse(response *models.NSBResponse) e
 			return err
 		}
 
-		if member.NationalStandardBodyID == nil {
-			tx.Rollback()
-			return errors.New("user login as the National TC Secretary of the responding NSB")
-		}
+		// if member.NationalStandardBodyID == nil {
+		// 	tx.Rollback()
+		// 	return errors.New("user login as the National TC Secretary of the responding NSB")
+		// }
 
-		if member.NationalStandardBody.NationalTCSecretaryID == nil || member.NationalStandardBody.NationalTCSecretaryID != &response.ResponderID {
-			tx.Rollback()
-			return errors.New("user login as the National TC Secretary of the responding NSB")
-		}
+		// if member.NationalStandardBody.NationalTCSecretaryID == nil || member.NationalStandardBody.NationalTCSecretaryID != &response.ResponderID {
+		// 	tx.Rollback()
+		// 	return errors.New("user login as the National TC Secretary of the responding NSB")
+		// }
 
 		// Check if Acceptance exists for the given project
 		if err := tx.Where("project_id = ?", response.ProjectID).First(&acceptance).Error; err != nil {
