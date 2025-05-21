@@ -64,7 +64,7 @@ func (h *OrganizationHandler) FetchMemberStates(c *gin.Context) {
 			offset = val
 		}
 	}
-	states, err := h.organizationService.FetchMemberStates(limit, offset)
+	states, total, err := h.organizationService.FetchMemberStates(limit, offset)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
@@ -72,7 +72,7 @@ func (h *OrganizationHandler) FetchMemberStates(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"states": states,
-		"total":  len(*states),
+		"total":  total,
 		"limit":  limit,
 		"page":   offset,
 	})
@@ -163,14 +163,14 @@ func (h *OrganizationHandler) FetchNSBs(c *gin.Context) {
 			offset = val
 		}
 	}
-	nsbs, err := h.organizationService.FetchNSBs(limit, offset)
+	nsbs, total, err := h.organizationService.FetchNSBs(limit, offset)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"nsbs":  nsbs,
-		"total": len(*nsbs),
+		"total": total,
 		"limit": limit,
 		"page":  offset,
 	})

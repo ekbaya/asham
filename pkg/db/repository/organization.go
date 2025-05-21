@@ -24,10 +24,17 @@ func (r *OrganizationRepository) CreateMemberState(state *models.MemberState) er
 	return r.db.Create(state).Error
 }
 
-func (r *OrganizationRepository) FetchMemberStates(limit, offset int) (*[]models.MemberState, error) {
+func (r *OrganizationRepository) FetchMemberStates(limit, offset int) (*[]models.MemberState, int64, error) {
 	var states []models.MemberState
+	var total int64
+
+	// Count total before applying limit/offset
+	if err := r.db.Model(&models.MemberState{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
 	err := r.db.Limit(limit).Offset(offset).Preload(clause.Associations).Find(&states).Error
-	return &states, err
+	return &states, total, err
 }
 
 // NSBs
@@ -45,15 +52,22 @@ func (r *OrganizationRepository) UpdateNationalTCSecretary(nsbID, newSecretaryID
 		Update("national_tc_secretary_id", newSecretaryID).Error
 }
 
-func (r *OrganizationRepository) FetchNSBs(limit, offset int) (*[]models.NationalStandardBody, error) {
+func (r *OrganizationRepository) FetchNSBs(limit, offset int) (*[]models.NationalStandardBody, int64, error) {
 	var nsbs []models.NationalStandardBody
+	var total int64
+
+	// Count total before applying limit/offset
+	if err := r.db.Model(&models.NationalStandardBody{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
 	err := r.db.
 		Limit(limit).
 		Offset(offset).
 		Preload("MemberState").
 		Preload("NationalTCSecretary").
 		Find(&nsbs).Error
-	return &nsbs, err
+	return &nsbs, total, err
 }
 
 // Committee Methods

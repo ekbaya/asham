@@ -27,7 +27,7 @@ func (service *OrganizationService) UpdateNationalTCSecretary(nsbID, newSecretar
 	return service.repo.UpdateNationalTCSecretary(nsbID, newSecretaryID)
 }
 
-func (service *OrganizationService) FetchNSBs(limit, offset int) (*[]models.NationalStandardBody, error) {
+func (service *OrganizationService) FetchNSBs(limit, offset int) (*[]models.NationalStandardBody, int64, error) {
 	return service.repo.FetchNSBs(limit, offset)
 }
 
@@ -125,7 +125,7 @@ func (service *OrganizationService) CreateMemberState(state *models.MemberState)
 	return service.repo.CreateMemberState(state)
 }
 
-func (service *OrganizationService) FetchMemberStates(limit, offset int) (*[]models.MemberState, error) {
+func (service *OrganizationService) FetchMemberStates(limit, offset int) (*[]models.MemberState, int64, error) {
 	return service.repo.FetchMemberStates(limit, offset)
 }
 
