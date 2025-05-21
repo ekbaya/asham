@@ -245,28 +245,28 @@ func (service *OrganizationService) GetJointTechnicalCommitteeMembers(committeeI
 	return service.repo.GetJointTechnicalCommitteeMembers(committeeID)
 }
 
-func (service *OrganizationService) GetArsoCouncil() ([]models.ARSOCouncil, error) {
-	return service.repo.GetArsoCouncil()
+func (service *OrganizationService) GetArsoCouncil(limit, offset int) ([]models.ARSOCouncil, int64, error) {
+	return service.repo.GetArsoCouncil(limit, offset)
 }
 
-func (service *OrganizationService) GetJointAdvisoryGroups() ([]models.JointAdvisoryGroup, error) {
-	return service.repo.GetJointAdvisoryGroups()
+func (service *OrganizationService) GetJointAdvisoryGroups(limit, offset int) ([]models.JointAdvisoryGroup, int64, error) {
+	return service.repo.GetJointAdvisoryGroups(limit, offset)
 }
 
-func (service *OrganizationService) GetStandardsManagementCommittees() ([]models.StandardsManagementCommittee, error) {
-	return service.repo.GetStandardsManagementCommittees()
+func (service *OrganizationService) GetStandardsManagementCommittees(limit, offset int) ([]models.StandardsManagementCommittee, int64, error) {
+	return service.repo.GetStandardsManagementCommittees(limit, offset)
 }
 
-func (service *OrganizationService) GetTechnicalCommittees() ([]models.TechnicalCommittee, error) {
-	return service.repo.GetTechnicalCommittees()
+func (service *OrganizationService) GetTechnicalCommittees(limit, offset int) ([]models.TechnicalCommittee, int64, error) {
+	return service.repo.GetTechnicalCommittees(limit, offset)
 }
 
-func (service *OrganizationService) GetSpecializedCommittees() ([]models.SpecializedCommittee, error) {
-	return service.repo.GetSpecializedCommittees()
+func (service *OrganizationService) GetSpecializedCommittees(limit, offset int) ([]models.SpecializedCommittee, int64, error) {
+	return service.repo.GetSpecializedCommittees(limit, offset)
 }
 
-func (service *OrganizationService) GetJointTechnicalCommittees() ([]models.JointTechnicalCommittee, error) {
-	return service.repo.GetJointTechnicalCommittees()
+func (service *OrganizationService) GetJointTechnicalCommittees(limit, offset int) ([]models.JointTechnicalCommittee, int64, error) {
+	return service.repo.GetJointTechnicalCommittees(limit, offset)
 }
 
 func (service *OrganizationService) AddMemberStateToTCParticipatingCountries(id string, stateId string) error {

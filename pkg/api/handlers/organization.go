@@ -1121,63 +1121,189 @@ func (h *OrganizationHandler) GetJointTechnicalCommitteeMembers(c *gin.Context) 
 }
 
 func (h *OrganizationHandler) GetArsoCouncil(c *gin.Context) {
-	committees, err := h.organizationService.GetArsoCouncil()
+	// Pagination
+	limit := 10
+	offset := 0
+
+	if limitStr := c.Query("pageSize"); limitStr != "" {
+		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
+			limit = val
+		}
+	}
+
+	if offsetStr := c.Query("page"); offsetStr != "" {
+		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
+			offset = val
+		}
+	}
+
+	committees, total, err := h.organizationService.GetArsoCouncil(limit, offset)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"committees": committees})
+	c.JSON(http.StatusOK, gin.H{
+		"committees": committees,
+		"total":      total,
+		"limit":      limit,
+		"page":       offset,
+	})
 }
 
 func (h *OrganizationHandler) GetJointAdvisoryGroups(c *gin.Context) {
-	committees, err := h.organizationService.GetJointAdvisoryGroups()
+	// Pagination
+	limit := 10
+	offset := 0
+
+	if limitStr := c.Query("pageSize"); limitStr != "" {
+		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
+			limit = val
+		}
+	}
+
+	if offsetStr := c.Query("page"); offsetStr != "" {
+		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
+			offset = val
+		}
+	}
+
+	committees, total, err := h.organizationService.GetJointAdvisoryGroups(limit, offset)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"committees": committees})
+	c.JSON(http.StatusOK, gin.H{
+		"committees": committees,
+		"total":      total,
+		"limit":      limit,
+		"page":       offset,
+	})
 }
 
 func (h *OrganizationHandler) GetStandardsManagementCommittees(c *gin.Context) {
-	committees, err := h.organizationService.GetStandardsManagementCommittees()
+	// Pagination
+	limit := 10
+	offset := 0
+
+	if limitStr := c.Query("pageSize"); limitStr != "" {
+		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
+			limit = val
+		}
+	}
+
+	if offsetStr := c.Query("page"); offsetStr != "" {
+		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
+			offset = val
+		}
+	}
+
+	committees, total, err := h.organizationService.GetStandardsManagementCommittees(limit, offset)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"committees": committees})
+	c.JSON(http.StatusOK, gin.H{
+		"committees": committees,
+		"total":      total,
+		"limit":      limit,
+		"page":       offset,
+	})
 }
 
 func (h *OrganizationHandler) GetTechnicalCommittees(c *gin.Context) {
-	committees, err := h.organizationService.GetTechnicalCommittees()
+	// Pagination
+	limit := 10
+	offset := 0
+
+	if limitStr := c.Query("pageSize"); limitStr != "" {
+		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
+			limit = val
+		}
+	}
+
+	if offsetStr := c.Query("page"); offsetStr != "" {
+		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
+			offset = val
+		}
+	}
+
+	committees, total, err := h.organizationService.GetTechnicalCommittees(limit, offset)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"committees": committees})
+	c.JSON(http.StatusOK, gin.H{
+		"committees": committees,
+		"total":      total,
+		"limit":      limit,
+		"page":       offset,
+	})
 }
 
 func (h *OrganizationHandler) GetSpecializedCommittees(c *gin.Context) {
-	committees, err := h.organizationService.GetSpecializedCommittees()
+	// Pagination
+	limit := 10
+	offset := 0
+
+	if limitStr := c.Query("pageSize"); limitStr != "" {
+		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
+			limit = val
+		}
+	}
+
+	if offsetStr := c.Query("page"); offsetStr != "" {
+		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
+			offset = val
+		}
+	}
+
+	committees, total, err := h.organizationService.GetSpecializedCommittees(limit, offset)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"committees": committees})
+	c.JSON(http.StatusOK, gin.H{
+		"committees": committees,
+		"total":      total,
+		"limit":      limit,
+		"page":       offset,
+	})
 }
 
 func (h *OrganizationHandler) GetJointTechnicalCommittees(c *gin.Context) {
-	committees, err := h.organizationService.GetJointTechnicalCommittees()
+	// Pagination
+	limit := 10
+	offset := 0
+
+	if limitStr := c.Query("pageSize"); limitStr != "" {
+		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
+			limit = val
+		}
+	}
+
+	if offsetStr := c.Query("page"); offsetStr != "" {
+		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
+			offset = val
+		}
+	}
+
+	committees, total, err := h.organizationService.GetJointTechnicalCommittees(limit, offset)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"committees": committees})
+	c.JSON(http.StatusOK, gin.H{
+		"committees": committees,
+		"total":      total,
+		"limit":      limit,
+		"page":       offset,
+	})
 }
 
 func (h *OrganizationHandler) AddMemberStateToTCParticipatingCountries(c *gin.Context) {

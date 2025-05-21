@@ -491,52 +491,89 @@ func (r *OrganizationRepository) GetJointTechnicalCommitteeMembers(committeeID s
 	return committee.JointMembers, nil
 }
 
-func (r *OrganizationRepository) GetArsoCouncil() ([]models.ARSOCouncil, error) {
+func (r *OrganizationRepository) GetArsoCouncil(limit, offset int) ([]models.ARSOCouncil, int64, error) {
 	var committees []models.ARSOCouncil
-	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
-		return nil, err
+	var total int64
+
+	// Count total before applying limit/offset
+	if err := r.db.Model(&models.ARSOCouncil{}).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
-	return committees, nil
+
+	if err := r.db.Limit(limit).Offset(offset).Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, 0, err
+	}
+	return committees, total, nil
 }
 
-func (r *OrganizationRepository) GetJointAdvisoryGroups() ([]models.JointAdvisoryGroup, error) {
+func (r *OrganizationRepository) GetJointAdvisoryGroups(limit, offset int) ([]models.JointAdvisoryGroup, int64, error) {
 	var committees []models.JointAdvisoryGroup
-	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
-		return nil, err
+	var total int64
+
+	if err := r.db.Model(&models.JointAdvisoryGroup{}).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
-	return committees, nil
+
+	if err := r.db.Limit(limit).Offset(offset).Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, 0, err
+	}
+	return committees, total, nil
 }
 
-func (r *OrganizationRepository) GetStandardsManagementCommittees() ([]models.StandardsManagementCommittee, error) {
+func (r *OrganizationRepository) GetStandardsManagementCommittees(limit, offset int) ([]models.StandardsManagementCommittee, int64, error) {
 	var committees []models.StandardsManagementCommittee
-	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
-		return nil, err
+	var total int64
+
+	if err := r.db.Model(&models.StandardsManagementCommittee{}).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
-	return committees, nil
+
+	if err := r.db.Limit(limit).Offset(offset).Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, 0, err
+	}
+	return committees, total, nil
 }
 
-func (r *OrganizationRepository) GetTechnicalCommittees() ([]models.TechnicalCommittee, error) {
+func (r *OrganizationRepository) GetTechnicalCommittees(limit, offset int) ([]models.TechnicalCommittee, int64, error) {
 	var committees []models.TechnicalCommittee
-	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
-		return nil, err
+	var total int64
+
+	if err := r.db.Model(&models.TechnicalCommittee{}).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
-	return committees, nil
+
+	if err := r.db.Limit(limit).Offset(offset).Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, 0, err
+	}
+	return committees, total, nil
 }
 
-func (r *OrganizationRepository) GetSpecializedCommittees() ([]models.SpecializedCommittee, error) {
+func (r *OrganizationRepository) GetSpecializedCommittees(limit, offset int) ([]models.SpecializedCommittee, int64, error) {
 	var committees []models.SpecializedCommittee
-	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
-		return nil, err
+	var total int64
+
+	if err := r.db.Model(&models.SpecializedCommittee{}).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
-	return committees, nil
+
+	if err := r.db.Limit(limit).Offset(offset).Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, 0, err
+	}
+	return committees, total, nil
 }
 
-func (r *OrganizationRepository) GetJointTechnicalCommittees() ([]models.JointTechnicalCommittee, error) {
+func (r *OrganizationRepository) GetJointTechnicalCommittees(limit, offset int) ([]models.JointTechnicalCommittee, int64, error) {
 	var committees []models.JointTechnicalCommittee
-	if err := r.db.Preload(clause.Associations).Find(&committees).Error; err != nil {
-		return nil, err
+	var total int64
+
+	if err := r.db.Model(&models.JointTechnicalCommittee{}).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
-	return committees, nil
+
+	if err := r.db.Limit(limit).Offset(offset).Preload(clause.Associations).Find(&committees).Error; err != nil {
+		return nil, 0, err
+	}
+	return committees, total, nil
 }
 
 // Technical Committee Specific Methods
