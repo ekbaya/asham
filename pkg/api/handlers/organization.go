@@ -103,6 +103,24 @@ func (h *OrganizationHandler) CreateNSB(c *gin.Context) {
 	utilities.ShowMessage(c, http.StatusCreated, "NSB registered successfully")
 }
 
+func (h *OrganizationHandler) UpdateNSB(c *gin.Context) {
+	var payload models.NationalStandardBody
+	c.ShouldBindJSON(&payload)
+
+	if payload.ID == uuid.Nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, "ID is required")
+		return
+	}
+
+	err := h.organizationService.CreateNSB(&payload)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "NSB registered successfully")
+}
+
 func (h *OrganizationHandler) UpdateNationalTCSecretary(c *gin.Context) {
 	var payload struct {
 		NSB       string `json:"nsb" binding:"required"`

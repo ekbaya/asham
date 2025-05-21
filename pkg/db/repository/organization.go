@@ -35,6 +35,10 @@ func (r *OrganizationRepository) CreateNSB(nsb *models.NationalStandardBody) err
 	return r.db.Create(nsb).Error
 }
 
+func (r *OrganizationRepository) UpdateNSB(nsb *models.NationalStandardBody) error {
+	return r.db.Save(nsb).Error
+}
+
 func (r *OrganizationRepository) UpdateNationalTCSecretary(nsbID, newSecretaryID string) error {
 	return r.db.Model(&models.NationalStandardBody{}).
 		Where("id = ?", nsbID).

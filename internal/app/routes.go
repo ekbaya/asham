@@ -66,6 +66,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		organization.POST("/member_states", organizationHandler.CreateMemberState)
 		organization.GET("/member_states", organizationHandler.FetchMemberStates)
 		organization.POST("/nsbs", organizationHandler.CreateNSB)
+		organization.PATCH("/nsbs", organizationHandler.UpdateNSB)
 		organization.POST("/nsbs/secretary", organizationHandler.UpdateNationalTCSecretary)
 		organization.GET("/nsbs", organizationHandler.FetchNSBs)
 		organization.POST("/committee", organizationHandler.CreateCommittee)
