@@ -23,8 +23,8 @@ func (service *OrganizationService) UpdateNationalTCSecretary(nsbID, newSecretar
 	return service.repo.UpdateNationalTCSecretary(nsbID, newSecretaryID)
 }
 
-func (service *OrganizationService) FetchNSBs() (*[]models.NationalStandardBody, error) {
-	return service.repo.FetchNSBs()
+func (service *OrganizationService) FetchNSBs(limit, offset int) (*[]models.NationalStandardBody, error) {
+	return service.repo.FetchNSBs(limit, offset)
 }
 
 func (service *OrganizationService) SearchTechnicalCommittees(params map[string]interface{}) ([]models.TechnicalCommittee, error) {
@@ -121,8 +121,8 @@ func (service *OrganizationService) CreateMemberState(state *models.MemberState)
 	return service.repo.CreateMemberState(state)
 }
 
-func (service *OrganizationService) FetchMemberStates() (*[]models.MemberState, error) {
-	return service.repo.FetchMemberStates()
+func (service *OrganizationService) FetchMemberStates(limit, offset int) (*[]models.MemberState, error) {
+	return service.repo.FetchMemberStates(limit, offset)
 }
 
 func (service *OrganizationService) UpdateCommitteeSecretary(committeeType string, committeeID string, newSecretaryID string) error {

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/ekbaya/asham/pkg/domain/services"
@@ -48,12 +49,33 @@ func (h *OrganizationHandler) CreateMemberState(c *gin.Context) {
 }
 
 func (h *OrganizationHandler) FetchMemberStates(c *gin.Context) {
-	states, err := h.organizationService.FetchMemberStates()
+	// Pagination
+	limit := 10
+	offset := 0
+
+	if limitStr := c.Query("pageSize"); limitStr != "" {
+		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
+			limit = val
+		}
+	}
+
+	if offsetStr := c.Query("page"); offsetStr != "" {
+		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
+			offset = val
+		}
+	}
+	states, err := h.organizationService.FetchMemberStates(limit, offset)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, states)
+
+	c.JSON(http.StatusOK, gin.H{
+		"states": states,
+		"total":  len(*states),
+		"limit":  limit,
+		"page":   offset,
+	})
 }
 
 func (h *OrganizationHandler) CreateNSB(c *gin.Context) {
@@ -108,12 +130,32 @@ func (h *OrganizationHandler) UpdateNationalTCSecretary(c *gin.Context) {
 }
 
 func (h *OrganizationHandler) FetchNSBs(c *gin.Context) {
-	nsbs, err := h.organizationService.FetchNSBs()
+	// Pagination
+	limit := 10
+	offset := 0
+
+	if limitStr := c.Query("pageSize"); limitStr != "" {
+		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
+			limit = val
+		}
+	}
+
+	if offsetStr := c.Query("page"); offsetStr != "" {
+		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
+			offset = val
+		}
+	}
+	nsbs, err := h.organizationService.FetchNSBs(limit, offset)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, nsbs)
+	c.JSON(http.StatusOK, gin.H{
+		"nsbs":  nsbs,
+		"total": len(*nsbs),
+		"limit": limit,
+		"page":  offset,
+	})
 }
 
 func (h *OrganizationHandler) CreateCommittee(c *gin.Context) {
