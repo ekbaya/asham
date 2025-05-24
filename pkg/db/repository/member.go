@@ -30,13 +30,23 @@ func (r *MemberRepository) GetMemberByID(id string) (*models.Member, error) {
 	return &member, nil
 }
 
-func (r *MemberRepository) GetAllMembers() (*[]models.Member, error) {
+func (r *MemberRepository) GetAllMembers(limit, offset int) (*[]models.Member, int64, error) {
 	var members []models.Member
-	result := r.db.Preload(clause.Associations).Preload("NationalStandardBody.MemberState").Find(&members)
-	if result.Error != nil {
-		return nil, result.Error
+	var total int64
+
+	// Get total count before applying limit/offset
+	if err := r.db.Model(&models.Member{}).Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
-	return &members, nil
+
+	result := r.db.Preload(clause.Associations).
+		Preload("NationalStandardBody.MemberState").
+		Limit(limit).Offset(offset).
+		Find(&members)
+	if result.Error != nil {
+		return nil, 0, result.Error
+	}
+	return &members, total, nil
 }
 
 func (r *MemberRepository) GetMemberByEmail(email string) (*models.Member, error) {

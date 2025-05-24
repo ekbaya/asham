@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/ekbaya/asham/pkg/domain/services"
@@ -262,12 +263,33 @@ func (h *UsersHandler) UpdateUser(c *gin.Context) {
 }
 
 func (h *UsersHandler) GetAllUsers(c *gin.Context) {
-	members, err := h.userService.GetAllMembers()
+
+	limit := 10
+	offset := 0
+
+	if limitStr := c.Query("pageSize"); limitStr != "" {
+		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
+			limit = val
+		}
+	}
+
+	if offsetStr := c.Query("page"); offsetStr != "" {
+		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
+			offset = val
+		}
+	}
+
+	members, total, err := h.userService.GetAllMembers(limit, offset)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusUnauthorized, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, members)
+	c.JSON(http.StatusOK, gin.H{
+		"members": members,
+		"total":   total,
+		"limit":   limit,
+		"page":    offset,
+	})
 }
 
 func (h *UsersHandler) DeleteMember(c *gin.Context) {

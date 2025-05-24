@@ -131,8 +131,8 @@ func (service *MemberService) DeleteMember(memberID string) error {
 	return service.repo.DeleteMember(memberID)
 }
 
-func (service *MemberService) GetAllMembers() (*[]models.Member, error) {
-	return service.repo.GetAllMembers()
+func (service *MemberService) GetAllMembers(limit, offset int) (*[]models.Member, int64, error) {
+	return service.repo.GetAllMembers(limit, offset)
 }
 
 func (service *MemberService) Logout(accessToken, refreshToken string) error {
