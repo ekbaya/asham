@@ -1,0 +1,58 @@
+version: "3"
+
+services:
+  db:
+    image: mariadb
+    container_name: nextcloud-db
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_PASSWORD: nextcloud
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+
+  app:
+    image: nextcloud
+    container_name: nextcloud-app
+    restart: always
+    ports:
+      - 8080:80
+    depends_on:
+      - db
+    volumes:
+      - nextcloud:/var/www/html
+    environment:
+      MYSQL_PASSWORD: nextcloud
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_HOST: db
+      NEXTCLOUD_TRUSTED_DOMAINS: localhost:8080
+
+  collabora:
+    image: collabora/code
+    container_name: collabora
+    restart: always
+    ports:
+      - 9980:9980
+    environment:
+      # Fixed domain configuration - allow requests from Nextcloud
+      - domain=nextcloud-app
+      - username=admin
+      - password=your-password
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=true
+      # Add WOPI allow list
+      - dictionaries=en_US
+    cap_add:
+      - MKNOD
+    depends_on:
+      - app
+    # Add this network configuration
+    networks:
+      - default
+
+volumes:
+  db:
+  nextcloud:
