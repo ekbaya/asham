@@ -19,7 +19,7 @@ services:
     container_name: nextcloud-app
     restart: always
     ports:
-      - 8081:80
+      - 8081:80 # Expose Nextcloud on port 8081
     depends_on:
       - db
     volumes:
@@ -29,29 +29,24 @@ services:
       MYSQL_DATABASE: nextcloud
       MYSQL_USER: nextcloud
       MYSQL_HOST: db
-      NEXTCLOUD_TRUSTED_DOMAINS: localhost:8081
+      NEXTCLOUD_TRUSTED_DOMAINS: collabo.arso.mystock.co.ke
 
   collabora:
     image: collabora/code
     container_name: collabora
     restart: always
     ports:
-      - 9980:9980
+      - 9980:9980 # Still required for internal Docker use and reverse proxy
     environment:
-      # Fixed domain configuration - allow requests from Nextcloud
-      - domain=nextcloud-app
+      - domain=collabo\\.arso\\.mystock\\.co\\.ke
       - username=admin
       - password=your-password
       - extra_params=--o:ssl.enable=false --o:ssl.termination=true
-      # Add WOPI allow list
       - dictionaries=en_US
     cap_add:
       - MKNOD
     depends_on:
       - app
-    # Add this network configuration
-    networks:
-      - default
 
 volumes:
   db:
