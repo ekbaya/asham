@@ -285,10 +285,10 @@ func (h *UsersHandler) GetAllUsers(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"members": members,
-		"total":   total,
-		"limit":   limit,
-		"page":    offset,
+		"users": members,
+		"total": total,
+		"limit": limit,
+		"page":  offset,
 	})
 }
 
