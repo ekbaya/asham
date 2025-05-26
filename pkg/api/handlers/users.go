@@ -233,14 +233,7 @@ func (h *UsersHandler) PublicAccount(c *gin.Context) {
 }
 
 func (h *UsersHandler) GetUserDetails(c *gin.Context) {
-	// Retrieve user_id from context
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	user, err := h.userService.AccountWithResponsibilities(userID.(string))
+	user, err := h.userService.AccountWithResponsibilities(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
