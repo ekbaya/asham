@@ -45,7 +45,12 @@ func (service *MemberService) CreateMember(member *models.Member) error {
 		return err
 	}
 
-	go service.emailService.SendWelcomeEmail(member.Email, member.FirstName, clearPassword)
+	go func() {
+		err := service.emailService.SendWelcomeEmail(member.Email, member.FirstName, clearPassword)
+		if err != nil {
+			fmt.Printf("Failed to send welcome email to %s: %v\n", member.Email, err)
+		}
+	}()
 
 	return nil
 }
