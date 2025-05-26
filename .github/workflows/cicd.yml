@@ -41,3 +41,8 @@ jobs:
             go build -o asham .
             pm2 restart asham
             pm2 save
+
+            cd ../collaboration
+            docker-compose down
+            docker-compose up -d --build
+            docker system prune -f

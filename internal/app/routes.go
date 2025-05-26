@@ -46,7 +46,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		{
 			protected.GET("/account", authHandler.Account)
 			protected.GET("/account/:id", authHandler.GetUserDetails)
-			protected.GET("/user", authHandler.GetUserDetails)
+			protected.GET("/user/:id", authHandler.GetUserDetails)
 			protected.PUT("/user", authHandler.UpdateUser)
 			protected.GET("/users", authHandler.GetAllUsers)
 			protected.DELETE("/users/:id", authHandler.DeleteMember)
