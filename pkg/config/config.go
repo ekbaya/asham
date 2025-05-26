@@ -29,9 +29,12 @@ type GRPCConfig struct {
 }
 
 func LoadConfig() (*Config, error) {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load(".env")
 	if err != nil {
-		return nil, err
+		err = godotenv.Load("../.env")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	config := &Config{
