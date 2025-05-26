@@ -13,20 +13,45 @@
       background: #00923f;
       color: #fff;
       width: 100%;
-      padding: 32px 0 16px 0;
+      padding: 24px 0 12px 0;
       text-align: center;
       font-size: 2em;
       font-weight: bold;
       letter-spacing: 2px;
     }
+    .logo {
+      width: 90px;
+      height: auto;
+      margin-bottom: 8px;
+      margin-top: 8px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      background: #fff;
+      padding: 10px;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      border: 2px solid #00923f;
+    }
     .container {
       background: #fff;
       max-width: 600px;
-      margin: 32px auto;
-      border-radius: 8px;
+      margin: 0 auto;
+      border-radius: 0 0 8px 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       padding: 32px;
       text-align: center;
+      border-top: none;
+    }
+    .bottom-banner {
+      background: #00923f;
+      color: #fff;
+      width: 100%;
+      padding: 12px 0;
+      text-align: center;
+      font-size: 1em;
+      font-style: italic;
+      border-radius: 0 0 8px 8px;
     }
     .button {
       display: inline-block;
@@ -42,22 +67,36 @@
       text-align: center;
       color: #888;
       font-size: 12px;
-      margin-top: 32px;
+      margin-top: 24px;
+      margin-bottom: 0;
+    }
+    .disclaimer {
+      color: #aaa;
+      font-size: 10px;
+      margin-top: 16px;
+      line-height: 1.5;
+      text-align: center;
+      padding: 0 16px;
     }
   </style>
 </head>
 <body>
   <div class="banner">
+    <img src="cid:arso_logo" alt="ARSO Logo" class="logo" />
     Welcome to ASHAM
   </div>
   <div class="container">
-    <p style="text-align:center;">Hi <strong>{{.Name}}</strong>,</p>
-    <p style="text-align:center;">Thank you for registering with ASHAM. Your account has been created successfully.</p>
-    <p style="text-align:center;"><strong>Your password:</strong> <span style="color:#00923f;">{{.Password}}</span></p>
+    <p>Hi <strong>{{.Name}}</strong>,</p>
+    <p>Thank you for registering with ASHAM. Your account has been created successfully.</p>
+    <p><strong>Your password:</strong> <span style="color:#00923f;">{{.Password}}</span></p>
     <a href="https://arso-oran.org/" class="button">Visit ASHAM</a>
-    <div class="footer">
-      &copy; {{.Year}} ASHAM / ARSO. All rights reserved.
-    </div>
+  </div>
+  <div class="bottom-banner">
+    This is an auto generated email, please do not reply.<br>
+    All other queries should be sent to: <a href="mailto:support@arso-oran.org" style="color:#fff;text-decoration:underline;">support@arso-oran.org</a>
+  </div>
+  <div class="footer disclaimer">
+    This email, its attachments and any rights attached hereto is confidential, private and intended for the addressee only. If you are not the intended recipient and received this email by mistake, kindly notify the sender, and delete it immediately. Unauthorized use of this email is prohibited and unlawful. The Company accepts no liability whatsoever for any loss or damages whatsoever and howsoever incurred or suffered resulting or arising from the use of this email or its attachments. The Company does not warrant the integrity of this email nor that it is free of errors, viruses, interception or interference. Use of "Techno Brain" content, trademarks without the prior written consent is prohibited.
   </div>
 </body>
 </html>

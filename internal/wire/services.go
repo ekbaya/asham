@@ -71,6 +71,7 @@ func GetEmailConfigurations() *services.EmailConfig {
 		Password:          password,
 		From:              from,
 		EmailTemplatePath: "../templates/welcome_email.html",
+		LogoPath:          "../templates/arso_logo.png",
 	}
 
 	log.Printf("[EmailConfig] Host: %s, Port: %d, Username: %s, From: %s", host, port, username, from)
