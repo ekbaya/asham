@@ -33,6 +33,8 @@ var ServiceSet = wire.NewSet(
 	services.NewLibraryService,
 	repository.NewStandardRepository,
 	services.NewStandardService,
+	repository.NewRbacRepository,
+	services.NewRbacService,
 )
 
 func GetEmailConfigurations() *services.EmailConfig {

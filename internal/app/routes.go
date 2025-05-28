@@ -25,6 +25,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	meetingHandler := handlers.NewMeetingHandler(*services.MeetingService)
 	libraryHandler := handlers.NewLibraryHandler(*services.LibraryService, *services.MemberService)
 	standardHandler := handlers.NewStandardHandler(services.StandardService)
+	rbacHandler := handlers.NewRbacHandler(services.RbacService)
 
 	api := router.Group("/api")
 
@@ -57,6 +58,18 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		{
 			refreshTokenGroup.POST("/refresh-token", authHandler.GenerateRefreshToken)
 		}
+	}
+
+	// RBAC Routes
+	rbac := api.Group("rbac")
+	rbac.Use(middleware.AuthMiddleware())
+	{
+		rbac.POST("/roles", rbacHandler.CreateRole)
+		rbac.GET("/roles", rbacHandler.ListRoles)
+		rbac.POST("/permissions", rbacHandler.CreatePermission)
+		rbac.GET("/permissions", rbacHandler.ListPermissions)
+		rbac.POST("/assign/:member_id/:role_id", rbacHandler.AssignRoleToMember)
+		rbac.GET("/members/:member_id/roles", rbacHandler.ListMemberRoles)
 	}
 
 	// Organization Route
