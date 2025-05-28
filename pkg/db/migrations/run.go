@@ -17,6 +17,8 @@ func RunMigrations(db *gorm.DB) error {
 		&models.Document{},
 		&models.MemberState{},
 		&models.NationalStandardBody{},
+		&models.Permission{},
+		&models.Role{},
 		&models.Member{},
 		&models.ARSOCouncil{},
 		&models.JointAdvisoryGroup{},

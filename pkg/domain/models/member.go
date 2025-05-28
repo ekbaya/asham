@@ -31,6 +31,7 @@ type Member struct {
 	Type                   UserType              `json:"type" gorm:"default:internal"`
 	CanPreviewStandard     bool                  `json:"can_preview_standard" gorm:"default:true"`
 	CanDownloadStandard    bool                  `json:"can_download_standard" gorm:"default:true"`
+	Roles                  []Role                `gorm:"many2many:user_roles;"`
 	CreatedAt              time.Time
 }
 type MemberMinified struct {

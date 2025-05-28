@@ -1,0 +1,138 @@
+package repository
+
+import (
+	"github.com/ekbaya/asham/pkg/domain/models"
+	"gorm.io/gorm"
+)
+
+type RbacRepository struct {
+	db *gorm.DB
+}
+
+func NewRbacRepository(db *gorm.DB) *RbacRepository {
+	return &RbacRepository{db: db}
+}
+
+// Role CRUD
+
+func (r *RbacRepository) CreateRole(role *models.Role) error {
+	return r.db.Create(role).Error
+}
+
+func (r *RbacRepository) GetRoleByID(id string) (*models.Role, error) {
+	var role models.Role
+	if err := r.db.Preload("Permissions").First(&role, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &role, nil
+}
+
+func (r *RbacRepository) ListRoles() ([]models.Role, error) {
+	var roles []models.Role
+	err := r.db.Preload("Permissions").Find(&roles).Error
+	return roles, err
+}
+
+func (r *RbacRepository) UpdateRole(role *models.Role) error {
+	return r.db.Save(role).Error
+}
+
+func (r *RbacRepository) DeleteRole(id string) error {
+	return r.db.Delete(&models.Role{}, "id = ?", id).Error
+}
+
+// Permission CRUD
+
+func (r *RbacRepository) CreatePermission(permission *models.Permission) error {
+	return r.db.Create(permission).Error
+}
+
+func (r *RbacRepository) GetPermissionByID(id string) (*models.Permission, error) {
+	var perm models.Permission
+	if err := r.db.First(&perm, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &perm, nil
+}
+
+func (r *RbacRepository) ListPermissions() ([]models.Permission, error) {
+	var perms []models.Permission
+	err := r.db.Find(&perms).Error
+	return perms, err
+}
+
+func (r *RbacRepository) UpdatePermission(permission *models.Permission) error {
+	return r.db.Save(permission).Error
+}
+
+func (r *RbacRepository) DeletePermission(id string) error {
+	return r.db.Delete(&models.Permission{}, "id = ?", id).Error
+}
+
+// Role-Permission Management
+
+func (r *RbacRepository) AddPermissionToRole(roleID string, permissionID string) error {
+	var role models.Role
+	if err := r.db.Preload("Permissions").First(&role, "id = ?", roleID).Error; err != nil {
+		return err
+	}
+
+	var permission models.Permission
+	if err := r.db.First(&permission, "id = ?", permissionID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&role).Association("Permissions").Append(&permission)
+}
+
+func (r *RbacRepository) RemovePermissionFromRole(roleID string, permissionID string) error {
+	var role models.Role
+	if err := r.db.Preload("Permissions").First(&role, "id = ?", roleID).Error; err != nil {
+		return err
+	}
+
+	var permission models.Permission
+	if err := r.db.First(&permission, "id = ?", permissionID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&role).Association("Permissions").Delete(&permission)
+}
+
+// Member-Role Management
+
+func (r *RbacRepository) AssignRoleToMember(memberID string, roleID string) error {
+	var member models.Member
+	if err := r.db.Preload("Roles").First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	var role models.Role
+	if err := r.db.First(&role, "id = ?", roleID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&member).Association("Roles").Append(&role)
+}
+
+func (r *RbacRepository) RemoveRoleFromMember(memberID string, roleID string) error {
+	var member models.Member
+	if err := r.db.Preload("Roles").First(&member, "id = ?", memberID).Error; err != nil {
+		return err
+	}
+
+	var role models.Role
+	if err := r.db.First(&role, "id = ?", roleID).Error; err != nil {
+		return err
+	}
+
+	return r.db.Model(&member).Association("Roles").Delete(&role)
+}
+
+func (r *RbacRepository) ListRolesForMember(memberID string) ([]models.Role, error) {
+	var member models.Member
+	if err := r.db.Preload("Roles").First(&member, "id = ?", memberID).Error; err != nil {
+		return nil, err
+	}
+	return member.Roles, nil
+}

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 )
@@ -57,4 +59,11 @@ func GetPDFPageCount(pdfURL string) (int, error) {
 	}
 
 	return pageCount, nil
+}
+
+func ToUpperUnderscore(s string) string {
+	// Replace spaces and hyphens with underscores
+	re := regexp.MustCompile(`[ -]+`)
+	s = re.ReplaceAllString(s, "_")
+	return strings.ToUpper(s)
 }
