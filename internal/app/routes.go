@@ -66,6 +66,8 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	{
 		rbac.POST("/roles", rbacHandler.CreateRole)
 		rbac.GET("/roles", rbacHandler.ListRoles)
+		rbac.GET("/roles/:id", rbacHandler.GetRoleByID)
+		rbac.DELETE("/roles/:id", rbacHandler.DeleteRole)
 		rbac.POST("/permissions", rbacHandler.CreatePermission)
 		rbac.GET("/permissions", rbacHandler.ListPermissions)
 		rbac.POST("/assign/:member_id/:role_id", rbacHandler.AssignRoleToMember)

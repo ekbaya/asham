@@ -53,6 +53,26 @@ func (h *RbacHandler) ListRoles(c *gin.Context) {
 	utilities.Show(c, http.StatusOK, "roles", roles)
 }
 
+func (h *RbacHandler) GetRoleByID(c *gin.Context) {
+	role, err := h.rbacService.GetRoleByID(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.Show(c, http.StatusOK, "role", role)
+}
+
+func (h *RbacHandler) DeleteRole(c *gin.Context) {
+	err := h.rbacService.DeleteRole(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "role has been deleted")
+}
+
 func (h *RbacHandler) CreatePermission(c *gin.Context) {
 	var permission models.Permission
 	if err := c.ShouldBindJSON(&permission); err != nil {
