@@ -32,23 +32,32 @@ func NewTokenManager(msConfig *MSAzureConfig) *TokenManager {
 }
 
 func (tm *TokenManager) RetrieveToken(ctx context.Context) (string, error) {
+	fmt.Println("[TokenManager] Attempting to retrieve token from Redis...")
 	// Try getting the token from Redis
 	token, err := tm.redisClient.Get(ctx, tokenKey).Result()
 	if err == nil {
+		fmt.Println("[TokenManager] Token found in Redis.")
 		return token, nil // Found in Redis
 	}
+	fmt.Printf("[TokenManager] Token not found in Redis or error occurred: %v\n", err)
 
 	// Token not found or expired, fetch a new one
+	fmt.Println("[TokenManager] Fetching new token from Microsoft Graph...")
 	token, err = tm.GetMicrosoftGraphAccessToken(tm.msConfig.TenantID, tm.msConfig.ClientID, tm.msConfig.ClientSecret)
 	if err != nil {
+		fmt.Printf("[TokenManager] Failed to fetch new token: %v\n", err)
 		return "", fmt.Errorf("failed to fetch new token: %w", err)
 	}
+	fmt.Println("[TokenManager] Successfully fetched new token.")
 
 	// Store in Redis with expiry slightly less than 1 hour (to be safe)
+	fmt.Println("[TokenManager] Storing new token in Redis...")
 	err = tm.redisClient.Set(ctx, tokenKey, token, 55*time.Minute).Err()
 	if err != nil {
+		fmt.Printf("[TokenManager] Failed to store token in Redis: %v\n", err)
 		return "", fmt.Errorf("failed to store token in Redis: %w", err)
 	}
+	fmt.Println("[TokenManager] Token successfully stored in Redis.")
 
 	return token, nil
 }
