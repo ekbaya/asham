@@ -6,11 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"mime"
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/config"
@@ -301,11 +299,7 @@ func (service *DocumentService) UploadFileToOneDriveFolder(ctx context.Context, 
 	defer file.Close()
 
 	// Step 2: Detect content type
-	ext := filepath.Ext(filePath)
-	contentType := mime.TypeByExtension(ext)
-	if contentType == "" {
-		contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-	}
+	contentType := "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
 	// Step 1: Create folder if it doesn't exist
 	createFolderUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/root/children", userEmail)
