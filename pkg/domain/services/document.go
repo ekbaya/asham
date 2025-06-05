@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ekbaya/asham/pkg/config"
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/google/uuid"
@@ -142,11 +143,13 @@ func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.Sha
 	// Retrieve the token from the token manager
 	userToken, err := service.tokenManager.RetrieveToken(ctx)
 
+	userEmail := config.GetConfig().AZURE_USER_EMAIL
+
 	if err != nil {
 		return nil, err
 	}
 
-	url := "https://graph.microsoft.com/v1.0/me/drive/root/children"
+	url := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/root/search(q='*.docx')", userEmail)
 	req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
 	req.Header.Set("Authorization", "Bearer "+userToken)
 	req.Header.Set("Accept", "application/json")

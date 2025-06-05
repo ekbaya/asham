@@ -15,6 +15,7 @@ type Config struct {
 	AZURE_TENANT_ID     string
 	AZURE_CLIENT_ID     string
 	AZURE_CLIENT_SECRET string
+	AZURE_USER_EMAIL    string
 	EmailConfig         EmailConfig
 }
 
@@ -72,6 +73,7 @@ func LoadConfig() (*Config, error) {
 		AZURE_TENANT_ID:     os.Getenv("AZURE_TENANT_ID"),
 		AZURE_CLIENT_ID:     os.Getenv("AZURE_CLIENT_ID"),
 		AZURE_CLIENT_SECRET: os.Getenv("AZURE_CLIENT_SECRET"),
+		AZURE_USER_EMAIL:    os.Getenv("AZURE_USER_EMAIL"),
 		EmailConfig: EmailConfig{
 			Host:     os.Getenv("EMAIL_HOST"),
 			Port:     os.Getenv("EMAIL_PORT"),
