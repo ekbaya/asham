@@ -170,11 +170,55 @@ func (service *ProjectService) FetchStages() (*[]models.Stage, error) {
 }
 
 func (service *ProjectService) ReviewWD(secretary, projectID, comment string, status models.WorkingDraftStatus) error {
-	return service.repo.ReviewWD(secretary, projectID, comment, status)
+	err := service.repo.ReviewWD(secretary, projectID, comment, status)
+	if err == nil && status == models.ACCEPTED {
+		projectUUID, err := uuid.Parse(projectID)
+		if err != nil {
+			return err
+		}
+		project, err := service.GetProjectByID(projectUUID)
+		if err != nil {
+			return err
+		}
+		fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
+		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName)
+		if errr != nil {
+			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
+		}
+
+		project.SharepointDocID = &doc.ID
+		err = service.UpdateProject(project)
+		if err != nil {
+			return fmt.Errorf("failed to update project after WD review: %w", err)
+		}
+	}
+	return err
 }
 
 func (service *ProjectService) ReviewCD(secretary, projectId string, isConsensusReached bool, action models.ProposalAction, meetingRequired bool) error {
-	return service.repo.ReviewCD(secretary, projectId, isConsensusReached, action, meetingRequired)
+	err := service.repo.ReviewCD(secretary, projectId, isConsensusReached, action, meetingRequired)
+	if err == nil && isConsensusReached {
+		projectUUID, err := uuid.Parse(projectId)
+		if err != nil {
+			return err
+		}
+		project, err := service.GetProjectByID(projectUUID)
+		if err != nil {
+			return err
+		}
+		fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
+		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName)
+		if errr != nil {
+			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
+		}
+
+		project.SharepointDocID = &doc.ID
+		err = service.UpdateProject(project)
+		if err != nil {
+			return fmt.Errorf("failed to update project after CD review: %w", err)
+		}
+	}
+	return err
 }
 
 func (service *ProjectService) ReviewDARS(secretary,
@@ -188,14 +232,59 @@ func (service *ProjectService) ReviewDARS(secretary,
 		return fmt.Errorf("alternative deliverables cannot be empty when status is rejected")
 
 	}
-	return service.repo.ReviewDARS(secretary, projectId, wto_notification_notified, unresolvedIssues, alternativeDeliverable, status)
+	err := service.repo.ReviewDARS(secretary, projectId, wto_notification_notified, unresolvedIssues, alternativeDeliverable, status)
+	if err == nil && status != "" && status == string(models.DARSApproved) {
+		projectUUID, err := uuid.Parse(projectId)
+		if err != nil {
+			return err
+		}
+		project, err := service.GetProjectByID(projectUUID)
+		if err != nil {
+			return err
+		}
+		fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
+		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName)
+		if errr != nil {
+			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
+		}
+
+		project.SharepointDocID = &doc.ID
+		err = service.UpdateProject(project)
+		if err != nil {
+			return fmt.Errorf("failed to update project after DARS review: %w", err)
+		}
+	}
+	return err
 }
 
 func (service *ProjectService) ApproveFDARS(secretary, projectId string, approve bool, action string) error {
 	if action == "" && !approve {
 		return fmt.Errorf("action cannot be empty when not approving")
 	}
-	return service.repo.ApproveFDARS(secretary, projectId, approve, action)
+	err := service.repo.ApproveFDARS(secretary, projectId, approve, action)
+	if err == nil && approve {
+		projectUUID, err := uuid.Parse(projectId)
+		if err != nil {
+			return err
+		}
+		project, err := service.GetProjectByID(projectUUID)
+		if err != nil {
+			return err
+		}
+		fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
+		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName)
+		if errr != nil {
+			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
+		}
+
+		project.SharepointDocID = &doc.ID
+		err = service.UpdateProject(project)
+		if err != nil {
+			return fmt.Errorf("failed to update project after FDARS review: %w", err)
+		}
+	}
+
+	return err
 }
 
 func (service *ProjectService) ApproveFDRSForPublication(secretary, projectId string, approve bool, comment string) error {
