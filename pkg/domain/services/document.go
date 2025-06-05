@@ -250,7 +250,7 @@ func (service *DocumentService) GetDocument(ctx context.Context, documentId stri
 	}
 
 	// Call the /preview endpoint to get the embedUrl
-	previewUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/me/drive/items/%s/preview", documentId)
+	previewUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s/preview", userEmail, documentId)
 	previewReq, _ := http.NewRequestWithContext(ctx, "POST", previewUrl, nil)
 	previewReq.Header.Set("Authorization", "Bearer "+token)
 	previewReq.Header.Set("Accept", "application/json")
