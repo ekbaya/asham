@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/db/repository"
@@ -47,7 +48,7 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 
 	// project is at stage 0
 	project.StageID = stage.ID.String()
-	fileName := fmt.Sprintf("%s.docx", project.ID)
+	fileName := fmt.Sprintf("%s.docx", strings.ReplaceAll(project.Reference, "/", "-"))
 
 	folderName := fmt.Sprintf("ASHAM_ARSO_PLATFORM_PROJECT_%d", project.Number)
 	doc, err := service.docService.UploadFileToOneDriveFolder(context.Background(), folderName, fileName)
