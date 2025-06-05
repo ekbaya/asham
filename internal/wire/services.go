@@ -1,14 +1,14 @@
 package wire
 
 import (
-	"strconv"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/ekbaya/asham/pkg/config"
-	"log"
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/services"
 	"github.com/google/wire"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
+	"log"
+	"strconv"
 )
 
 var ServiceSet = wire.NewSet(
@@ -59,7 +59,7 @@ func GetEmailConfigurations() *services.EmailConfig {
 		From:     globalConfig.EmailConfig.From,
 	}
 
-	log.Printf("[EmailConfig] Host: %s, Port: %d, Username: %s, From: %s", host, port, username, from)
+	log.Printf("[EmailConfig] Host: %s, Port: %d, Username: %s, From: %s", globalConfig.EmailConfig.Host, port, globalConfig.EmailConfig.Username, globalConfig.EmailConfig.From)
 
 	return &emailConfig
 }
