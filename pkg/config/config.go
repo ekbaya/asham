@@ -12,6 +12,10 @@ type Config struct {
 	Server              ServerConfig
 	GRPC                GRPCConfig
 	GOOGLE_CLIENT_TOKEN string
+	AZURE_TENANT_ID     string
+	AZURE_CLIENT_ID     string
+	AZURE_CLIENT_SECRET string
+	EmailConfig         EmailConfig
 }
 
 type DatabaseConfig struct {
@@ -28,6 +32,14 @@ type ServerConfig struct {
 
 type GRPCConfig struct {
 	Port string
+}
+
+type EmailConfig struct {
+	Host     string
+	Port     string
+	Username string
+	Password string
+	From     string
 }
 
 var (
@@ -57,6 +69,16 @@ func LoadConfig() (*Config, error) {
 			Port: os.Getenv("GRPC_PORT"),
 		},
 		GOOGLE_CLIENT_TOKEN: os.Getenv("GOOGLE_CLIENT_TOKEN"),
+		AZURE_TENANT_ID:     os.Getenv("AZURE_TENANT_ID"),
+		AZURE_CLIENT_ID:     os.Getenv("AZURE_CLIENT_ID"),
+		AZURE_CLIENT_SECRET: os.Getenv("AZURE_CLIENT_SECRET"),
+		EmailConfig: EmailConfig{
+			Host:     os.Getenv("EMAIL_HOST"),
+			Port:     os.Getenv("EMAIL_PORT"),
+			Username: os.Getenv("EMAIL_USERNAME"),
+			Password: os.Getenv("EMAIL_PASSWORD"),
+			From:     os.Getenv("EMAIL_FROM"),
+		},
 	}
 
 	return config, nil
