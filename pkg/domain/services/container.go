@@ -15,6 +15,7 @@ type ServiceContainer struct {
 	LibraryService              *LibraryService
 	StandardService             *StandardService
 	RbacService                 *RbacService
+	TokenManager                *TokenManager
 }
 
 func NewServiceContainer(
@@ -32,6 +33,7 @@ func NewServiceContainer(
 	libraryService *LibraryService,
 	standardService *StandardService,
 	rbacService *RbacService,
+	tokenManager *TokenManager,
 ) *ServiceContainer {
 	return &ServiceContainer{
 		OrganizationService:         organizationService,
@@ -48,5 +50,6 @@ func NewServiceContainer(
 		LibraryService:              libraryService,
 		StandardService:             standardService,
 		RbacService:                 rbacService,
+		TokenManager:                tokenManager,
 	}
 }

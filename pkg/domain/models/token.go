@@ -4,36 +4,14 @@ import (
 	"context"
 	"errors"
 	"os"
-	"strconv"
 	"time"
 
+	redisClient "github.com/ekbaya/asham/pkg/db/redis"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/redis/go-redis/v9"
 )
 
 var jwtSecret = []byte(getSecretKey()) // Secret key for signing and verifying JWTs
-var redisClient *redis.Client
-
-// Initialize Redis client
-func InitRedis() {
-	redisAddr := os.Getenv("REDIS_ADDR")
-	if redisAddr == "" {
-		redisAddr = "localhost:6379" // Default Redis address
-	}
-
-	redisDB := 0
-	if dbStr := os.Getenv("REDIS_DB"); dbStr != "" {
-		if db, err := strconv.Atoi(dbStr); err == nil {
-			redisDB = db
-		}
-	}
-
-	redisClient = redis.NewClient(&redis.Options{
-		Addr:     redisAddr,
-		Password: os.Getenv("REDIS_PASSWORD"), // No password by default
-		DB:       redisDB,                     // Default DB
-	})
-}
 
 // Claims represents the custom claims for JWT
 type Claims struct {
@@ -103,7 +81,7 @@ func ValidateJWT(tokenStr string) (*Claims, error) {
 
 	// Check if token has been invalidated
 	ctx := context.Background()
-	val, err := redisClient.Get(ctx, "blacklist:"+tokenStr).Result()
+	val, err := redisClient.GetRedis().Get(ctx, "blacklist:"+tokenStr).Result()
 	if err != redis.Nil {
 		// Token exists in blacklist or there was an error
 		if err == nil && val == "1" {
@@ -133,7 +111,7 @@ func ValidateRefreshToken(tokenStr string) (*Claims, error) {
 			if ve.Errors&jwt.ValidationErrorExpired != 0 {
 				// Even for expired tokens, check if they're blacklisted
 				ctx := context.Background()
-				val, redisErr := redisClient.Get(ctx, "blacklist:"+tokenStr).Result()
+				val, redisErr := redisClient.GetRedis().Get(ctx, "blacklist:"+tokenStr).Result()
 				if redisErr != redis.Nil {
 					if redisErr == nil && val == "1" {
 						return nil, errors.New("refresh token has been invalidated")
@@ -148,7 +126,7 @@ func ValidateRefreshToken(tokenStr string) (*Claims, error) {
 
 	// Check if token has been invalidated
 	ctx := context.Background()
-	val, redisErr := redisClient.Get(ctx, "blacklist:"+tokenStr).Result()
+	val, redisErr := redisClient.GetRedis().Get(ctx, "blacklist:"+tokenStr).Result()
 	if redisErr != redis.Nil {
 		if redisErr == nil && val == "1" {
 			return nil, errors.New("refresh token has been invalidated")
@@ -192,11 +170,11 @@ func Logout(accessToken string, refreshToken string) error {
 	}
 
 	// Add tokens to blacklist with their respective TTLs
-	if err := redisClient.Set(ctx, "blacklist:"+accessToken, "1", accessTTL).Err(); err != nil {
+	if err := redisClient.GetRedis().Set(ctx, "blacklist:"+accessToken, "1", accessTTL).Err(); err != nil {
 		return err
 	}
 
-	if err := redisClient.Set(ctx, "blacklist:"+refreshToken, "1", refreshTTL).Err(); err != nil {
+	if err := redisClient.GetRedis().Set(ctx, "blacklist:"+refreshToken, "1", refreshTTL).Err(); err != nil {
 		return err
 	}
 
@@ -213,7 +191,7 @@ func LogoutUser(userID string) error {
 
 	// Get all tokens for user (from a hypothetical storage)
 	userTokensKey := "user:tokens:" + userID
-	tokens, err := redisClient.SMembers(ctx, userTokensKey).Result()
+	tokens, err := redisClient.GetRedis().SMembers(ctx, userTokensKey).Result()
 	if err != nil && err != redis.Nil {
 		return err
 	}
@@ -221,13 +199,13 @@ func LogoutUser(userID string) error {
 	// Add all tokens to blacklist
 	for _, token := range tokens {
 		// Add to blacklist with a long TTL (e.g., 30 days)
-		if err := redisClient.Set(ctx, "blacklist:"+token, "1", 30*24*time.Hour).Err(); err != nil {
+		if err := redisClient.GetRedis().Set(ctx, "blacklist:"+token, "1", 30*24*time.Hour).Err(); err != nil {
 			return err
 		}
 	}
 
 	// Remove the user's token set
-	if err := redisClient.Del(ctx, userTokensKey).Err(); err != nil {
+	if err := redisClient.GetRedis().Del(ctx, userTokensKey).Err(); err != nil {
 		return err
 	}
 

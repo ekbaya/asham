@@ -9,7 +9,7 @@ import (
 	"github.com/ekbaya/asham/pkg/config"
 	"github.com/ekbaya/asham/pkg/db"
 	"github.com/ekbaya/asham/pkg/db/migrations"
-	"github.com/ekbaya/asham/pkg/domain/models"
+	"github.com/ekbaya/asham/pkg/db/redis"
 	"gorm.io/gorm"
 )
 
@@ -20,8 +20,8 @@ type App struct {
 }
 
 func NewApp(cfg *config.Config) (*App, error) {
-	// init redis
-	models.InitRedis()
+	// Initialize redis client
+	redis.InitRedis("localhost:6379", "", 0)
 
 	// Initialize database connection
 	db, err := db.NewPostgresConnection()
