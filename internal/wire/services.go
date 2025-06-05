@@ -2,9 +2,10 @@ package wire
 
 import (
 	"strconv"
-
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/ekbaya/asham/pkg/config"
+	"log"
+	"os"
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/services"
 	"github.com/google/wire"
@@ -58,6 +59,9 @@ func GetEmailConfigurations() *services.EmailConfig {
 		Password: globalConfig.EmailConfig.Password,
 		From:     globalConfig.EmailConfig.From,
 	}
+
+	log.Printf("[EmailConfig] Host: %s, Port: %d, Username: %s, From: %s", host, port, username, from)
+
 	return &emailConfig
 }
 

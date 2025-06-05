@@ -7,15 +7,17 @@ import (
 	"net/smtp"
 	"os"
 	"text/template"
+	"time"
 )
 
 // EmailConfig holds the configuration for the email service
 type EmailConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	From     string
+	Host              string
+	Port              int
+	Username          string
+	Password          string
+	From              string
+	EmailTemplatePath string
 }
 
 // EmailService handles sending emails
@@ -35,7 +37,7 @@ func (s *EmailService) SendWelcomeEmail(toEmail, name, password string) error {
 	subject := "Welcome to Our Service"
 
 	// Read the email template from file
-	tmpl, err := os.ReadFile("templates/welcome_email.html")
+	tmpl, err := os.ReadFile(s.config.EmailTemplatePath)
 	if err != nil {
 		return fmt.Errorf("failed to read email template: %w", err)
 	}
@@ -46,15 +48,17 @@ func (s *EmailService) SendWelcomeEmail(toEmail, name, password string) error {
 		return fmt.Errorf("failed to parse email template: %w", err)
 	}
 
-	// Prepare template data including band name "ASHAM"
+	// Prepare template data including band name "ASHAM" and dynamic year
 	data := struct {
 		Name     string
 		Password string
 		BandName string
+		Year     int
 	}{
 		Name:     name,
 		Password: password,
 		BandName: "ASHAM",
+		Year:     time.Now().Year(),
 	}
 
 	// Execute template with data
