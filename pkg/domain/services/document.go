@@ -1,11 +1,16 @@
 package services
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/config"
@@ -276,5 +281,86 @@ func (service *DocumentService) GetDocument(ctx context.Context, documentId stri
 		CreatedBy:    result.CreatedBy.User.DisplayName,
 		LastModified: result.LastModifiedDateTime,
 		EmbedUrl:     embedUrl,
+	}, nil
+}
+
+func (service *DocumentService) UploadFileToOneDriveFolder(ctx context.Context, folderName, fileName string) (*models.SharepointDocument, error) {
+	token, err := service.tokenManager.RetrieveToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+	userEmail := config.GetConfig().AZURE_USER_EMAIL
+
+	// Step 1: Open the file
+	filePath := config.GetConfig().DOC_TEMPLATE_PATH
+	file, err := os.Open(filePath)
+	if err != nil {
+		fmt.Printf("failed to open file: %v\n", err)
+		return nil, fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	// Step 2: Detect content type
+	ext := filepath.Ext(filePath)
+	contentType := mime.TypeByExtension(ext)
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+
+	// Step 1: Create folder if it doesn't exist
+	createFolderUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/root/children", userEmail)
+	folderPayload := map[string]any{
+		"name":                              folderName,
+		"folder":                            map[string]any{},
+		"@microsoft.graph.conflictBehavior": "replace",
+	}
+	folderBody, _ := json.Marshal(folderPayload)
+	req, _ := http.NewRequestWithContext(ctx, "POST", createFolderUrl, bytes.NewReader(folderBody))
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil || resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to create folder: %v (status: %d, body: %s)", err, resp.StatusCode, string(body))
+	}
+	defer resp.Body.Close()
+
+	// Step 2: Upload the file to the created folder
+	uploadUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/root:/%s/%s:/content", userEmail, url.PathEscape(folderName), url.PathEscape(fileName))
+	uploadReq, _ := http.NewRequestWithContext(ctx, "PUT", uploadUrl, file)
+	uploadReq.Header.Set("Authorization", "Bearer "+token)
+	uploadReq.Header.Set("Content-Type", contentType)
+
+	uploadResp, err := http.DefaultClient.Do(uploadReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload file: %v", err)
+	}
+	defer uploadResp.Body.Close()
+
+	if uploadResp.StatusCode >= 300 {
+		body, _ := io.ReadAll(uploadResp.Body)
+		return nil, fmt.Errorf("file upload failed: status %d, body: %s", uploadResp.StatusCode, string(body))
+	}
+
+	// Step 3: Decode response and return document metadata
+	var result struct {
+		Id     string `json:"id"`
+		Name   string `json:"name"`
+		WebUrl string `json:"webUrl"`
+		File   *struct {
+			MimeType string `json:"mimeType"`
+		} `json:"file"`
+	}
+
+	if err := json.NewDecoder(uploadResp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to parse upload response: %v", err)
+	}
+
+	return &models.SharepointDocument{
+		ID:       result.Id,
+		Name:     result.Name,
+		WebURL:   result.WebUrl,
+		EmbedUrl: "",
 	}, nil
 }

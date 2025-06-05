@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -10,11 +11,12 @@ import (
 )
 
 type ProjectService struct {
-	repo *repository.ProjectRepository
+	repo       *repository.ProjectRepository
+	docService *DocumentService
 }
 
-func NewProjectService(repo *repository.ProjectRepository) *ProjectService {
-	return &ProjectService{repo: repo}
+func NewProjectService(repo *repository.ProjectRepository, docService *DocumentService) *ProjectService {
+	return &ProjectService{repo: repo, docService: docService}
 }
 
 func (service *ProjectService) CreateProject(project *models.Project) error {
@@ -45,6 +47,15 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 
 	// project is at stage 0
 	project.StageID = stage.ID.String()
+
+	folderName := fmt.Sprintf("Project_%d", project.Number)
+	doc, err := service.docService.UploadFileToOneDriveFolder(context.Background(), folderName, project.Reference)
+
+	if err != nil {
+		return fmt.Errorf("failed to upload project template: %w", err)
+	}
+
+	project.SharepointDocID = &doc.ID
 
 	// Save project in the repository
 	return service.repo.CreateProject(project)

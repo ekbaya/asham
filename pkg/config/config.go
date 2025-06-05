@@ -17,6 +17,7 @@ type Config struct {
 	AZURE_CLIENT_SECRET string
 	AZURE_USER_EMAIL    string
 	EmailConfig         EmailConfig
+	DOC_TEMPLATE_PATH   string
 }
 
 type DatabaseConfig struct {
@@ -81,6 +82,7 @@ func LoadConfig() (*Config, error) {
 			Password: os.Getenv("EMAIL_PASSWORD"),
 			From:     os.Getenv("EMAIL_FROM"),
 		},
+		DOC_TEMPLATE_PATH: "../templates/project_template.docx",
 	}
 
 	return config, nil

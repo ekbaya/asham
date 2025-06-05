@@ -126,6 +126,7 @@ type Project struct {
 	StandardID                    *string    `json:"standard_id"`
 	Standard                      *Document  `json:"standard"`
 	Published                     bool       `json:"published" gorm:"default:false"`
+	SharepointDocID               *string    `json:"sharepoint_doc_id"`
 	PublishedDate                 *time.Time `json:"published_date"`
 	CreatedAt                     time.Time  `json:"created_at"`
 	UpdatedAt                     time.Time  `json:"updated_at"`
