@@ -143,11 +143,11 @@ func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.Sha
 	// Retrieve the token from the token manager
 	userToken, err := service.tokenManager.RetrieveToken(ctx)
 
-	userEmail := config.GetConfig().AZURE_USER_EMAIL
-
 	if err != nil {
 		return nil, err
 	}
+
+	userEmail := config.GetConfig().AZURE_USER_EMAIL
 
 	url := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/root/search(q='*.docx')", userEmail)
 	req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -207,7 +207,9 @@ func (service *DocumentService) GetDocument(ctx context.Context, documentId stri
 		return nil, err
 	}
 
-	oneDriveUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/me/drive/items/%s", documentId)
+	userEmail := config.GetConfig().AZURE_USER_EMAIL
+
+	oneDriveUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s", userEmail, documentId)
 	req, _ := http.NewRequestWithContext(ctx, "GET", oneDriveUrl, nil)
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Accept", "application/json")
