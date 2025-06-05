@@ -142,7 +142,7 @@ func (service *DocumentService) UpdateMeetingMinutes(meetingId, fileURL, member 
 	return service.repo.UpdateMeetingMinutes(meetingId, fileURL, member)
 }
 
-func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.SharepointDocument, error) {
+func (service *DocumentService) ListDocuments(ctx context.Context, projectNumber int64) ([]models.SharepointDocument, error) {
 	// Retrieve the token from the token manager
 	userToken, err := service.tokenManager.RetrieveToken(ctx)
 	if err != nil {
@@ -210,9 +210,10 @@ func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.Sha
 				if err := json.NewDecoder(folderResp.Body).Decode(&folderResult); err != nil {
 					return
 				}
+				projectFolder := fmt.Sprintf("PROJECT_%d", projectNumber)
 				for _, subFolder := range folderResult.Value {
-					if subFolder.Folder != nil && len(subFolder.Name) >= len("PROJECT_") &&
-						subFolder.Name[:len("PROJECT_")] == "PROJECT_" {
+					if subFolder.Folder != nil && len(subFolder.Name) >= len(projectFolder) &&
+						subFolder.Name[:len(projectFolder)] == projectFolder {
 						// List files in PROJECT_ folder
 						projectFolderUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s/children", userEmail, subFolder.Id)
 						projectFolderReq, _ := http.NewRequestWithContext(ctx, "GET", projectFolderUrl, nil)

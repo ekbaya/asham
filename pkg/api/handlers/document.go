@@ -416,7 +416,11 @@ func (h *DocumentHandler) ListDocuments(c *gin.Context) {
 }
 
 func (h *DocumentHandler) ListSharepointDocuments(c *gin.Context) {
-	documents, err := h.documentService.ListDocuments(c)
+	projectNumber, err := strconv.Atoi(c.Query("project_number"))
+	if err != nil {
+		projectNumber = 0
+	}
+	documents, err := h.documentService.ListDocuments(c, int64(projectNumber))
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
