@@ -1,6 +1,9 @@
 package services
 
 import (
+	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/db/repository"
@@ -9,11 +12,13 @@ import (
 )
 
 type AcceptanceService struct {
-	repo *repository.AcceptanceRepository
+	repo           *repository.AcceptanceRepository
+	docService     *DocumentService
+	projectService *ProjectService
 }
 
-func NewAcceptanceService(repo *repository.AcceptanceRepository) *AcceptanceService {
-	return &AcceptanceService{repo: repo}
+func NewAcceptanceService(repo *repository.AcceptanceRepository, docService *DocumentService, projectService *ProjectService) *AcceptanceService {
+	return &AcceptanceService{repo: repo, docService: docService, projectService: projectService}
 }
 
 func (service *AcceptanceService) CreateNSBResponse(response *models.NSBResponse) error {
@@ -67,7 +72,23 @@ func (service *AcceptanceService) CalculateNSBResponseStats(projectID string) er
 }
 
 func (service *AcceptanceService) SetAcceptanceApproval(acceptance models.Acceptance) error {
-	return service.repo.SetAcceptanceApproval(acceptance)
+	err := service.repo.SetAcceptanceApproval(acceptance)
+	if err == nil {
+		projectUUID, err := uuid.Parse(acceptance.ProjectID)
+		if err != nil {
+			return err
+		}
+		project, err := service.projectService.GetProjectByID(projectUUID)
+		if err != nil {
+			return err
+		}
+		fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
+		_, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName)
+		if errr != nil {
+			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
+		}
+	}
+	return err
 }
 
 func (service *AcceptanceService) GetAcceptanceResults(id string) (*models.AcceptanceResults, error) {

@@ -181,11 +181,13 @@ func (service *DocumentService) ListDocuments(ctx context.Context, projectNumber
 
 	var documents []models.SharepointDocument
 
+	parentFolderName := config.GetConfig().ONEDRIVE_FOLDER_NAME
+
 	// For each folder matching the pattern, list its files
 	for _, item := range rootResult.Value {
-		if item.Folder != nil && len(item.Name) >= len("ASHAM_ARSO_PLATFORM") &&
-			item.Name[:len("ASHAM_ARSO_PLATFORM")] == "ASHAM_ARSO_PLATFORM" {
-			// List children of ASHAM_ARSO_PLATFORM folder
+		if item.Folder != nil && len(item.Name) >= len(parentFolderName) &&
+			item.Name[:len(parentFolderName)] == parentFolderName {
+			// List children of parent folder
 			folderUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s/children", userEmail, item.Id)
 			folderReq, _ := http.NewRequestWithContext(ctx, "GET", folderUrl, nil)
 			folderReq.Header.Set("Authorization", "Bearer "+userToken)
@@ -347,15 +349,17 @@ func (service *DocumentService) GetDocument(ctx context.Context, documentId stri
 	}, nil
 }
 
-func (service *DocumentService) UploadFileToOneDriveFolder(ctx context.Context, folderName, fileName string) (*models.SharepointDocument, error) {
+func (service *DocumentService) UploadFileToOneDriveFolder(ctx context.Context, fileName string) (*models.SharepointDocument, error) {
 	token, err := service.tokenManager.RetrieveToken(ctx)
 	if err != nil {
 		return nil, err
 	}
-	userEmail := config.GetConfig().AZURE_USER_EMAIL
+	globalConfig := config.GetConfig()
+	userEmail := globalConfig.AZURE_USER_EMAIL
 
 	// Step 1: Open the file
-	filePath := config.GetConfig().DOC_TEMPLATE_PATH
+	filePath := globalConfig.DOC_TEMPLATE_PATH
+	folderName := globalConfig.ONEDRIVE_FOLDER_NAME
 	file, err := os.Open(filePath)
 	if err != nil {
 		fmt.Printf("failed to open file: %v\n", err)
@@ -422,4 +426,93 @@ func (service *DocumentService) UploadFileToOneDriveFolder(ctx context.Context, 
 		WebURL:   result.WebUrl,
 		EmbedUrl: "",
 	}, nil
+}
+
+func (service *DocumentService) CopyOneDriveFile(
+	ctx context.Context,
+	sourceFileID string,
+	newName string,
+) (*models.SharepointDocument, error) {
+	token, err := service.tokenManager.RetrieveToken(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get token: %v", err)
+	}
+
+	userEmail := config.GetConfig().AZURE_USER_EMAIL
+
+	// Step 1: Call the Graph /copy endpoint
+	copyURL := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s/copy", userEmail, sourceFileID)
+	body := map[string]any{
+		"name": newName,
+	}
+
+	jsonBody, _ := json.Marshal(body)
+	req, err := http.NewRequestWithContext(ctx, "POST", copyURL, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create copy request: %v", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute copy request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusAccepted {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("copy failed: %s, %s", resp.Status, string(bodyBytes))
+	}
+
+	// Step 2: Poll the Location URL for result
+	locationURL := resp.Header.Get("Location")
+	if locationURL == "" {
+		return nil, fmt.Errorf("no location header received for copy tracking")
+	}
+
+	var newItem struct {
+		Id     string `json:"id"`
+		Name   string `json:"name"`
+		WebUrl string `json:"webUrl"`
+		File   *struct {
+			MimeType string `json:"mimeType"`
+		} `json:"file"`
+	}
+
+	client := http.DefaultClient
+	for i := 0; i < 15; i++ {
+		time.Sleep(2 * time.Second)
+
+		pollReq, _ := http.NewRequestWithContext(ctx, "GET", locationURL, nil)
+		pollReq.Header.Set("Authorization", "Bearer "+token)
+
+		pollResp, err := client.Do(pollReq)
+		if err != nil {
+			return nil, fmt.Errorf("failed to poll copy status: %v", err)
+		}
+
+		if pollResp.StatusCode == http.StatusAccepted {
+			pollResp.Body.Close()
+			continue
+		} else if pollResp.StatusCode == http.StatusOK {
+			defer pollResp.Body.Close()
+			if err := json.NewDecoder(pollResp.Body).Decode(&newItem); err != nil {
+				return nil, fmt.Errorf("failed to decode new file metadata: %v", err)
+			}
+
+			return &models.SharepointDocument{
+				ID:       newItem.Id,
+				Name:     newItem.Name,
+				WebURL:   newItem.WebUrl,
+				EmbedUrl: "",
+			}, nil
+		} else {
+			body, _ := io.ReadAll(pollResp.Body)
+			pollResp.Body.Close()
+			return nil, fmt.Errorf("unexpected status while polling copy: %d - %s", pollResp.StatusCode, string(body))
+		}
+	}
+	return nil, fmt.Errorf("copy operation timed out")
 }

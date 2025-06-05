@@ -50,8 +50,7 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 	project.StageID = stage.ID.String()
 	fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
 
-	folderName := "ASHAM_ARSO_PLATFORM"
-	doc, err := service.docService.UploadFileToOneDriveFolder(context.Background(), folderName, fileName)
+	doc, err := service.docService.UploadFileToOneDriveFolder(context.Background(), fileName)
 
 	if err != nil {
 		return fmt.Errorf("failed to upload project template: %w", err)

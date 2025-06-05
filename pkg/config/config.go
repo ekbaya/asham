@@ -8,16 +8,17 @@ import (
 )
 
 type Config struct {
-	DB                  DatabaseConfig
-	Server              ServerConfig
-	GRPC                GRPCConfig
-	GOOGLE_CLIENT_TOKEN string
-	AZURE_TENANT_ID     string
-	AZURE_CLIENT_ID     string
-	AZURE_CLIENT_SECRET string
-	AZURE_USER_EMAIL    string
-	EmailConfig         EmailConfig
-	DOC_TEMPLATE_PATH   string
+	DB                   DatabaseConfig
+	Server               ServerConfig
+	GRPC                 GRPCConfig
+	GOOGLE_CLIENT_TOKEN  string
+	AZURE_TENANT_ID      string
+	AZURE_CLIENT_ID      string
+	AZURE_CLIENT_SECRET  string
+	AZURE_USER_EMAIL     string
+	EmailConfig          EmailConfig
+	DOC_TEMPLATE_PATH    string
+	ONEDRIVE_FOLDER_NAME string
 }
 
 type DatabaseConfig struct {
@@ -82,7 +83,8 @@ func LoadConfig() (*Config, error) {
 			Password: os.Getenv("EMAIL_PASSWORD"),
 			From:     os.Getenv("EMAIL_FROM"),
 		},
-		DOC_TEMPLATE_PATH: "../templates/project_template.docx",
+		DOC_TEMPLATE_PATH:    "../templates/project_template.docx",
+		ONEDRIVE_FOLDER_NAME: "ASHAM_ARSO_PLATFORM",
 	}
 
 	return config, nil
