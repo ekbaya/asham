@@ -47,9 +47,10 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 
 	// project is at stage 0
 	project.StageID = stage.ID.String()
+	fileName := fmt.Sprintf("%s.docx", project.ID)
 
 	folderName := fmt.Sprintf("ASHAM_ARSO_PLATFORM_PROJECT_%d", project.Number)
-	doc, err := service.docService.UploadFileToOneDriveFolder(context.Background(), folderName, project.Reference)
+	doc, err := service.docService.UploadFileToOneDriveFolder(context.Background(), folderName, fileName)
 
 	if err != nil {
 		return fmt.Errorf("failed to upload project template: %w", err)
@@ -184,7 +185,7 @@ func (service *ProjectService) ReviewDARS(secretary,
 	status string) error {
 	if models.DARSStatus(status) == models.DARSRejected &&
 		alternativeDeliverable == "" {
-		return fmt.Errorf("Alternative deliverables cannot be empty when status is rejected")
+		return fmt.Errorf("alternative deliverables cannot be empty when status is rejected")
 
 	}
 	return service.repo.ReviewDARS(secretary, projectId, wto_notification_notified, unresolvedIssues, alternativeDeliverable, status)
@@ -192,7 +193,7 @@ func (service *ProjectService) ReviewDARS(secretary,
 
 func (service *ProjectService) ApproveFDARS(secretary, projectId string, approve bool, action string) error {
 	if action == "" && !approve {
-		return fmt.Errorf("Action cannot be empty when not approving")
+		return fmt.Errorf("action cannot be empty when not approving")
 	}
 	return service.repo.ApproveFDARS(secretary, projectId, approve, action)
 }
