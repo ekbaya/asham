@@ -48,7 +48,7 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 	// project is at stage 0
 	project.StageID = stage.ID.String()
 
-	folderName := fmt.Sprintf("Project_%d", project.Number)
+	folderName := fmt.Sprintf("ASHAM_ARSO_PLATFORM_PROJECT_%d", project.Number)
 	doc, err := service.docService.UploadFileToOneDriveFolder(context.Background(), folderName, project.Reference)
 
 	if err != nil {

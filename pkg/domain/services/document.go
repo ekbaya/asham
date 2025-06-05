@@ -304,7 +304,7 @@ func (service *DocumentService) UploadFileToOneDriveFolder(ctx context.Context, 
 	ext := filepath.Ext(filePath)
 	contentType := mime.TypeByExtension(ext)
 	if contentType == "" {
-		contentType = "application/octet-stream"
+		contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 	}
 
 	// Step 1: Create folder if it doesn't exist
