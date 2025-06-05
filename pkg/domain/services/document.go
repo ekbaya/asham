@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/config"
@@ -149,13 +148,7 @@ func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.Sha
 
 	userEmail := config.GetConfig().AZURE_USER_EMAIL
 
-	// Safely encode email and search query
-	safeEmail := url.PathEscape(userEmail)
-	searchQuery := "*.docx"
-	escapedQuery := url.QueryEscape(searchQuery) // becomes %2A.docx
-
-	url := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/root/search(q=%s)", safeEmail, escapedQuery)
-
+	url := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/root/children", userEmail)
 	req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
 	req.Header.Set("Authorization", "Bearer "+userToken)
 	req.Header.Set("Accept", "application/json")
@@ -166,7 +159,7 @@ func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.Sha
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != 200 {
 		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("failed to fetch items: %s, body: %s", resp.Status, string(body))
 	}
@@ -187,7 +180,6 @@ func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.Sha
 			LastModifiedDateTime string `json:"lastModifiedDateTime"`
 		} `json:"value"`
 	}
-
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %v", err)
 	}
@@ -204,8 +196,8 @@ func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.Sha
 			})
 		}
 	}
-
 	return documents, nil
+
 }
 
 func (service *DocumentService) GetDocument(ctx context.Context, documentId string) (*models.SharepointDocument, error) {
