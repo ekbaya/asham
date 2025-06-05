@@ -151,6 +151,7 @@ func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.Sha
 
 	userEmail := config.GetConfig().AZURE_USER_EMAIL
 
+	// Get all items in the root folder
 	url := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/root/children", userEmail)
 	req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
 	req.Header.Set("Authorization", "Bearer "+userToken)
@@ -167,40 +168,72 @@ func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.Sha
 		return nil, fmt.Errorf("failed to fetch items: %s, body: %s", resp.Status, string(body))
 	}
 
-	var result struct {
+	var rootResult struct {
 		Value []struct {
-			Id     string `json:"id"`
-			Name   string `json:"name"`
-			WebUrl string `json:"webUrl"`
-			File   *struct {
-				MimeType string `json:"mimeType"`
-			} `json:"file"`
-			CreatedBy struct {
-				User struct {
-					DisplayName string `json:"displayName"`
-				} `json:"user"`
-			} `json:"createdBy"`
-			LastModifiedDateTime string `json:"lastModifiedDateTime"`
+			Id     string    `json:"id"`
+			Name   string    `json:"name"`
+			Folder *struct{} `json:"folder"`
 		} `json:"value"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&rootResult); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %v", err)
 	}
 
 	var documents []models.SharepointDocument
-	for _, item := range result.Value {
-		if item.File != nil && item.File.MimeType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" {
-			documents = append(documents, models.SharepointDocument{
-				ID:           item.Id,
-				Name:         item.Name,
-				WebURL:       item.WebUrl,
-				CreatedBy:    item.CreatedBy.User.DisplayName,
-				LastModified: item.LastModifiedDateTime,
-			})
+
+	// For each folder matching the pattern, list its files
+	for _, item := range rootResult.Value {
+		if item.Folder != nil && len(item.Name) >= len("ASHAM_ARSO_PLATFORM_PROJECT_") &&
+			item.Name[:len("ASHAM_ARSO_PLATFORM_PROJECT_")] == "ASHAM_ARSO_PLATFORM_PROJECT_" {
+			// List children of this folder
+			folderUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s/children", userEmail, item.Id)
+			folderReq, _ := http.NewRequestWithContext(ctx, "GET", folderUrl, nil)
+			folderReq.Header.Set("Authorization", "Bearer "+userToken)
+			folderReq.Header.Set("Accept", "application/json")
+
+			folderResp, err := http.DefaultClient.Do(folderReq)
+			if err != nil {
+				continue
+			}
+			func() {
+				defer folderResp.Body.Close()
+				if folderResp.StatusCode != 200 {
+					return
+				}
+				var folderResult struct {
+					Value []struct {
+						Id     string `json:"id"`
+						Name   string `json:"name"`
+						WebUrl string `json:"webUrl"`
+						File   *struct {
+							MimeType string `json:"mimeType"`
+						} `json:"file"`
+						CreatedBy struct {
+							User struct {
+								DisplayName string `json:"displayName"`
+							} `json:"user"`
+						} `json:"createdBy"`
+						LastModifiedDateTime string `json:"lastModifiedDateTime"`
+					} `json:"value"`
+				}
+				if err := json.NewDecoder(folderResp.Body).Decode(&folderResult); err != nil {
+					return
+				}
+				for _, fileItem := range folderResult.Value {
+					if fileItem.File != nil && fileItem.File.MimeType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" {
+						documents = append(documents, models.SharepointDocument{
+							ID:           fileItem.Id,
+							Name:         fileItem.Name,
+							WebURL:       fileItem.WebUrl,
+							CreatedBy:    fileItem.CreatedBy.User.DisplayName,
+							LastModified: fileItem.LastModifiedDateTime,
+						})
+					}
+				}
+			}()
 		}
 	}
 	return documents, nil
-
 }
 
 func (service *DocumentService) GetDocument(ctx context.Context, documentId string) (*models.SharepointDocument, error) {
