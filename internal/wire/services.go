@@ -1,13 +1,14 @@
 package wire
 
 import (
-	"log"
-	"os"
-	"strconv"
-
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/ekbaya/asham/pkg/config"
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/services"
 	"github.com/google/wire"
+	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
+	"log"
+	"strconv"
 )
 
 var ServiceSet = wire.NewSet(
@@ -19,6 +20,7 @@ var ServiceSet = wire.NewSet(
 	services.NewMemberService,
 	repository.NewProjectRepository,
 	services.NewProjectService,
+	GetGraphServiceClient,
 	repository.NewDocumentRepository,
 	services.NewDocumentService,
 	repository.NewProposalRepository,
@@ -39,43 +41,53 @@ var ServiceSet = wire.NewSet(
 	services.NewStandardService,
 	repository.NewRbacRepository,
 	services.NewRbacService,
+	GetMSAzureConfig,
+	services.NewTokenManager,
 )
 
 func GetEmailConfigurations() *services.EmailConfig {
-	host := os.Getenv("SMTP_HOST")
-	if host == "" {
-		host = "live.smtp.mailtrap.io"
+	globalConfig := config.GetConfig()
+	port, err := strconv.Atoi(globalConfig.EmailConfig.Port)
+	if err != nil {
+		port = 587
 	}
-	portStr := os.Getenv("SMTP_PORT")
-	port := 587
-	if portStr != "" {
-		if p, err := strconv.Atoi(portStr); err == nil {
-			port = p
-		}
-	}
-	username := os.Getenv("SMTP_USERNAME")
-	if username == "" {
-		username = "smtp@mailtrap.io"
-	}
-	password := os.Getenv("SMTP_PASSWORD")
-	if password == "" {
-		password = "61dc207f67686fdb2aadbe5bc179fa71"
-	}
-	from := os.Getenv("SMTP_FROM")
-	if from == "" {
-		from = "no-reply@collectwave.com"
-	}
-
 	emailConfig := services.EmailConfig{
-		Host:              host,
-		Port:              port,
-		Username:          username,
-		Password:          password,
-		From:              from,
-		EmailTemplatePath: "../templates/welcome_email.html",
+		Host:     globalConfig.EmailConfig.Host,
+		Port:     port,
+		Username: globalConfig.EmailConfig.Username,
+		Password: globalConfig.EmailConfig.Password,
+		From:     globalConfig.EmailConfig.From,
 	}
 
-	log.Printf("[EmailConfig] Host: %s, Port: %d, Username: %s, From: %s", host, port, username, from)
+	log.Printf("[EmailConfig] Host: %s, Port: %d, Username: %s, From: %s", globalConfig.EmailConfig.Host, port, globalConfig.EmailConfig.Username, globalConfig.EmailConfig.From)
 
 	return &emailConfig
+}
+
+func GetMSAzureConfig() *services.MSAzureConfig {
+	globalConfig := config.GetConfig()
+	config := services.MSAzureConfig{
+		TenantID:     globalConfig.AZURE_TENANT_ID,
+		ClientID:     globalConfig.AZURE_CLIENT_ID,
+		ClientSecret: globalConfig.AZURE_CLIENT_SECRET,
+	}
+	return &config
+}
+
+func GetGraphServiceClient() *msgraphsdk.GraphServiceClient {
+	config := GetMSAzureConfig()
+	cred, err := azidentity.NewClientSecretCredential(
+		config.TenantID,
+		config.ClientID,
+		config.ClientSecret,
+		nil,
+	)
+	if err != nil {
+		return nil
+	}
+	client, err := msgraphsdk.NewGraphServiceClientWithCredentials(cred, []string{"https://graph.microsoft.com/.default"})
+	if err != nil {
+		return nil
+	}
+	return client
 }

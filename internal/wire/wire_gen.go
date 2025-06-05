@@ -24,7 +24,10 @@ func InitializeServices(db *gorm.DB) (*services.ServiceContainer, error) {
 	projectRepository := repository.NewProjectRepository(db)
 	projectService := services.NewProjectService(projectRepository)
 	documentRepository := repository.NewDocumentRepository(db)
-	documentService := services.NewDocumentService(documentRepository)
+	graphServiceClient := GetGraphServiceClient()
+	msAzureConfig := GetMSAzureConfig()
+	tokenManager := services.NewTokenManager(msAzureConfig)
+	documentService := services.NewDocumentService(documentRepository, projectRepository, graphServiceClient, tokenManager)
 	proposalRepository := repository.NewProposalRepository(db)
 	proposalService := services.NewProposalService(proposalRepository)
 	acceptanceRepository := repository.NewAcceptanceRepository(db)
@@ -43,6 +46,6 @@ func InitializeServices(db *gorm.DB) (*services.ServiceContainer, error) {
 	standardService := services.NewStandardService(standardRepository)
 	rbacRepository := repository.NewRbacRepository(db)
 	rbacService := services.NewRbacService(rbacRepository)
-	serviceContainer := services.NewServiceContainer(organizationService, memberService, projectService, documentService, proposalService, acceptanceService, commentService, emailService, nationalConsultationService, ballotingService, meetingService, libraryService, standardService, rbacService)
+	serviceContainer := services.NewServiceContainer(organizationService, memberService, projectService, documentService, proposalService, acceptanceService, commentService, emailService, nationalConsultationService, ballotingService, meetingService, libraryService, standardService, rbacService, tokenManager)
 	return serviceContainer, nil
 }

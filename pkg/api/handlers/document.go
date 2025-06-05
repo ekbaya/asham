@@ -415,6 +415,24 @@ func (h *DocumentHandler) ListDocuments(c *gin.Context) {
 	utilities.Show(c, http.StatusOK, "data", response)
 }
 
+func (h *DocumentHandler) ListSharepointDocuments(c *gin.Context) {
+	documents, err := h.documentService.ListDocuments(c)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	utilities.Show(c, http.StatusOK, "data", documents)
+}
+
+func (h *DocumentHandler) GetSharepointDocument(c *gin.Context) {
+	document, err := h.documentService.GetDocument(c, c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	utilities.Show(c, http.StatusOK, "data", document)
+}
+
 // SearchDocuments searches for documents based on a query
 func (h *DocumentHandler) SearchDocuments(c *gin.Context) {
 	query := c.Query("q")

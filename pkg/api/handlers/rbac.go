@@ -43,6 +43,31 @@ func (h *RbacHandler) CreateRole(c *gin.Context) {
 	utilities.ShowMessage(c, http.StatusCreated, "Role created successfully")
 }
 
+func (h *RbacHandler) UpdateRole(c *gin.Context) {
+	var role models.Role
+	if err := c.ShouldBindJSON(&role); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
+			return
+		}
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Ensure role.Title is uppercase and words are separated by underscores
+	processedTitle := utilities.ToUpperUnderscore(role.Title)
+	role.Title = processedTitle
+
+	err := h.rbacService.UpdateRole(&role)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "Role created successfully")
+}
+
 func (h *RbacHandler) ListRoles(c *gin.Context) {
 	roles, err := h.rbacService.ListRoles()
 	if err != nil {
@@ -51,6 +76,26 @@ func (h *RbacHandler) ListRoles(c *gin.Context) {
 	}
 
 	utilities.Show(c, http.StatusOK, "roles", roles)
+}
+
+func (h *RbacHandler) GetRoleByID(c *gin.Context) {
+	role, err := h.rbacService.GetRoleByID(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.Show(c, http.StatusOK, "role", role)
+}
+
+func (h *RbacHandler) DeleteRole(c *gin.Context) {
+	err := h.rbacService.DeleteRole(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "role has been deleted")
 }
 
 func (h *RbacHandler) CreatePermission(c *gin.Context) {

@@ -1,21 +1,34 @@
 package services
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/google/uuid"
+	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 )
 
-type DocumentService struct {
-	repo        *repository.DocumentRepository
-	projectRepo *repository.ProjectRepository
+type TokenResponse struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	ExpiresIn   int    `json:"expires_in"`
 }
 
-func NewDocumentService(repo *repository.DocumentRepository) *DocumentService {
-	return &DocumentService{repo: repo}
+type DocumentService struct {
+	repo         *repository.DocumentRepository
+	projectRepo  *repository.ProjectRepository
+	client       *msgraphsdk.GraphServiceClient
+	tokenManager *TokenManager
+}
+
+func NewDocumentService(repo *repository.DocumentRepository, projectRepo *repository.ProjectRepository, client *msgraphsdk.GraphServiceClient, tokenManager *TokenManager) *DocumentService {
+	return &DocumentService{repo: repo, projectRepo: projectRepo, client: client, tokenManager: tokenManager}
 }
 
 func (service *DocumentService) Create(doc *models.Document) error {
@@ -123,4 +136,140 @@ func (service *DocumentService) UpdateProjectRelatedDoc(projectId, docTitle, doc
 
 func (service *DocumentService) UpdateMeetingMinutes(meetingId, fileURL, member string) error {
 	return service.repo.UpdateMeetingMinutes(meetingId, fileURL, member)
+}
+
+func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.SharepointDocument, error) {
+	// Retrieve the token from the token manager
+	userToken, err := service.tokenManager.RetrieveToken(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	url := "https://graph.microsoft.com/v1.0/me/drive/root/children"
+	req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req.Header.Set("Authorization", "Bearer "+userToken)
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch items: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to fetch items: %s, body: %s", resp.Status, string(body))
+	}
+
+	var result struct {
+		Value []struct {
+			Id     string `json:"id"`
+			Name   string `json:"name"`
+			WebUrl string `json:"webUrl"`
+			File   *struct {
+				MimeType string `json:"mimeType"`
+			} `json:"file"`
+			CreatedBy struct {
+				User struct {
+					DisplayName string `json:"displayName"`
+				} `json:"user"`
+			} `json:"createdBy"`
+			LastModifiedDateTime string `json:"lastModifiedDateTime"`
+		} `json:"value"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %v", err)
+	}
+
+	var documents []models.SharepointDocument
+	for _, item := range result.Value {
+		if item.File != nil && item.File.MimeType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" {
+			documents = append(documents, models.SharepointDocument{
+				ID:           item.Id,
+				Name:         item.Name,
+				WebURL:       item.WebUrl,
+				CreatedBy:    item.CreatedBy.User.DisplayName,
+				LastModified: item.LastModifiedDateTime,
+			})
+		}
+	}
+	return documents, nil
+}
+
+func (service *DocumentService) GetDocument(ctx context.Context, documentId string) (*models.SharepointDocument, error) {
+	// Retrieve the token from the token manager
+	token, err := service.tokenManager.RetrieveToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	oneDriveUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/me/drive/items/%s", documentId)
+	req, _ := http.NewRequestWithContext(ctx, "GET", oneDriveUrl, nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch document from OneDrive: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to fetch document details: status %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	var result struct {
+		Id     string `json:"id"`
+		Name   string `json:"name"`
+		WebUrl string `json:"webUrl"`
+		File   *struct {
+			MimeType string `json:"mimeType"`
+		} `json:"file"`
+		CreatedBy struct {
+			User struct {
+				DisplayName string `json:"displayName"`
+			} `json:"user"`
+		} `json:"createdBy"`
+		LastModifiedDateTime string `json:"lastModifiedDateTime"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode OneDrive document response: %v", err)
+	}
+	if result.File == nil {
+		return nil, fmt.Errorf("item is not a file")
+	}
+	if result.File.MimeType != "application/vnd.openxmlformats-officedocument.wordprocessingml.document" {
+		return nil, fmt.Errorf("item is not a Word document (mimeType: %s)", result.File.MimeType)
+	}
+
+	// Call the /preview endpoint to get the embedUrl
+	previewUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/me/drive/items/%s/preview", documentId)
+	previewReq, _ := http.NewRequestWithContext(ctx, "POST", previewUrl, nil)
+	previewReq.Header.Set("Authorization", "Bearer "+token)
+	previewReq.Header.Set("Accept", "application/json")
+
+	embedUrl := ""
+	previewResp, err := http.DefaultClient.Do(previewReq)
+	if err == nil && previewResp.StatusCode == 200 {
+		var previewResult struct {
+			GetUrl string `json:"getUrl"`
+		}
+		if err := json.NewDecoder(previewResp.Body).Decode(&previewResult); err == nil {
+			embedUrl = previewResult.GetUrl
+		}
+	}
+	if previewResp != nil {
+		previewResp.Body.Close()
+	}
+
+	return &models.SharepointDocument{
+		ID:           result.Id,
+		Name:         result.Name,
+		WebURL:       result.WebUrl,
+		CreatedBy:    result.CreatedBy.User.DisplayName,
+		LastModified: result.LastModifiedDateTime,
+		EmbedUrl:     embedUrl,
+	}, nil
 }

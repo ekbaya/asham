@@ -66,6 +66,9 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	{
 		rbac.POST("/roles", rbacHandler.CreateRole)
 		rbac.GET("/roles", rbacHandler.ListRoles)
+		rbac.GET("/roles/:id", rbacHandler.GetRoleByID)
+		rbac.DELETE("/roles/:id", rbacHandler.DeleteRole)
+		rbac.PUT("/roles", rbacHandler.UpdateRole)
 		rbac.POST("/permissions", rbacHandler.CreatePermission)
 		rbac.GET("/permissions", rbacHandler.ListPermissions)
 		rbac.POST("/assign/:member_id/:role_id", rbacHandler.AssignRoleToMember)
@@ -188,6 +191,9 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		document.GET("/search", documentHandler.SearchDocuments)
 		document.GET("/date", documentHandler.GetDocumentsByDateRange)
 		document.GET("/count", documentHandler.CountDocuments)
+		// Sharepoint documents
+		document.GET("/sharepoint", documentHandler.ListSharepointDocuments)
+		document.GET("/sharepoint/:id", documentHandler.GetSharepointDocument)
 	}
 
 	// Project Route
