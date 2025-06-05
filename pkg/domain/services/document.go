@@ -183,9 +183,9 @@ func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.Sha
 
 	// For each folder matching the pattern, list its files
 	for _, item := range rootResult.Value {
-		if item.Folder != nil && len(item.Name) >= len("ASHAM_ARSO_PLATFORM_PROJECT_") &&
-			item.Name[:len("ASHAM_ARSO_PLATFORM_PROJECT_")] == "ASHAM_ARSO_PLATFORM_PROJECT_" {
-			// List children of this folder
+		if item.Folder != nil && len(item.Name) >= len("ASHAM_ARSO_PLATFORM") &&
+			item.Name[:len("ASHAM_ARSO_PLATFORM")] == "ASHAM_ARSO_PLATFORM" {
+			// List children of ASHAM_ARSO_PLATFORM folder
 			folderUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s/children", userEmail, item.Id)
 			folderReq, _ := http.NewRequestWithContext(ctx, "GET", folderUrl, nil)
 			folderReq.Header.Set("Authorization", "Bearer "+userToken)
@@ -202,32 +202,63 @@ func (service *DocumentService) ListDocuments(ctx context.Context) ([]models.Sha
 				}
 				var folderResult struct {
 					Value []struct {
-						Id     string `json:"id"`
-						Name   string `json:"name"`
-						WebUrl string `json:"webUrl"`
-						File   *struct {
-							MimeType string `json:"mimeType"`
-						} `json:"file"`
-						CreatedBy struct {
-							User struct {
-								DisplayName string `json:"displayName"`
-							} `json:"user"`
-						} `json:"createdBy"`
-						LastModifiedDateTime string `json:"lastModifiedDateTime"`
+						Id     string    `json:"id"`
+						Name   string    `json:"name"`
+						Folder *struct{} `json:"folder"`
 					} `json:"value"`
 				}
 				if err := json.NewDecoder(folderResp.Body).Decode(&folderResult); err != nil {
 					return
 				}
-				for _, fileItem := range folderResult.Value {
-					if fileItem.File != nil && fileItem.File.MimeType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" {
-						documents = append(documents, models.SharepointDocument{
-							ID:           fileItem.Id,
-							Name:         fileItem.Name,
-							WebURL:       fileItem.WebUrl,
-							CreatedBy:    fileItem.CreatedBy.User.DisplayName,
-							LastModified: fileItem.LastModifiedDateTime,
-						})
+				for _, subFolder := range folderResult.Value {
+					if subFolder.Folder != nil && len(subFolder.Name) >= len("PROJECT_") &&
+						subFolder.Name[:len("PROJECT_")] == "PROJECT_" {
+						// List files in PROJECT_ folder
+						projectFolderUrl := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s/children", userEmail, subFolder.Id)
+						projectFolderReq, _ := http.NewRequestWithContext(ctx, "GET", projectFolderUrl, nil)
+						projectFolderReq.Header.Set("Authorization", "Bearer "+userToken)
+						projectFolderReq.Header.Set("Accept", "application/json")
+
+						projectFolderResp, err := http.DefaultClient.Do(projectFolderReq)
+						if err != nil {
+							continue
+						}
+						func() {
+							defer projectFolderResp.Body.Close()
+							if projectFolderResp.StatusCode != 200 {
+								return
+							}
+							var projectFolderResult struct {
+								Value []struct {
+									Id     string `json:"id"`
+									Name   string `json:"name"`
+									WebUrl string `json:"webUrl"`
+									File   *struct {
+										MimeType string `json:"mimeType"`
+									} `json:"file"`
+									CreatedBy struct {
+										User struct {
+											DisplayName string `json:"displayName"`
+										} `json:"user"`
+									} `json:"createdBy"`
+									LastModifiedDateTime string `json:"lastModifiedDateTime"`
+								} `json:"value"`
+							}
+							if err := json.NewDecoder(projectFolderResp.Body).Decode(&projectFolderResult); err != nil {
+								return
+							}
+							for _, fileItem := range projectFolderResult.Value {
+								if fileItem.File != nil && fileItem.File.MimeType == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" {
+									documents = append(documents, models.SharepointDocument{
+										ID:           fileItem.Id,
+										Name:         fileItem.Name,
+										WebURL:       fileItem.WebUrl,
+										CreatedBy:    fileItem.CreatedBy.User.DisplayName,
+										LastModified: fileItem.LastModifiedDateTime,
+									})
+								}
+							}
+						}()
 					}
 				}
 			}()
