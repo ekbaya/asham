@@ -438,12 +438,14 @@ func (service *DocumentService) CopyOneDriveFile(
 		return nil, fmt.Errorf("failed to get token: %v", err)
 	}
 
-	userEmail := config.GetConfig().AZURE_USER_EMAIL
+	globalConfig := config.GetConfig()
+	userEmail := globalConfig.AZURE_USER_EMAIL
+	parentFolderName := globalConfig.ONEDRIVE_FOLDER_NAME
 
 	// Step 1: Call the Graph /copy endpoint
 	copyURL := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s/copy", userEmail, sourceFileID)
 	body := map[string]any{
-		"name": newName,
+		"name": fmt.Sprintf("%s/%s", parentFolderName, newName),
 	}
 
 	jsonBody, _ := json.Marshal(body)
