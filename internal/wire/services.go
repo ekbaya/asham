@@ -5,7 +5,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/ekbaya/asham/pkg/config"
 	"log"
-	"os"
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/services"
 	"github.com/google/wire"
