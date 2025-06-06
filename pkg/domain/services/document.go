@@ -475,6 +475,7 @@ func (service *DocumentService) CopyOneDriveFile(
 
 	// Step 2: Poll the Location URL for result
 	locationURL := resp.Header.Get("Location")
+	fmt.Printf("Copy initiated, polling location: %s\n", locationURL)
 	if locationURL == "" {
 		return nil, fmt.Errorf("no location header received for copy tracking")
 	}
