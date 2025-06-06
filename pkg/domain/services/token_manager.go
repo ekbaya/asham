@@ -76,7 +76,7 @@ func (tm *TokenManager) RetrieveDelegateToken(ctx context.Context) (string, erro
 
 	// Token not found or expired, fetch a new one
 	fmt.Println("[TokenManager] Fetching new delegate token from Microsoft Graph...")
-	token, err = tm.GetDelegatedAccessTokenViaDeviceCode(tm.msConfig.ClientID, tm.msConfig.TenantID)
+	token, err = tm.GetDelegatedAccessTokenViaDeviceCode(tm.msConfig.ClientID, tm.msConfig.ClientSecret, tm.msConfig.TenantID)
 	if err != nil {
 		fmt.Printf("[TokenManager] Failed to fetch new delegate token: %v\n", err)
 		return "", fmt.Errorf("failed to fetch new delegate token: %w", err)
@@ -128,7 +128,7 @@ func (tm *TokenManager) GetMicrosoftGraphAccessToken(tenantID, clientID, clientS
 	return token.AccessToken, nil
 }
 
-func (tm *TokenManager) GetDelegatedAccessTokenViaDeviceCode(clientID string, tenantID string) (string, error) {
+func (tm *TokenManager) GetDelegatedAccessTokenViaDeviceCode(clientID, clientSecret, tenantID string) (string, error) {
 	deviceCodeURL := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/devicecode", tenantID)
 	tokenURL := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", tenantID)
 
@@ -165,6 +165,7 @@ func (tm *TokenManager) GetDelegatedAccessTokenViaDeviceCode(clientID string, te
 		tokenForm.Set("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
 		tokenForm.Set("client_id", clientID)
 		tokenForm.Set("device_code", deviceResp.DeviceCode)
+		tokenForm.Set("client_secret", clientSecret)
 
 		tokenResp, err := http.PostForm(tokenURL, tokenForm)
 		if err != nil {
