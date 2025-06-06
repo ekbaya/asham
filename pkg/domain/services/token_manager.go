@@ -134,7 +134,7 @@ func (tm *TokenManager) GetDelegatedAccessTokenViaDeviceCode(clientID, clientSec
 
 	form := url.Values{}
 	form.Set("client_id", clientID)
-	form.Set("scope", "https://graph.microsoft.com/User.Read Files.ReadWrite.All")
+	form.Set("scope", "https://graph.microsoft.com/User.Read Files.ReadWrite.All offline_access")
 
 	// Step 1: Get device code
 	resp, err := http.PostForm(deviceCodeURL, form)
@@ -158,7 +158,12 @@ func (tm *TokenManager) GetDelegatedAccessTokenViaDeviceCode(clientID, clientSec
 	fmt.Println(deviceResp.Message)
 
 	// Step 2: Poll for token
+	start := time.Now()
 	for {
+		if time.Since(start) > time.Duration(deviceResp.ExpiresIn)*time.Second {
+			return "", fmt.Errorf("device code expired before authorization")
+		}
+
 		time.Sleep(time.Duration(deviceResp.Interval) * time.Second)
 
 		tokenForm := url.Values{}
