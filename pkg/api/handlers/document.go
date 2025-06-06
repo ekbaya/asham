@@ -464,6 +464,34 @@ func (h *DocumentHandler) CopySharepointDocument(c *gin.Context) {
 	utilities.Show(c, http.StatusOK, "data", document)
 }
 
+func (h *DocumentHandler) InviteExternalUsersToDocument(c *gin.Context) {
+	var payload struct {
+		DocumentID string   `json:"doc_id" binding:"required"`
+		Emails     []string `json:"emails" binding:"required"`
+		Roles      []string `json:"roles" binding:"required" validate:"dive,oneof=read write owner reviewer"`
+		Message    string   `json:"message" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			// Convert validation errors into human-readable messages
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
+			return
+		}
+		// For non-validation errors
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.documentService.InviteExternalUsersToDocument(c, payload.DocumentID, payload.Emails, payload.Roles, payload.Message)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	utilities.ShowMessage(c, http.StatusOK, "Invite has been sent successfully")
+}
+
 // SearchDocuments searches for documents based on a query
 func (h *DocumentHandler) SearchDocuments(c *gin.Context) {
 	query := c.Query("q")

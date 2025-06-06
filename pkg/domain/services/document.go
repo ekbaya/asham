@@ -522,3 +522,74 @@ func (service *DocumentService) CopyOneDriveFile(
 
 	return nil, fmt.Errorf("copy operation completed, but new file not found after polling")
 }
+
+func (service *DocumentService) InviteExternalUsersToDocument(
+	ctx context.Context,
+	itemID string,
+	emails []string,
+	roles []string,
+	message string,
+) error {
+	token, err := service.tokenManager.RetrieveToken(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get token: %w", err)
+	}
+
+	globalConfig := config.GetConfig()
+	userEmail := globalConfig.AZURE_USER_EMAIL
+
+	// Validate roles
+	validRoles := map[string]bool{"read": true, "write": true, "owner": true}
+	for _, r := range roles {
+		if !validRoles[r] {
+			return fmt.Errorf("invalid role: %s (must be one of read, write, owner)", r)
+		}
+	}
+
+	// Build recipients
+	recipients := make([]map[string]string, len(emails))
+	for i, email := range emails {
+		recipients[i] = map[string]string{"email": email}
+	}
+
+	// Build payload
+	payload := map[string]any{
+		"recipients":     recipients,
+		"message":        message,
+		"requireSignIn":  true,
+		"sendInvitation": true,
+		"roles":          roles,
+	}
+
+	bodyBytes, _ := json.Marshal(payload)
+
+	// Build request
+	inviteURL := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s/invite", userEmail, itemID)
+	req, err := http.NewRequestWithContext(ctx, "POST", inviteURL, bytes.NewReader(bodyBytes))
+	if err != nil {
+		return fmt.Errorf("failed to create invite request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("invite request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode >= 300 {
+		return fmt.Errorf("invite failed: status=%d, body=%s", resp.StatusCode, string(respBody))
+	}
+
+	// Optional: parse and log result
+	var result map[string]interface{}
+	if err := json.Unmarshal(respBody, &result); err != nil {
+		return fmt.Errorf("failed to parse invite response: %w", err)
+	}
+
+	fmt.Printf("✅ Invite sent: %+v\n", result)
+	return nil
+}

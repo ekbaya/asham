@@ -195,6 +195,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		document.GET("/sharepoint", documentHandler.ListSharepointDocuments)
 		document.GET("/sharepoint/:id", documentHandler.GetSharepointDocument)
 		document.POST("/sharepoint/copy", documentHandler.CopySharepointDocument)
+		document.POST("/sharepoint/invite", documentHandler.InviteExternalUsersToDocument)
 	}
 
 	// Project Route
