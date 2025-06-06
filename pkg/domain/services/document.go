@@ -458,7 +458,6 @@ func (service *DocumentService) CopyOneDriveFile(
 	if err != nil {
 		return nil, fmt.Errorf("failed to create copy request: %v", err)
 	}
-
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 
@@ -473,54 +472,53 @@ func (service *DocumentService) CopyOneDriveFile(
 		return nil, fmt.Errorf("copy failed: %s, %s", resp.Status, string(bodyBytes))
 	}
 
-	// Step 2: Poll the Location URL for result
-	locationURL := resp.Header.Get("Location")
-	fmt.Printf("Copy initiated, polling location: %s\n", locationURL)
-	if locationURL == "" {
-		return nil, fmt.Errorf("no location header received for copy tracking")
-	}
-
-	var newItem struct {
-		Id     string `json:"id"`
-		Name   string `json:"name"`
-		WebUrl string `json:"webUrl"`
-		File   *struct {
-			MimeType string `json:"mimeType"`
-		} `json:"file"`
-	}
-
+	// Step 2: Manually poll the destination folder for the new file
 	client := http.DefaultClient
+	listURL := fmt.Sprintf(
+		"https://graph.microsoft.com/v1.0/users/%s/drive/root:/%s/%s:/children",
+		userEmail, parentFolderName, projectFolder,
+	)
+
 	for i := 0; i < 15; i++ {
 		time.Sleep(2 * time.Second)
 
-		pollReq, _ := http.NewRequestWithContext(ctx, "GET", locationURL, nil)
-		pollReq.Header.Set("Authorization", "Bearer "+token)
+		listReq, _ := http.NewRequestWithContext(ctx, "GET", listURL, nil)
+		listReq.Header.Set("Authorization", "Bearer "+token)
 
-		pollResp, err := client.Do(pollReq)
+		listResp, err := client.Do(listReq)
 		if err != nil {
-			return nil, fmt.Errorf("failed to poll copy status: %v", err)
+			return nil, fmt.Errorf("failed to poll folder for new file: %v", err)
+		}
+		defer listResp.Body.Close()
+
+		if listResp.StatusCode != http.StatusOK {
+			bodyBytes, _ := io.ReadAll(listResp.Body)
+			return nil, fmt.Errorf("folder listing failed: %s - %s", listResp.Status, string(bodyBytes))
 		}
 
-		if pollResp.StatusCode == http.StatusAccepted {
-			pollResp.Body.Close()
-			continue
-		} else if pollResp.StatusCode == http.StatusOK {
-			defer pollResp.Body.Close()
-			if err := json.NewDecoder(pollResp.Body).Decode(&newItem); err != nil {
-				return nil, fmt.Errorf("failed to decode new file metadata: %v", err)
-			}
+		var listResult struct {
+			Value []struct {
+				Id     string `json:"id"`
+				Name   string `json:"name"`
+				WebUrl string `json:"webUrl"`
+			} `json:"value"`
+		}
 
-			return &models.SharepointDocument{
-				ID:       newItem.Id,
-				Name:     newItem.Name,
-				WebURL:   newItem.WebUrl,
-				EmbedUrl: "",
-			}, nil
-		} else {
-			body, _ := io.ReadAll(pollResp.Body)
-			pollResp.Body.Close()
-			return nil, fmt.Errorf("unexpected status while polling copy: %d - %s", pollResp.StatusCode, string(body))
+		if err := json.NewDecoder(listResp.Body).Decode(&listResult); err != nil {
+			return nil, fmt.Errorf("failed to decode folder contents: %v", err)
+		}
+
+		for _, item := range listResult.Value {
+			if item.Name == newName {
+				return &models.SharepointDocument{
+					ID:       item.Id,
+					Name:     item.Name,
+					WebURL:   item.WebUrl,
+					EmbedUrl: "",
+				}, nil
+			}
 		}
 	}
-	return nil, fmt.Errorf("copy operation timed out")
+
+	return nil, fmt.Errorf("copy operation completed, but new file not found after polling")
 }
