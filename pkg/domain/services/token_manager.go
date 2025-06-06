@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	redisClient "github.com/ekbaya/asham/pkg/db/redis"
@@ -93,4 +94,63 @@ func (tm *TokenManager) GetMicrosoftGraphAccessToken(tenantID, clientID, clientS
 	}
 
 	return token.AccessToken, nil
+}
+
+func GetDelegatedAccessTokenViaDeviceCode(clientID string, tenantID string) (string, error) {
+	deviceCodeURL := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/devicecode", tenantID)
+	tokenURL := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", tenantID)
+
+	form := url.Values{}
+	form.Set("client_id", clientID)
+	form.Set("scope", "https://graph.microsoft.com/User.Read Files.ReadWrite.All")
+
+	// Step 1: Get device code
+	resp, err := http.PostForm(deviceCodeURL, form)
+	if err != nil {
+		return "", fmt.Errorf("failed to get device code: %w", err)
+	}
+	defer resp.Body.Close()
+
+	var deviceResp struct {
+		UserCode        string `json:"user_code"`
+		DeviceCode      string `json:"device_code"`
+		VerificationURL string `json:"verification_uri"`
+		ExpiresIn       int    `json:"expires_in"`
+		Interval        int    `json:"interval"`
+		Message         string `json:"message"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&deviceResp); err != nil {
+		return "", fmt.Errorf("failed to parse device code response: %w", err)
+	}
+
+	fmt.Println(deviceResp.Message)
+
+	// Step 2: Poll for token
+	for {
+		time.Sleep(time.Duration(deviceResp.Interval) * time.Second)
+
+		tokenForm := url.Values{}
+		tokenForm.Set("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
+		tokenForm.Set("client_id", clientID)
+		tokenForm.Set("device_code", deviceResp.DeviceCode)
+
+		tokenResp, err := http.PostForm(tokenURL, tokenForm)
+		if err != nil {
+			return "", fmt.Errorf("failed to request token: %w", err)
+		}
+		defer tokenResp.Body.Close()
+
+		body, _ := io.ReadAll(tokenResp.Body)
+		if tokenResp.StatusCode == 200 {
+			var token TokenResponse
+			if err := json.Unmarshal(body, &token); err != nil {
+				return "", fmt.Errorf("failed to parse token: %w", err)
+			}
+			return token.AccessToken, nil
+		} else if strings.Contains(string(body), "authorization_pending") {
+			continue
+		} else {
+			return "", fmt.Errorf("token request error: %s", string(body))
+		}
+	}
 }
