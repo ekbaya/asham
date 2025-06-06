@@ -439,8 +439,9 @@ func (h *DocumentHandler) GetSharepointDocument(c *gin.Context) {
 
 func (h *DocumentHandler) CopySharepointDocument(c *gin.Context) {
 	var payload struct {
-		FileID  string `json:"file_id" binding:"required"`
-		NewName string `json:"new_name" binding:"required"`
+		FileID        string `json:"file_id" binding:"required"`
+		NewName       string `json:"new_name" binding:"required"`
+		ProjectNumber int64  `json:"project_number" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		validationErrors, ok := err.(validator.ValidationErrors)
@@ -455,7 +456,7 @@ func (h *DocumentHandler) CopySharepointDocument(c *gin.Context) {
 		return
 	}
 
-	document, err := h.documentService.CopyOneDriveFile(c, payload.FileID, payload.NewName)
+	document, err := h.documentService.CopyOneDriveFile(c, payload.FileID, payload.NewName, payload.ProjectNumber)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return

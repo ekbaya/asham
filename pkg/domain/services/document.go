@@ -432,6 +432,7 @@ func (service *DocumentService) CopyOneDriveFile(
 	ctx context.Context,
 	sourceFileID string,
 	newName string,
+	projectNumber int64,
 ) (*models.SharepointDocument, error) {
 	token, err := service.tokenManager.RetrieveToken(ctx)
 	if err != nil {
@@ -441,13 +442,14 @@ func (service *DocumentService) CopyOneDriveFile(
 	globalConfig := config.GetConfig()
 	userEmail := globalConfig.AZURE_USER_EMAIL
 	parentFolderName := globalConfig.ONEDRIVE_FOLDER_NAME
+	projectFolder := fmt.Sprintf("PROJECT_%d", projectNumber)
 
 	// Step 1: Call the Graph /copy endpoint
 	copyURL := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s/copy", userEmail, sourceFileID)
 	body := map[string]any{
 		"name": newName,
 		"parentReference": map[string]string{
-			"path": fmt.Sprintf("/drive/root:/%s", parentFolderName),
+			"path": fmt.Sprintf("/drive/root:/%s/%s", parentFolderName, projectFolder),
 		},
 	}
 

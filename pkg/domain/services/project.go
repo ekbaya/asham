@@ -181,7 +181,7 @@ func (service *ProjectService) ReviewWD(secretary, projectID, comment string, st
 			return err
 		}
 		fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
-		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName)
+		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName, project.Number)
 		if errr != nil {
 			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
 		}
@@ -207,7 +207,7 @@ func (service *ProjectService) ReviewCD(secretary, projectId string, isConsensus
 			return err
 		}
 		fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
-		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName)
+		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName, project.Number)
 		if errr != nil {
 			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
 		}
@@ -243,7 +243,7 @@ func (service *ProjectService) ReviewDARS(secretary,
 			return err
 		}
 		fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
-		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName)
+		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName, project.Number)
 		if errr != nil {
 			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
 		}
@@ -272,7 +272,7 @@ func (service *ProjectService) ApproveFDARS(secretary, projectId string, approve
 			return err
 		}
 		fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
-		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName)
+		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName, project.Number)
 		if errr != nil {
 			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
 		}
