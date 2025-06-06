@@ -468,7 +468,7 @@ func (h *DocumentHandler) InviteExternalUsersToDocument(c *gin.Context) {
 	var payload struct {
 		DocumentID string   `json:"doc_id" binding:"required"`
 		Emails     []string `json:"emails" binding:"required"`
-		Roles      []string `json:"roles" binding:"required" validate:"dive,oneof=read write owner reviewer"`
+		Roles      []string `json:"roles" binding:"required" validate:"dive,oneof=read write owner"`
 		Message    string   `json:"message" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&payload); err != nil {
