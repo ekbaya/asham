@@ -445,7 +445,10 @@ func (service *DocumentService) CopyOneDriveFile(
 	// Step 1: Call the Graph /copy endpoint
 	copyURL := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/drive/items/%s/copy", userEmail, sourceFileID)
 	body := map[string]any{
-		"name": fmt.Sprintf("%s/%s", parentFolderName, newName),
+		"name": newName,
+		"parentReference": map[string]string{
+			"path": fmt.Sprintf("/drive/root:/%s", parentFolderName),
+		},
 	}
 
 	jsonBody, _ := json.Marshal(body)
