@@ -27,6 +27,7 @@ type TokenManager struct {
 }
 
 const tokenKey = "microsoft_graph_access_token"
+const delegateTokenKey = "microsoft_graph_delegate_access_token"
 
 func NewTokenManager(msConfig *MSAzureConfig) *TokenManager {
 	return &TokenManager{redisClient: redisClient.GetRedis(), msConfig: msConfig}
@@ -59,6 +60,37 @@ func (tm *TokenManager) RetrieveToken(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("failed to store token in Redis: %w", err)
 	}
 	fmt.Println("[TokenManager] Token successfully stored in Redis.")
+
+	return token, nil
+}
+
+func (tm *TokenManager) RetrieveDelegateToken(ctx context.Context) (string, error) {
+	fmt.Println("[TokenManager] Attempting to retrieve delegate token from Redis...")
+	// Try getting the token from Redis
+	token, err := tm.redisClient.Get(ctx, delegateTokenKey).Result()
+	if err == nil {
+		fmt.Println("[TokenManager] Delegate Token found in Redis.")
+		return token, nil // Found in Redis
+	}
+	fmt.Printf("[TokenManager] Delegate Token not found in Redis or error occurred: %v\n", err)
+
+	// Token not found or expired, fetch a new one
+	fmt.Println("[TokenManager] Fetching new delegate token from Microsoft Graph...")
+	token, err = tm.GetDelegatedAccessTokenViaDeviceCode(tm.msConfig.ClientID, tm.msConfig.TenantID)
+	if err != nil {
+		fmt.Printf("[TokenManager] Failed to fetch new delegate token: %v\n", err)
+		return "", fmt.Errorf("failed to fetch new delegate token: %w", err)
+	}
+	fmt.Println("[TokenManager] Successfully fetched new delegate token.")
+
+	// Store in Redis with expiry slightly less than 1 hour (to be safe)
+	fmt.Println("[TokenManager] Storing new delegate token in Redis...")
+	err = tm.redisClient.Set(ctx, delegateTokenKey, token, 55*time.Minute).Err()
+	if err != nil {
+		fmt.Printf("[TokenManager] Failed to store delegate token in Redis: %v\n", err)
+		return "", fmt.Errorf("failed to store delegate token in Redis: %w", err)
+	}
+	fmt.Println("[TokenManager] Delegate Token successfully stored in Redis.")
 
 	return token, nil
 }
@@ -96,7 +128,7 @@ func (tm *TokenManager) GetMicrosoftGraphAccessToken(tenantID, clientID, clientS
 	return token.AccessToken, nil
 }
 
-func GetDelegatedAccessTokenViaDeviceCode(clientID string, tenantID string) (string, error) {
+func (tm *TokenManager) GetDelegatedAccessTokenViaDeviceCode(clientID string, tenantID string) (string, error) {
 	deviceCodeURL := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/devicecode", tenantID)
 	tokenURL := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", tenantID)
 

@@ -530,7 +530,7 @@ func (service *DocumentService) InviteExternalUsersToDocument(
 	roles []string,
 	message string,
 ) error {
-	token, err := service.tokenManager.RetrieveToken(ctx)
+	token, err := service.tokenManager.RetrieveDelegateToken(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get token: %w", err)
 	}
