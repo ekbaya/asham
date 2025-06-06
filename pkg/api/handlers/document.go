@@ -437,6 +437,32 @@ func (h *DocumentHandler) GetSharepointDocument(c *gin.Context) {
 	utilities.Show(c, http.StatusOK, "data", document)
 }
 
+func (h *DocumentHandler) CopySharepointDocument(c *gin.Context) {
+	var payload struct {
+		FileID  string `json:"file_id" binding:"required"`
+		NewName string `json:"new_name" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		validationErrors, ok := err.(validator.ValidationErrors)
+		if ok {
+			// Convert validation errors into human-readable messages
+			formattedErrors := utilities.FormatValidationErrors(validationErrors)
+			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
+			return
+		}
+		// For non-validation errors
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	document, err := h.documentService.CopyOneDriveFile(c, payload.FileID, payload.NewName)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	utilities.Show(c, http.StatusOK, "data", document)
+}
+
 // SearchDocuments searches for documents based on a query
 func (h *DocumentHandler) SearchDocuments(c *gin.Context) {
 	query := c.Query("q")
