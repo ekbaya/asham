@@ -270,7 +270,7 @@ func (r *ProjectRepository) ReviewWD(secretary, projectID, comment string, statu
 	})
 }
 
-func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comment, approvedBy string) error {
+func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comment, approvedBy, sharepointDocID string) error {
 	tx := r.db.Begin() // Start a transaction
 	if tx.Error != nil {
 		return tx.Error
@@ -293,6 +293,9 @@ func (r *ProjectRepository) ApproveProject(projectID string, approved bool, comm
 	project.PWIApproved = approved
 	project.PWIApprovalComment = comment
 	project.ApprovedByID = &approvedBy
+	if approved && sharepointDocID != "" {
+		project.SharepointDocID = &sharepointDocID
+	}
 
 	// Save the updated project
 	if err := tx.Save(&project).Error; err != nil {

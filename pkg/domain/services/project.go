@@ -48,15 +48,6 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 
 	// project is at stage 0
 	project.StageID = stage.ID.String()
-	fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
-
-	doc, err := service.docService.UploadFileToOneDriveFolder(context.Background(), fileName)
-
-	if err != nil {
-		return fmt.Errorf("failed to upload project template: %w", err)
-	}
-
-	project.SharepointDocID = &doc.ID
 
 	// Save project in the repository
 	return service.repo.CreateProject(project)
@@ -90,7 +81,24 @@ func (service *ProjectService) UpdateProjectStage(projectID uuid.UUID, newStageI
 }
 
 func (service *ProjectService) ApproveProject(projectID string, approved bool, comment, approvedBy string) error {
-	return service.repo.ApproveProject(projectID, approved, comment, approvedBy)
+	var sharepointDocID string = ""
+	if approved {
+		project, err := service.repo.GetProjectByID(uuid.MustParse(projectID))
+
+		if err != nil {
+			return fmt.Errorf("failed to get project by ID: %w", err)
+		}
+
+		fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
+
+		doc, err := service.docService.UploadFileToOneDriveFolder(context.Background(), fileName)
+
+		if err != nil {
+			return fmt.Errorf("failed to upload project template: %w", err)
+		}
+		sharepointDocID = doc.ID
+	}
+	return service.repo.ApproveProject(projectID, approved, comment, approvedBy, sharepointDocID)
 }
 
 func (service *ProjectService) ApproveProjectProposal(projectID string, approved bool, comment, approvedBy, procedure string) error {
