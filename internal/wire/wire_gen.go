@@ -25,7 +25,7 @@ func InitializeServices(db *gorm.DB) (*services.ServiceContainer, error) {
 	documentRepository := repository.NewDocumentRepository(db)
 	graphServiceClient := GetGraphServiceClient()
 	msAzureConfig := GetMSAzureConfig()
-	tokenManager := services.NewTokenManager(msAzureConfig)
+	tokenManager := services.NewTokenManager(msAzureConfig, emailService)
 	documentService := services.NewDocumentService(documentRepository, projectRepository, graphServiceClient, tokenManager)
 	projectService := services.NewProjectService(projectRepository, documentService)
 	proposalRepository := repository.NewProposalRepository(db)

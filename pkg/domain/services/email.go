@@ -20,6 +20,12 @@ type EmailConfig struct {
 	EmailTemplatePath string
 }
 
+type RecipientEmail struct {
+	To    string
+	Body  string
+	Title string // Optional: allows subject customization per email
+}
+
 // EmailService handles sending emails
 type EmailService struct {
 	config *EmailConfig
@@ -91,5 +97,18 @@ func (s *EmailService) sendEmail(to, subject, body string) error {
 		return errors.New("failed to send email: " + err.Error())
 	}
 
+	return nil
+}
+
+func (s *EmailService) SendCustomEmails(emails []RecipientEmail) error {
+	for _, email := range emails {
+		subject := email.Title
+		if subject == "" {
+			subject = "Notification from ASHAM"
+		}
+		if err := s.sendEmail(email.To, subject, email.Body); err != nil {
+			return fmt.Errorf("failed to send email to %s: %w", email.To, err)
+		}
+	}
 	return nil
 }

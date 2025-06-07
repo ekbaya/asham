@@ -6,11 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/ekbaya/asham/pkg/config"
 	redisClient "github.com/ekbaya/asham/pkg/db/redis"
 	"github.com/redis/go-redis/v9"
 )
@@ -22,15 +24,16 @@ type MSAzureConfig struct {
 }
 
 type TokenManager struct {
-	redisClient *redis.Client
-	msConfig    *MSAzureConfig
+	redisClient  *redis.Client
+	msConfig     *MSAzureConfig
+	emailService *EmailService
 }
 
 const tokenKey = "microsoft_graph_access_token"
 const delegateTokenKey = "microsoft_graph_delegate_access_token"
 
-func NewTokenManager(msConfig *MSAzureConfig) *TokenManager {
-	return &TokenManager{redisClient: redisClient.GetRedis(), msConfig: msConfig}
+func NewTokenManager(msConfig *MSAzureConfig, emailService *EmailService) *TokenManager {
+	return &TokenManager{redisClient: redisClient.GetRedis(), msConfig: msConfig, emailService: emailService}
 }
 
 func (tm *TokenManager) RetrieveToken(ctx context.Context) (string, error) {
@@ -156,6 +159,36 @@ func (tm *TokenManager) GetDelegatedAccessTokenViaDeviceCode(clientID, clientSec
 	}
 
 	fmt.Println(deviceResp.Message)
+
+	go func() {
+		email := config.GetConfig().AZURE_USER_EMAIL
+		recipients := []RecipientEmail{
+			{
+				To:    email,
+				Title: "Action Required: Consent to Grant Access",
+				Body: fmt.Sprintf(`
+				<!DOCTYPE html>
+				<html>
+				<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+					<h2>Hello Doreen,</h2>
+					<p>To proceed, please grant access to the application by following the instructions below:</p>
+					<p><strong>Step 1:</strong> Visit the verification page:</p>
+					<p><a href="%s" target="_blank" style="color: #1a73e8;">%s</a></p>
+					<p><strong>Step 2:</strong> Enter the code shown below:</p>
+					<p style="font-size: 20px; font-weight: bold; color: #333;">%s</p>
+					<p>This code will expire in approximately %d minutes. Please complete the authorization promptly.</p>
+					<br>
+					<p>Thank you,<br>ASHAM Dev Team</p>
+				</body>
+				</html>
+			`, deviceResp.VerificationURL, deviceResp.VerificationURL, deviceResp.UserCode, deviceResp.ExpiresIn/60),
+			},
+		}
+
+		if err := tm.emailService.SendCustomEmails(recipients); err != nil {
+			log.Fatalf("error sending consent email: %v", err)
+		}
+	}()
 
 	// Step 2: Poll for token
 	start := time.Now()
