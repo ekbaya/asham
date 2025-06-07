@@ -31,3 +31,10 @@ func GeneratePaginationData(limit int, currentPage int, totalItems int) Paginati
 		HasPrevious:  currentPage > 1,
 	}
 }
+
+func CalculateOffset(page, pageSize int) int {
+	if page < 1 {
+		page = 1 // Default to first page if invalid page number
+	}
+	return (page - 1) * pageSize
+}
