@@ -116,7 +116,10 @@ func (h *MeetingHandler) GetAllMeetings(c *gin.Context) {
 		return
 	}
 
-	meetings, err := h.meetingService.GetAllMeetings(page, pageSize)
+	// Calculate offset based on page number and limit
+	offset := utilities.CalculateOffset(page, pageSize)
+
+	meetings, err := h.meetingService.GetAllMeetings(offset, pageSize)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return

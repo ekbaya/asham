@@ -249,7 +249,7 @@ func (h *ProposalHandler) GetProposalByProject(c *gin.Context) {
 }
 
 func (h *ProposalHandler) ListProposals(c *gin.Context) {
-	limitStr := c.DefaultQuery("limit", "10")
+	limitStr := c.DefaultQuery("pageSize", "10")
 	pageStr := c.DefaultQuery("page", "1")
 
 	limit, err := strconv.Atoi(limitStr)
@@ -262,7 +262,8 @@ func (h *ProposalHandler) ListProposals(c *gin.Context) {
 		page = 1
 	}
 
-	offset := (page - 1) * limit
+	// Calculate offset based on page number and limit
+	offset := utilities.CalculateOffset(page, limit)
 
 	proposals, total, err := h.proposalService.List(limit, offset)
 	if err != nil {
@@ -404,7 +405,7 @@ func (h *ProposalHandler) SearchProposals(c *gin.Context) {
 		return
 	}
 
-	limitStr := c.DefaultQuery("limit", "10")
+	limitStr := c.DefaultQuery("pageSize", "10")
 	pageStr := c.DefaultQuery("page", "1")
 
 	limit, err := strconv.Atoi(limitStr)
@@ -417,7 +418,8 @@ func (h *ProposalHandler) SearchProposals(c *gin.Context) {
 		page = 1
 	}
 
-	offset := (page - 1) * limit
+	// Calculate offset based on page number and limit
+	offset := utilities.CalculateOffset(page, limit)
 
 	proposals, total, err := h.proposalService.Search(query, limit, offset)
 	if err != nil {
@@ -440,7 +442,7 @@ func (h *ProposalHandler) GetProposalsByCreator(c *gin.Context) {
 		return
 	}
 
-	limitStr := c.DefaultQuery("limit", "10")
+	limitStr := c.DefaultQuery("pageSize", "10")
 	pageStr := c.DefaultQuery("page", "1")
 
 	limit, err := strconv.Atoi(limitStr)
@@ -453,7 +455,8 @@ func (h *ProposalHandler) GetProposalsByCreator(c *gin.Context) {
 		page = 1
 	}
 
-	offset := (page - 1) * limit
+	// Calculate offset based on page number and limit
+	offset := utilities.CalculateOffset(page, limit)
 
 	proposals, total, err := h.proposalService.GetByCreator(memberID, limit, offset)
 	if err != nil {
