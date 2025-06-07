@@ -348,7 +348,7 @@ func (h *ProjectHandler) FindProjectRequests(c *gin.Context) {
 
 	// Pagination
 	limit := 10
-	offset := 0
+	pageNumber := 0
 
 	if limitStr := c.Query("pageSize"); limitStr != "" {
 		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 {
@@ -358,9 +358,12 @@ func (h *ProjectHandler) FindProjectRequests(c *gin.Context) {
 
 	if offsetStr := c.Query("page"); offsetStr != "" {
 		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
-			offset = val
+			pageNumber = val
 		}
 	}
+
+	// Calculate offset based on page number and limit
+	offset := utilities.CalculateOffset(pageNumber, limit)
 
 	projects, total, err := h.projectService.FindProjectRequests(params, limit, offset)
 	if err != nil {
@@ -372,7 +375,7 @@ func (h *ProjectHandler) FindProjectRequests(c *gin.Context) {
 		"projects": projects,
 		"total":    total,
 		"limit":    limit,
-		"page":     offset,
+		"page":     pageNumber,
 	})
 }
 
