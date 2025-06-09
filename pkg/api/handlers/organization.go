@@ -78,6 +78,30 @@ func (h *OrganizationHandler) FetchMemberStates(c *gin.Context) {
 	})
 }
 
+func (h *OrganizationHandler) DeleteMemberState(c *gin.Context) {
+	id := c.Param("id")
+
+	err := h.organizationService.DeleteMemberState(id)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusNoContent, "Member state deleted succussfuly")
+}
+
+func (h *OrganizationHandler) UpdateMemberState(c *gin.Context) {
+	var payload models.MemberState
+	c.ShouldBindJSON(&payload)
+
+	err := h.organizationService.UpdateMemberState(&payload)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusCreated, "Member state updated successfully")
+}
+
 func (h *OrganizationHandler) CreateNSB(c *gin.Context) {
 	var payload models.NationalStandardBody
 	if err := c.ShouldBindJSON(&payload); err != nil {

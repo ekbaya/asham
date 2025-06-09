@@ -92,6 +92,12 @@ func (service *AcceptanceService) SetAcceptanceApproval(acceptance models.Accept
 		if err != nil {
 			return fmt.Errorf("failed to update project after WD review: %w", err)
 		}
+
+		err = service.docService.UpdateProjectDoc(acceptance.ProjectID, "WD", fileName, project.MemberID)
+		if err != nil {
+			return fmt.Errorf("failed to create WD: %w", err)
+		}
+
 	}
 	return err
 }

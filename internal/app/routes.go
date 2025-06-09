@@ -71,6 +71,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		rbac.PUT("/roles", rbacHandler.UpdateRole)
 		rbac.POST("/permissions", rbacHandler.CreatePermission)
 		rbac.GET("/permissions", rbacHandler.ListPermissions)
+		rbac.DELETE("/permissions/:id", rbacHandler.DeletePermission)
 		rbac.POST("/assign/:member_id/:role_id", rbacHandler.AssignRoleToMember)
 		rbac.GET("/members/:member_id/roles", rbacHandler.ListMemberRoles)
 	}
@@ -81,6 +82,8 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	{
 		organization.POST("/member_states", organizationHandler.CreateMemberState)
 		organization.GET("/member_states", organizationHandler.FetchMemberStates)
+		organization.PATCH("/member_states/:id", organizationHandler.UpdateMemberState)
+		organization.DELETE("/member_states/:id", organizationHandler.DeleteMemberState)
 		organization.POST("/nsbs", organizationHandler.CreateNSB)
 		organization.PATCH("/nsbs", organizationHandler.UpdateNSB)
 		organization.POST("/nsbs/secretary", organizationHandler.UpdateNationalTCSecretary)

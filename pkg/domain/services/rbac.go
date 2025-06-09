@@ -39,6 +39,10 @@ func (s *RbacService) DeleteRole(id string) error {
 	return s.repo.DeleteRole(id)
 }
 
+func (s *RbacService) DeletePermission(id string) error {
+	return s.repo.DeletePermission(id)
+}
+
 func (s *RbacService) CreatePermission(permission *models.Permission) error {
 	permission.ID = uuid.New()
 	permission.CreatedAt = time.Now()
