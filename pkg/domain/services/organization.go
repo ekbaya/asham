@@ -129,6 +129,14 @@ func (service *OrganizationService) FetchMemberStates(limit, offset int) (*[]mod
 	return service.repo.FetchMemberStates(limit, offset)
 }
 
+func (service *OrganizationService) UpdateMemberState(state *models.MemberState) error {
+	return service.repo.UpdateMemberState(state)
+}
+
+func (service *OrganizationService) DeleteMemberState(id string) error {
+	return service.repo.DeleteMemberState(id)
+}
+
 func (service *OrganizationService) UpdateCommitteeSecretary(committeeType string, committeeID string, newSecretaryID string) error {
 	return service.repo.UpdateCommitteeSecretary(committeeType, committeeID, newSecretaryID)
 }

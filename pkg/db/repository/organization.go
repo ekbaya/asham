@@ -37,6 +37,14 @@ func (r *OrganizationRepository) FetchMemberStates(limit, offset int) (*[]models
 	return &states, total, err
 }
 
+func (r *OrganizationRepository) UpdateMemberState(state *models.MemberState) error {
+	return r.db.Save(state).Error
+}
+
+func (r *OrganizationRepository) DeleteMemberState(id string) error {
+	return r.db.Delete(&models.MemberState{}, "id = ?", id).Error
+}
+
 // NSBs
 func (r *OrganizationRepository) CreateNSB(nsb *models.NationalStandardBody) error {
 	return r.db.Create(nsb).Error
