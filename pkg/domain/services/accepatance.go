@@ -82,7 +82,7 @@ func (service *AcceptanceService) SetAcceptanceApproval(acceptance models.Accept
 		if err != nil {
 			return err
 		}
-		fileName := fmt.Sprintf("PROJECT_%d/%s.docx", project.Number, strings.ReplaceAll(project.Reference, "/", "-"))
+		fileName := fmt.Sprintf("%s.docx", strings.ReplaceAll(project.Reference, "/", "-"))
 		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName, project.Number)
 		if errr != nil {
 			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
