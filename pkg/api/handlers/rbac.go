@@ -156,3 +156,13 @@ func (h *RbacHandler) ListMemberRoles(c *gin.Context) {
 
 	utilities.Show(c, http.StatusOK, "roles", roles)
 }
+
+func (h *RbacHandler) DeletePermission(c *gin.Context) {
+	err := h.rbacService.DeletePermission(c.Param("id"))
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "role has been deleted")
+}
