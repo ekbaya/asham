@@ -38,11 +38,12 @@ type GRPCConfig struct {
 }
 
 type EmailConfig struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	From     string
+	Host              string
+	Port              string
+	Username          string
+	Password          string
+	From              string
+	EmailTemplatePath string
 }
 
 var (
@@ -77,11 +78,12 @@ func LoadConfig() (*Config, error) {
 		AZURE_CLIENT_SECRET: os.Getenv("AZURE_CLIENT_SECRET"),
 		AZURE_USER_EMAIL:    os.Getenv("AZURE_USER_EMAIL"),
 		EmailConfig: EmailConfig{
-			Host:     os.Getenv("EMAIL_HOST"),
-			Port:     os.Getenv("EMAIL_PORT"),
-			Username: os.Getenv("EMAIL_USERNAME"),
-			Password: os.Getenv("EMAIL_PASSWORD"),
-			From:     os.Getenv("EMAIL_FROM"),
+			Host:              os.Getenv("EMAIL_HOST"),
+			Port:              os.Getenv("EMAIL_PORT"),
+			Username:          os.Getenv("EMAIL_USERNAME"),
+			Password:          os.Getenv("EMAIL_PASSWORD"),
+			From:              os.Getenv("EMAIL_FROM"),
+			EmailTemplatePath: "templates/welcome_email.html",
 		},
 		DOC_TEMPLATE_PATH:    "../templates/project_template.docx",
 		ONEDRIVE_FOLDER_NAME: "ASHAM_ARSO_PLATFORM",
