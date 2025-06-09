@@ -1,14 +1,15 @@
 package wire
 
 import (
+	"log"
+	"strconv"
+
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/ekbaya/asham/pkg/config"
 	"github.com/ekbaya/asham/pkg/db/repository"
 	"github.com/ekbaya/asham/pkg/domain/services"
 	"github.com/google/wire"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
-	"log"
-	"strconv"
 )
 
 var ServiceSet = wire.NewSet(
@@ -52,14 +53,17 @@ func GetEmailConfigurations() *services.EmailConfig {
 		port = 587
 	}
 	emailConfig := services.EmailConfig{
-		Host:     globalConfig.EmailConfig.Host,
-		Port:     port,
-		Username: globalConfig.EmailConfig.Username,
-		Password: globalConfig.EmailConfig.Password,
-		From:     globalConfig.EmailConfig.From,
+		Host:              globalConfig.EmailConfig.Host,
+		Port:              port,
+		Username:          globalConfig.EmailConfig.Username,
+		Password:          globalConfig.EmailConfig.Password,
+		From:              globalConfig.EmailConfig.From,
+		EmailTemplatePath: globalConfig.EmailConfig.EmailTemplatePath,
 	}
 
-	log.Printf("[EmailConfig] Host: %s, Port: %d, Username: %s, From: %s", globalConfig.EmailConfig.Host, port, globalConfig.EmailConfig.Username, globalConfig.EmailConfig.From)
+	log.Printf("[EmailConfig] Host: %s, Port: %d, Username: %s, From: %s, TemplatePath: %s",
+		globalConfig.EmailConfig.Host, port, globalConfig.EmailConfig.Username,
+		globalConfig.EmailConfig.From, globalConfig.EmailConfig.EmailTemplatePath)
 
 	return &emailConfig
 }

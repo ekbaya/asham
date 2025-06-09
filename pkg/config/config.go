@@ -83,7 +83,7 @@ func LoadConfig() (*Config, error) {
 			Username:          os.Getenv("EMAIL_USERNAME"),
 			Password:          os.Getenv("EMAIL_PASSWORD"),
 			From:              os.Getenv("EMAIL_FROM"),
-			EmailTemplatePath: "templates/welcome_email.html",
+			EmailTemplatePath: "../templates/welcome_email.html",
 		},
 		DOC_TEMPLATE_PATH:    "../templates/project_template.docx",
 		ONEDRIVE_FOLDER_NAME: "ASHAM_ARSO_PLATFORM",

@@ -41,6 +41,11 @@ func NewEmailService(config *EmailConfig) *EmailService {
 // SendWelcomeEmail sends a styled HTML welcome email to a new user with their password
 func (s *EmailService) SendWelcomeEmail(toEmail, name, password string) error {
 	subject := "Welcome to Our Service"
+	if s.config.EmailTemplatePath == "" {
+		return errors.New("email template path not configured")
+	}
+	// Debug log the template path
+	fmt.Printf("Attempting to read email template from: %s\n", s.config.EmailTemplatePath)
 
 	// Read the email template from file
 	tmpl, err := os.ReadFile(s.config.EmailTemplatePath)
