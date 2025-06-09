@@ -33,6 +33,7 @@ type EmailService struct {
 
 // NewEmailService creates a new email service
 func NewEmailService(config *EmailConfig) *EmailService {
+	fmt.Printf("Creating email service with config: %+v\n", config)
 	return &EmailService{
 		config: config,
 	}
@@ -41,6 +42,7 @@ func NewEmailService(config *EmailConfig) *EmailService {
 // SendWelcomeEmail sends a styled HTML welcome email to a new user with their password
 func (s *EmailService) SendWelcomeEmail(toEmail, name, password string) error {
 	subject := "Welcome to Our Service"
+	fmt.Printf("Email service config: %+v\n", s.config)
 	if s.config.EmailTemplatePath == "" {
 		return errors.New("email template path not configured")
 	}
