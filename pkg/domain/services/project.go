@@ -199,6 +199,11 @@ func (service *ProjectService) ReviewWD(secretary, projectID, comment string, st
 		if err != nil {
 			return fmt.Errorf("failed to update project after WD review: %w", err)
 		}
+
+		err = service.docService.UpdateProjectDoc(projectID, "CD", fileName, project.MemberID)
+		if err != nil {
+			return fmt.Errorf("failed to create CD: %w", err)
+		}
 	}
 	return err
 }
@@ -224,6 +229,11 @@ func (service *ProjectService) ReviewCD(secretary, projectId string, isConsensus
 		err = service.UpdateProject(project)
 		if err != nil {
 			return fmt.Errorf("failed to update project after CD review: %w", err)
+		}
+
+		err = service.docService.UpdateProjectDoc(projectId, "DARS", fileName, project.MemberID)
+		if err != nil {
+			return fmt.Errorf("failed to create DARS: %w", err)
 		}
 	}
 	return err
@@ -261,6 +271,11 @@ func (service *ProjectService) ReviewDARS(secretary,
 		if err != nil {
 			return fmt.Errorf("failed to update project after DARS review: %w", err)
 		}
+
+		err = service.docService.UpdateProjectDoc(projectId, "FDARS", fileName, project.MemberID)
+		if err != nil {
+			return fmt.Errorf("failed to create FDARS: %w", err)
+		}
 	}
 	return err
 }
@@ -289,6 +304,11 @@ func (service *ProjectService) ApproveFDARS(secretary, projectId string, approve
 		err = service.UpdateProject(project)
 		if err != nil {
 			return fmt.Errorf("failed to update project after FDARS review: %w", err)
+		}
+
+		err = service.docService.UpdateProjectDoc(projectId, "ARS", fileName, project.MemberID)
+		if err != nil {
+			return fmt.Errorf("failed to create ARS: %w", err)
 		}
 	}
 
