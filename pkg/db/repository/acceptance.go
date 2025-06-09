@@ -258,6 +258,20 @@ func (r *AcceptanceRepository) SetAcceptanceApproval(results models.Acceptance) 
 		acceptance.OtherInformation = results.OtherInformation
 		acceptance.DraftExpectedDate = results.DraftExpectedDate
 
+		// Create WD Manually
+		doc := models.Document{
+			ID:          uuid.New(),
+			Reference:   project.Reference,
+			Title:       project.Reference,
+			FileURL:     "OneDrive URL for WD",
+			Description: "WD",
+		}
+
+		if err := tx.Create(&doc).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
 		if len(results.DocumentsInConsidaration) > 0 {
 			var documents []models.Document
 			if err := tx.Where("id IN (?)", results.DocumentsInConsidaration).Find(&documents).Error; err != nil {
