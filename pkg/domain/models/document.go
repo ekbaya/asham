@@ -12,7 +12,7 @@ type Document struct {
 	CreatedBy   *Member   `json:"created_by"`
 	Title       string    `json:"title" binding:"required"`
 	Description string    `json:"description" binding:"required"`
-	Reference   string    `json:"reference" binding:"required" gorm:"unique;index"`
+	Reference   string    `json:"reference" binding:"required"`
 	FileURL     string    `json:"file_url"`
 	CreatedAt   time.Time `json:"created_at"`
 }
