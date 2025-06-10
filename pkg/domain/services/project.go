@@ -284,39 +284,40 @@ func (service *ProjectService) ApproveFDARS(secretary, projectId string, approve
 	if action == "" && !approve {
 		return fmt.Errorf("action cannot be empty when not approving")
 	}
-	err := service.repo.ApproveFDARS(secretary, projectId, approve, action)
-	if err == nil && approve {
-		projectUUID, err := uuid.Parse(projectId)
-		if err != nil {
-			return err
-		}
-		project, err := service.GetProjectByID(projectUUID)
-		if err != nil {
-			return err
-		}
-		fileName := fmt.Sprintf("%s.docx", strings.ReplaceAll(project.Reference, "/", "-"))
-		doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName, project.Number)
-		if errr != nil {
-			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
-		}
-
-		project.SharepointDocID = &doc.ID
-		err = service.UpdateProject(project)
-		if err != nil {
-			return fmt.Errorf("failed to update project after FDARS review: %w", err)
-		}
-
-		err = service.docService.UpdateProjectDoc(projectId, "ARS", fileName, project.MemberID)
-		if err != nil {
-			return fmt.Errorf("failed to create ARS: %w", err)
-		}
-	}
-
-	return err
+	return service.repo.ApproveFDARS(secretary, projectId, approve, action)
 }
 
 func (service *ProjectService) ApproveFDRSForPublication(secretary, projectId string, approve bool, comment string) error {
-	return service.repo.ApproveFDRSForPublication(secretary, projectId, approve, comment)
+	err := service.repo.ApproveFDRSForPublication(secretary, projectId, approve, comment)
+	if approve {
+		if err == nil && approve {
+			projectUUID, err := uuid.Parse(projectId)
+			if err != nil {
+				return err
+			}
+			project, err := service.GetProjectByID(projectUUID)
+			if err != nil {
+				return err
+			}
+			fileName := fmt.Sprintf("%s.docx", strings.ReplaceAll(project.Reference, "/", "-"))
+			doc, errr := service.docService.CopyOneDriveFile(context.Background(), *project.SharepointDocID, fileName, project.Number)
+			if errr != nil {
+				return fmt.Errorf("failed to copy OneDrive file: %w", errr)
+			}
+
+			project.SharepointDocID = &doc.ID
+			err = service.UpdateProject(project)
+			if err != nil {
+				return fmt.Errorf("failed to update project after FDARS review: %w", err)
+			}
+
+			err = service.docService.UpdateProjectDoc(projectId, "ARS", fileName, project.MemberID)
+			if err != nil {
+				return fmt.Errorf("failed to create ARS: %w", err)
+			}
+		}
+	}
+	return err
 }
 
 func (service *ProjectService) GetDashboardStats() (map[string]any, error) {
