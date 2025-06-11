@@ -7,6 +7,7 @@ import (
 
 var AllowedOrigins = []string{
 	"https://api.maziwasoko.co.ke",
+	"https://master.d132eek3o0f1jh.amplifyapp.com/",
 	"http://localhost",
 	"http://127.0.0.1:3000",
 	"http://192.168.100.43:3000",
