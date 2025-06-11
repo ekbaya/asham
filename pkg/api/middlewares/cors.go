@@ -8,6 +8,8 @@ import (
 var AllowedOrigins = []string{
 	"https://api.maziwasoko.co.ke",
 	"https://master.d132eek3o0f1jh.amplifyapp.com",
+	"https://arsolibrary.mystock.co.ke",
+	"https://www.arsolibrary.mystock.co.ke",
 	"http://localhost",
 	"http://127.0.0.1:3000",
 	"http://192.168.100.43:3000",
