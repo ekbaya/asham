@@ -154,7 +154,6 @@ func (u *User) ToSecureResponse() UserResponse {
 		Email:     HashEmail(u.Email),
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
-		CreatedAt: u.CreatedAt,
 	}
 }
 
