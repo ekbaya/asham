@@ -69,7 +69,7 @@ func (h *UsersHandler) Login(c *gin.Context) {
 	}
 
 	// Authenticate user and generate tokens
-	token, refreshToken, err := h.userService.Login(req.Username, req.Password)
+	token, refreshToken, err := h.userService.Login(req.Username, req.Password, models.Internal)
 	if err != nil {
 		// Handle authentication errors (e.g., invalid credentials)
 		utilities.ShowMessage(c, http.StatusUnauthorized, err.Error())

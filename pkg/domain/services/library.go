@@ -29,7 +29,7 @@ func (s *LibraryService) RegisterMember(user *models.Member) error {
 }
 
 func (s *LibraryService) Login(email, password string) (string, string, error) {
-	return s.memberService.Login(email, password)
+	return s.memberService.Login(email, password, models.External)
 }
 
 func (s *LibraryService) GetTopStandards(limit, offset int) ([]models.ProjectDTO, int64, error) {

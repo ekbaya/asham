@@ -55,7 +55,7 @@ func (service *MemberService) CreateMember(member *models.Member) error {
 	return nil
 }
 
-func (service *MemberService) Login(email, password string) (string, string, error) {
+func (service *MemberService) Login(email, password string, channel models.UserType) (string, string, error) {
 	user, err := service.repo.GetMemberByEmail(email)
 
 	// Handle error if user is not found
@@ -68,6 +68,10 @@ func (service *MemberService) Login(email, password string) (string, string, err
 	if !utilities.CheckPasswordHash(password, user.HashedPassword) {
 		fmt.Print("Wrong Username Or Password")
 		return "", "", errors.New("invalid credentials")
+	}
+
+	if channel == models.Internal && user.Type != models.External {
+		return "", "", errors.New("User is not authorized to login to admin panel")
 	}
 
 	// Generate JWT token
