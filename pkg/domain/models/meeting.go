@@ -85,5 +85,8 @@ type Meeting struct {
 	Attendees               *[]Member `json:"attendees,omitempty" gorm:"many2many:meeting_attendees;"`
 	MinutesDocID            *string   `json:"minutes_doc_id"`
 	MinutesDoc              *Document `json:"minutes_doc"`
-	CreatedAt               time.Time `json:"created_at"`
+
+	// Video conference information
+	VideoConferenceLink string    `json:"video_conference_link,omitempty"` // Link for virtual meetings
+	CreatedAt           time.Time `json:"created_at"`
 }

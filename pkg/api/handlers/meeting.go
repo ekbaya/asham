@@ -39,6 +39,11 @@ func (h *MeetingHandler) CreateMeeting(c *gin.Context) {
 		return
 	}
 
+	if payload.Format == models.MeetingFormatElectronic && payload.VideoConferenceLink == "" {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Video conference link is required for electronic meetings")
+		return
+	}
+
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
