@@ -44,14 +44,13 @@ type MemberMinified struct {
 
 // User represents a library user
 type User struct {
-	ID             uuid.UUID `json:"id"`
-	Phone          string    `json:"phone" binding:"required" example:"+1234567890"`
-	Email          string    `json:"email" gorm:"index;unique" binding:"required"`
-	FirstName      string    `json:"first_name" binding:"required"`
-	LastName       string    `json:"last_name" binding:"required"`
-	Password       string    `json:"password" binding:"required,min=8" gorm:"-"`
-	HashedPassword string    `json:"-" gorm:"column:password"`
-	CreatedAt      time.Time `json:"created_at"`
+	ID           uuid.UUID `json:"id"`
+	Phone        string    `json:"phone" binding:"required" example:"+1234567890"`
+	Email        string    `json:"email" gorm:"index;unique" binding:"required"`
+	FirstName    string    `json:"first_name" binding:"required"`
+	LastName     string    `json:"last_name" binding:"required"`
+	Organization string    `json:"organization" binding:"required"`
+	Country      string    `json:"country" binding:"required"`
 }
 
 // MemberResponse is a struct used for securely sending Member data in API responses

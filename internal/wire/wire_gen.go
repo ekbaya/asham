@@ -41,7 +41,7 @@ func InitializeServices(db *gorm.DB) (*services.ServiceContainer, error) {
 	meetingRepository := repository.NewMeetingRepository(db)
 	meetingService := services.NewMeetingService(meetingRepository)
 	libraryRepository := repository.NewLibraryRepository(db)
-	libraryService := services.NewLibraryService(libraryRepository)
+	libraryService := services.NewLibraryService(libraryRepository, memberService)
 	standardRepository := repository.NewStandardRepository(db)
 	standardService := services.NewStandardService(standardRepository)
 	rbacRepository := repository.NewRbacRepository(db)

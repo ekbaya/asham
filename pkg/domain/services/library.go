@@ -1,8 +1,6 @@
 package services
 
 import (
-	"errors"
-	"fmt"
 	"log"
 	"time"
 
@@ -15,65 +13,34 @@ import (
 )
 
 type LibraryService struct {
-	repo *repository.LibraryRepository
+	repo          *repository.LibraryRepository
+	memberService *MemberService
 }
 
-func NewLibraryService(repo *repository.LibraryRepository) *LibraryService {
+func NewLibraryService(repo *repository.LibraryRepository, memberService *MemberService) *LibraryService {
 	return &LibraryService{
-		repo: repo,
+		repo:          repo,
+		memberService: memberService,
 	}
 }
 
 func (s *LibraryService) RegisterMember(user *models.User) error {
-	// Validate password
-	if len(user.Password) < 8 {
-		return errors.New("password must be at least 8 characters long")
+	member := &models.Member{
+		ID:           uuid.New(),
+		FirstName:    user.FirstName,
+		LastName:     user.LastName,
+		Email:        user.Email,
+		Type:         models.External,
+		Phone:        user.Phone,
+		Organization: user.Organization,
+		Country:      user.Country,
+		CreatedAt:    time.Now(),
 	}
-
-	// Hash password
-	hashedPassword, err := utilities.HashPassword(user.Password)
-	if err != nil {
-		return errors.New("failed to hash password")
-	}
-
-	// Create user
-	user.HashedPassword = hashedPassword
-	user.ID = uuid.New()
-	user.CreatedAt = time.Now()
-	err = s.repo.CreateUser(user)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.memberService.CreateMember(member)
 }
 
 func (s *LibraryService) Login(email, password string) (string, string, error) {
-	user, err := s.repo.GetUserByEmail(email)
-	if err != nil {
-		fmt.Print("User Not Found: ", err)
-		return "", "", errors.New("invalid credentials")
-	}
-
-	// Verify password
-	if !utilities.CheckPasswordHash(password, user.HashedPassword) {
-		fmt.Print("Wrong Username Or Password")
-		return "", "", errors.New("invalid credentials")
-	}
-
-	// Generate JWT token
-	// token, err := models.GenerateJWT(user)
-	// if err != nil {
-	// 	return "", "", errors.New("failed to generate token")
-	// }
-
-	// Generate JWT refresh token
-	// refreshToken, err := models.GenerateRefreshToken(user)
-	// if err != nil {
-	// 	return "", "", errors.New("failed to generate refresh token")
-	// }
-
-	return "", "", nil
+	return s.memberService.Login(email, password)
 }
 
 func (s *LibraryService) GetTopStandards(limit, offset int) ([]models.ProjectDTO, int64, error) {
