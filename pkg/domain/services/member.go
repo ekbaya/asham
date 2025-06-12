@@ -70,8 +70,8 @@ func (service *MemberService) Login(email, password string, channel models.UserT
 		return "", "", errors.New("invalid credentials")
 	}
 
-	if channel == models.Internal && user.Type != models.External {
-		return "", "", errors.New("User is not authorized to login to admin panel")
+	if channel == models.Internal && user.Type == models.External {
+		return "", "", errors.New("user is not authorized to login to admin panel")
 	}
 
 	// Generate JWT token
