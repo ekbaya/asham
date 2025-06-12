@@ -178,14 +178,14 @@ func (h *UsersHandler) GenerateRefreshToken(c *gin.Context) {
 	}
 
 	// Generate a new access token
-	accessToken, err := models.GenerateJWT(user.ID.String())
+	accessToken, err := models.GenerateJWT(user)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to generate access token"})
 		return
 	}
 
 	// Generate a new refresh token
-	refreshToken, err := models.GenerateRefreshToken(user.ID.String())
+	refreshToken, err := models.GenerateRefreshToken(user)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to generate refresh token"})
 		return

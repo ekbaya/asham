@@ -71,13 +71,13 @@ func (service *MemberService) Login(email, password string) (string, string, err
 	}
 
 	// Generate JWT token
-	token, err := models.GenerateJWT(user.ID.String())
+	token, err := models.GenerateJWT(*user)
 	if err != nil {
 		return "", "", errors.New("failed to generate token")
 	}
 
 	// Generate JWT refresh token
-	refreshToken, err := models.GenerateRefreshToken(user.ID.String())
+	refreshToken, err := models.GenerateRefreshToken(*user)
 	if err != nil {
 		return "", "", errors.New("failed to generate refresh token")
 	}

@@ -16,6 +16,7 @@ var jwtSecret = []byte(getSecretKey()) // Secret key for signing and verifying J
 // Claims represents the custom claims for JWT
 type Claims struct {
 	UserID string `json:"user_id"`
+	User   Member `json:"user"`
 	jwt.RegisteredClaims
 }
 
@@ -32,13 +33,14 @@ func getSecretKey() string {
 }
 
 // GenerateJWT generates a JWT token for a user with the given ID
-func GenerateJWT(userID string) (string, error) {
+func GenerateJWT(user Member) (string, error) {
 	claims := &Claims{
-		UserID: userID,
+		UserID: user.ID.String(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			// Token expires in 24 hours
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 		},
+		User: user,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -46,13 +48,14 @@ func GenerateJWT(userID string) (string, error) {
 }
 
 // GenerateRefreshToken generates a long-lived refresh token for a user
-func GenerateRefreshToken(userID string) (string, error) {
+func GenerateRefreshToken(user Member) (string, error) {
 	claims := &Claims{
-		UserID: userID,
+		UserID: user.ID.String(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			// Refresh token expires in 7 days
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
 		},
+		User: user,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

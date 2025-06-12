@@ -26,7 +26,7 @@ func (r *LibraryRepository) CreateUser(user *models.User) error {
 
 func (r *LibraryRepository) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
-	result := r.db.Where("email = ?", email).First(&user)
+	result := r.db.Where("email = ?", email).Preload(clause.Associations).Preload("Roles.Permissions").First(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, errors.New("user not found")

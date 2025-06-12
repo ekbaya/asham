@@ -62,18 +62,18 @@ func (s *LibraryService) Login(email, password string) (string, string, error) {
 	}
 
 	// Generate JWT token
-	token, err := models.GenerateJWT(user.ID.String())
-	if err != nil {
-		return "", "", errors.New("failed to generate token")
-	}
+	// token, err := models.GenerateJWT(user)
+	// if err != nil {
+	// 	return "", "", errors.New("failed to generate token")
+	// }
 
 	// Generate JWT refresh token
-	refreshToken, err := models.GenerateRefreshToken(user.ID.String())
-	if err != nil {
-		return "", "", errors.New("failed to generate refresh token")
-	}
+	// refreshToken, err := models.GenerateRefreshToken(user)
+	// if err != nil {
+	// 	return "", "", errors.New("failed to generate refresh token")
+	// }
 
-	return token, refreshToken, nil
+	return "", "", nil
 }
 
 func (s *LibraryService) GetTopStandards(limit, offset int) ([]models.ProjectDTO, int64, error) {

@@ -23,7 +23,7 @@ func (r *MemberRepository) CreateMember(member *models.Member) error {
 
 func (r *MemberRepository) GetMemberByID(id string) (*models.Member, error) {
 	var member models.Member
-	result := r.db.Preload("NationalStandardBody").First(&member, "id = ?", id)
+	result := r.db.Preload(clause.Associations).Preload("Roles.Permissions").First(&member, "id = ?", id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
