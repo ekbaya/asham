@@ -24,19 +24,8 @@ func NewLibraryService(repo *repository.LibraryRepository, memberService *Member
 	}
 }
 
-func (s *LibraryService) RegisterMember(user *models.User) error {
-	member := &models.Member{
-		ID:           uuid.New(),
-		FirstName:    user.FirstName,
-		LastName:     user.LastName,
-		Email:        user.Email,
-		Type:         models.External,
-		Phone:        user.Phone,
-		Organization: user.Organization,
-		Country:      user.Country,
-		CreatedAt:    time.Now(),
-	}
-	return s.memberService.CreateMember(member)
+func (s *LibraryService) RegisterMember(user *models.Member) error {
+	return s.memberService.CreateMember(user)
 }
 
 func (s *LibraryService) Login(email, password string) (string, string, error) {

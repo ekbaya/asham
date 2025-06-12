@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -102,38 +100,40 @@ func (h *LibraryHandler) GetTopCommittees(c *gin.Context) {
 	})
 }
 func (h *LibraryHandler) RegisterMember(c *gin.Context) {
-	// Read and log request body for debugging
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		log.Printf("Error reading request body: %v", err)
-		utilities.ShowMessage(c, http.StatusBadRequest, "Failed to read request body")
-		return
+	var payload struct {
+		FirstName    string `json:"first_name" binding:"required"`
+		Lastname     string `json:"last_name" binding:"required"`
+		Email        string `json:"email" binding:"required"`
+		Organization string `json:"organization" binding:"required"`
+		Country      string `json:"country" binding:"required"`
 	}
-	log.Printf("Request body: %s", string(body))
-
-	// Restore request body for ShouldBindJSON
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
-
-	var payload models.User
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		log.Printf("Error binding JSON: %v", err)
-		if err.Error() == "EOF" {
-			utilities.ShowMessage(c, http.StatusBadRequest, "Empty or invalid request body")
-			return
-		}
 		validationErrors, ok := err.(validator.ValidationErrors)
 		if ok {
+			// Convert validation errors into human-readable messages
 			formattedErrors := utilities.FormatValidationErrors(validationErrors)
 			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
 			return
 		}
+
+		// For non-validation errors
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = h.libraryService.RegisterMember(&payload)
+	member := models.Member{
+		FirstName:           payload.FirstName,
+		LastName:            payload.Lastname,
+		Email:               payload.Email,
+		Type:                models.External,
+		Country:             payload.Country,
+		Organization:        payload.Organization,
+		CanPreviewStandard:  false,
+		CanDownloadStandard: false,
+	}
+
+	err := h.libraryService.RegisterMember(&member)
 	if err != nil {
-		log.Printf("Error registering user: %v", err)
 		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
 		return
 	}
