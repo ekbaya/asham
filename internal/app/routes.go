@@ -358,7 +358,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		library.POST("/register", libraryHandler.RegisterMember)
 		library.POST("/login", libraryHandler.Login)
 		library.GET("/logout/:userId", authHandler.LogoutAll)
-		library.GET("/account", middleware.AuthMiddleware(), authHandler.PublicAccount)
+		library.GET("/account", middleware.AuthMiddleware(), authHandler.Account)
 		library.GET("/standards", libraryHandler.FindStandards)
 		library.GET("/standards/:id", middleware.AuthMiddleware(), libraryHandler.GetStandardByID)
 		library.GET("/standards/preview/:id", middleware.AuthMiddleware(), libraryHandler.GetPreviewStandard)

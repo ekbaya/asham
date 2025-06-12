@@ -22,48 +22,6 @@ func NewUsersHandler(userService services.MemberService) *UsersHandler {
 	}
 }
 
-func (h *UsersHandler) RegisterPublicMember(c *gin.Context) {
-	var payload struct {
-		FirstName    string `json:"first_name" binding:"required"`
-		Lastname     string `json:"last_name" binding:"required"`
-		Email        string `json:"email" binding:"required"`
-		Organization string `json:"organization" binding:"required"`
-		Country      string `json:"country" binding:"required"`
-	}
-	if err := c.ShouldBindJSON(&payload); err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if ok {
-			// Convert validation errors into human-readable messages
-			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
-			return
-		}
-
-		// For non-validation errors
-		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	member := models.Member{
-		FirstName:           payload.FirstName,
-		LastName:            payload.Lastname,
-		Email:               payload.Email,
-		Type:                models.External,
-		Country:             payload.Country,
-		Organization:        payload.Organization,
-		CanPreviewStandard:  false,
-		CanDownloadStandard: false,
-	}
-
-	err := h.userService.CreateMember(&member)
-	if err != nil {
-		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	utilities.ShowMessage(c, http.StatusCreated, "User registered successfully")
-}
-
 func (h *UsersHandler) RegisterMember(c *gin.Context) {
 	var payload models.Member
 	if err := c.ShouldBindJSON(&payload); err != nil {
@@ -126,42 +84,6 @@ func (h *UsersHandler) Login(c *gin.Context) {
 	})
 }
 
-func (h *UsersHandler) PublicLogin(c *gin.Context) {
-	var req struct {
-		Username string `json:"username" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
-
-	// Bind and validate the request payload
-	if err := c.ShouldBindJSON(&req); err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if ok {
-			// Convert validation errors into human-readable messages
-			formattedErrors := utilities.FormatValidationErrors(validationErrors)
-			utilities.ShowError(c, http.StatusBadRequest, formattedErrors)
-			return
-		}
-
-		// For non-validation errors
-		utilities.ShowMessage(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	// Authenticate user and generate tokens
-	token, refreshToken, err := h.userService.Login(req.Username, req.Password)
-	if err != nil {
-		// Handle authentication errors (e.g., invalid credentials)
-		utilities.ShowMessage(c, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	utilities.Show(c, http.StatusOK, "success", map[string]any{
-		"access_token":  token,
-		"refresh_token": refreshToken,
-		"expires_in":    86400,
-	})
-}
-
 func (h *UsersHandler) GenerateRefreshToken(c *gin.Context) {
 	// Retrieve user_id from the context
 	userID, exists := c.Get("user_id")
@@ -201,22 +123,6 @@ func (h *UsersHandler) GenerateRefreshToken(c *gin.Context) {
 }
 
 func (h *UsersHandler) Account(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	user, err := h.userService.AccountWithResponsibilities(userID.(string))
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
-}
-
-func (h *UsersHandler) PublicAccount(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
