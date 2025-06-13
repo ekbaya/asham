@@ -425,7 +425,7 @@ func seedStages(db *gorm.DB, stageList []models.Stage) error {
 func seedRoles(db *gorm.DB, roles []models.Role) error {
 	for _, role := range roles {
 		var count int64
-		if err := db.Model(&models.Role{}).Where("name = ?", role.Title).Count(&count).Error; err != nil {
+		if err := db.Model(&models.Role{}).Where("title = ?", role.Title).Count(&count).Error; err != nil {
 			return err
 		}
 
@@ -443,7 +443,7 @@ func seedRoles(db *gorm.DB, roles []models.Role) error {
 func seedPermissions(db *gorm.DB, permissions []models.Permission) error {
 	for _, permission := range permissions {
 		var count int64
-		if err := db.Model(&models.Permission{}).Where("name = ?", permission.Title).Count(&count).Error; err != nil {
+		if err := db.Model(&models.Permission{}).Where("title = ?", permission.Title).Count(&count).Error; err != nil {
 			return err
 		}
 
