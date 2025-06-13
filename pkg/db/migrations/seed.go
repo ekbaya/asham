@@ -12,9 +12,12 @@ import (
 )
 
 type SeedData struct {
-	AdminUser models.Member
-	Stages    []models.Stage
-	Sectors   []string
+	AdminUser       models.Member
+	Stages          []models.Stage
+	Sectors         []string
+	Roles           []models.Role
+	Permissions     []models.Permission
+	RolePermissions map[string][]string
 }
 
 func GetDefaultSeedData() SeedData {
@@ -123,6 +126,165 @@ func GetDefaultSeedData() SeedData {
 				},
 			},
 		},
+		Roles: []models.Role{
+			{
+				Title:       "TC_SECRETARIAT",
+				Description: "Technical Committee Secretariat",
+			},
+			{
+				Title:       "SC_MEMBER",
+				Description: "Sub Committee Member",
+			},
+			{
+				Title:       "SMC_MEMBER",
+				Description: "Standards Management Committee Member",
+			},
+			{
+				Title:       "NSB_MEMBER",
+				Description: "National Standards Body Member",
+			},
+			{
+				Title:       "PROJECT_LEADER",
+				Description: "Leader of specific standardization projects",
+			},
+			{
+				Title:       "WORKING_GROUP_MEMBER",
+				Description: "Member of Working Groups",
+			},
+			{
+				Title:       "NATIONAL_EXPERT",
+				Description: "Expert at national level",
+			},
+			{
+				Title:       "ARSO_CENTRAL_SECRETARIAT",
+				Description: "ARSO Central Secretariat Member",
+			},
+		},
+		Permissions: []models.Permission{
+			// Preliminary Stage Permissions
+			{
+				Title:       "EVALUATE_PWI",
+				Description: "Can evaluate Preliminary Work Items",
+				Resource:    "preliminary_work_item",
+				Action:      "evaluate",
+			},
+			{
+				Title:       "REVIEW_PWI",
+				Description: "Can review Preliminary Work Items",
+				Resource:    "preliminary_work_item",
+				Action:      "review",
+			},
+
+			// Proposal Stage Permissions
+			{
+				Title:       "CREATE_NWIP",
+				Description: "Can create New Work Item Proposals",
+				Resource:    "new_work_item_proposal",
+				Action:      "create",
+			},
+			{
+				Title:       "VOTE_NWIP",
+				Description: "Can vote on New Work Item Proposals",
+				Resource:    "new_work_item_proposal",
+				Action:      "vote",
+			},
+			{
+				Title:       "COMPILE_POSITIONS",
+				Description: "Can compile national positions",
+				Resource:    "national_position",
+				Action:      "compile",
+			},
+
+			// Preparatory Stage Permissions
+			{
+				Title:       "DEVELOP_WORKING_DRAFT",
+				Description: "Can develop Working Drafts",
+				Resource:    "working_draft",
+				Action:      "develop",
+			},
+			{
+				Title:       "INVITE_EXPERTS",
+				Description: "Can invite expert assistance",
+				Resource:    "expert_assistance",
+				Action:      "invite",
+			},
+			{
+				Title:       "ASSIGN_PROJECT_LEADER",
+				Description: "Can assign Project Leaders",
+				Resource:    "project_leader",
+				Action:      "assign",
+			},
+
+			// Committee Stage Permissions
+			{
+				Title:       "REVIEW_COMMITTEE_DRAFT",
+				Description: "Can review Committee Drafts",
+				Resource:    "committee_draft",
+				Action:      "review",
+			},
+			{
+				Title:       "SUBMIT_COMMENTS",
+				Description: "Can submit comments on drafts",
+				Resource:    "draft_comments",
+				Action:      "submit",
+			},
+			{
+				Title:       "REGISTER_ENQUIRY_STAGE",
+				Description: "Can register drafts for Enquiry Stage",
+				Resource:    "enquiry_stage",
+				Action:      "register",
+			},
+
+			// Enquiry Stage Permissions
+			{
+				Title:       "GENERATE_DARS",
+				Description: "Can generate Draft African Standards",
+				Resource:    "draft_african_standard",
+				Action:      "generate",
+			},
+			{
+				Title:       "PUBLIC_REVIEW",
+				Description: "Can participate in public review",
+				Resource:    "public_review",
+				Action:      "review",
+			},
+		},
+		RolePermissions: map[string][]string{
+			"TC_SECRETARIAT": {
+				"EVALUATE_PWI",
+				"REVIEW_PWI",
+				"CREATE_NWIP",
+				"ASSIGN_PROJECT_LEADER",
+				"REGISTER_ENQUIRY_STAGE",
+			},
+			"SMC_MEMBER": {
+				"EVALUATE_PWI",
+				"VOTE_NWIP",
+				"COMPILE_POSITIONS",
+			},
+			"NSB_MEMBER": {
+				"SUBMIT_COMMENTS",
+				"VOTE_NWIP",
+				"PUBLIC_REVIEW",
+			},
+			"PROJECT_LEADER": {
+				"DEVELOP_WORKING_DRAFT",
+				"INVITE_EXPERTS",
+			},
+			"WORKING_GROUP_MEMBER": {
+				"DEVELOP_WORKING_DRAFT",
+				"REVIEW_COMMITTEE_DRAFT",
+				"SUBMIT_COMMENTS",
+			},
+			"NATIONAL_EXPERT": {
+				"REVIEW_COMMITTEE_DRAFT",
+				"SUBMIT_COMMENTS",
+			},
+			"ARSO_CENTRAL_SECRETARIAT": {
+				"GENERATE_DARS",
+				"REGISTER_ENQUIRY_STAGE",
+			},
+		},
 	}
 }
 
@@ -140,6 +302,18 @@ func SeedDatabase(db *gorm.DB) error {
 	if err := seedSectors(db, seedData.Sectors); err != nil {
 		return fmt.Errorf("failed to seed sectors: %w", err)
 	}
+
+	// if err := seedRoles(db, seedData.Roles); err != nil {
+	// 	return fmt.Errorf("failed to seed roles: %w", err)
+	// }
+
+	// if err := seedPermissions(db, seedData.Permissions); err != nil {
+	// 	return fmt.Errorf("failed to seed permissions: %w", err)
+	// }
+
+	// if err := seedRolePermissions(db, seedData.RolePermissions); err != nil {
+	// 	return fmt.Errorf("failed to seed role permissions: %w", err)
+	// }
 
 	return nil
 }
@@ -237,6 +411,113 @@ func seedStages(db *gorm.DB, stageList []models.Stage) error {
 			log.Printf("Created %d stages", len(stageList))
 			return nil
 		})
+	}
+
+	return nil
+}
+
+func seedRoles(db *gorm.DB, roles []models.Role) error {
+	for _, role := range roles {
+		var count int64
+		if err := db.Model(&models.Role{}).Where("name = ?", role.Title).Count(&count).Error; err != nil {
+			return err
+		}
+
+		if count == 0 {
+			role.ID = uuid.New()
+			if err := db.Create(&role).Error; err != nil {
+				return err
+			}
+			log.Printf("Created role: %s", role.Title)
+		}
+	}
+	return nil
+}
+
+func seedPermissions(db *gorm.DB, permissions []models.Permission) error {
+	for _, permission := range permissions {
+		var count int64
+		if err := db.Model(&models.Permission{}).Where("name = ?", permission.Title).Count(&count).Error; err != nil {
+			return err
+		}
+
+		if count == 0 {
+			permission.ID = uuid.New()
+			if err := db.Create(&permission).Error; err != nil {
+				return err
+			}
+			log.Printf("Created permission: %s", permission.Title)
+		}
+	}
+	return nil
+}
+
+func seedRolePermissions(db *gorm.DB, rolePermissions map[string][]string) error {
+	// Create a join table if it doesn't exist
+	if err := db.Table("role_permissions").AutoMigrate(&struct {
+		RoleID       uuid.UUID `gorm:"type:uuid;primaryKey"`
+		PermissionID uuid.UUID `gorm:"type:uuid;primaryKey"`
+	}{}); err != nil {
+		return fmt.Errorf("failed to ensure role_permissions table exists: %w", err)
+	}
+
+	for roleName, permissionNames := range rolePermissions {
+		// Find the role
+		var role models.Role
+		if err := db.Where("name = ?", roleName).First(&role).Error; err != nil {
+			log.Printf("Warning: Role %s not found: %v", roleName, err)
+			continue
+		}
+
+		// Process each permission for the role
+		for _, permissionName := range permissionNames {
+			var permission models.Permission
+			if err := db.Where("name = ?", permissionName).First(&permission).Error; err != nil {
+				log.Printf("Warning: Permission %s not found: %v", permissionName, err)
+				continue
+			}
+
+			// Check if relationship already exists
+			var exists bool
+			err := db.Table("role_permissions").
+				Where("role_id = ? AND permission_id = ?", role.ID, permission.ID).
+				Select("count(*) > 0").
+				Scan(&exists).Error
+
+			if err != nil {
+				return fmt.Errorf("failed to check role-permission relationship: %w", err)
+			}
+
+			if !exists {
+				// Create the relationship using SQL to ensure proper insertion
+				err = db.Exec(`
+                    INSERT INTO role_permissions (role_id, permission_id)
+                    VALUES (?, ?)
+                `, role.ID, permission.ID).Error
+
+				if err != nil {
+					return fmt.Errorf("failed to create role-permission relationship: %w", err)
+				}
+
+				log.Printf("Added permission %s to role %s", permissionName, roleName)
+			} else {
+				log.Printf("Permission %s already exists for role %s", permissionName, roleName)
+			}
+		}
+	}
+
+	// Verify relationships were created successfully
+	for roleName, permissionNames := range rolePermissions {
+		var role models.Role
+		if err := db.Preload("Permissions").Where("name = ?", roleName).First(&role).Error; err != nil {
+			log.Printf("Warning: Could not verify role %s: %v", roleName, err)
+			continue
+		}
+
+		if len(role.Permissions) != len(permissionNames) {
+			log.Printf("Warning: Role %s has %d permissions, expected %d",
+				roleName, len(role.Permissions), len(permissionNames))
+		}
 	}
 
 	return nil

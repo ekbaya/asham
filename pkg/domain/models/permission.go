@@ -9,10 +9,12 @@ import (
 )
 
 type Permission struct {
-	ID          uuid.UUID `json:"id" gorm:"primary_key"`
-	Title       string    `json:"title" binding:"required" gorm:"unique"`
-	Slug        string    `json:"slug" gorm:"unique"`
-	Description string
+	ID          uuid.UUID      `json:"id" gorm:"primary_key"`
+	Title       string         `json:"title" binding:"required" gorm:"unique"`
+	Slug        string         `json:"slug" gorm:"unique"`
+	Description string         `json:"description"`
+	Resource    string         `json:"resource"`
+	Action      string         `json:"action"`
 	CreatedAt   time.Time      `json:"-"`
 	UpdatedAt   time.Time      `json:"-"`
 	DeletedAt   gorm.DeletedAt `json:"-"`
