@@ -340,31 +340,37 @@ func seedSectors(db *gorm.DB, sectorsList []string) error {
 }
 
 func seedAdminUser(db *gorm.DB, adminData *models.Member) error {
-	// Generate a single user ID that will be used consistently
-	userID := uuid.New()
-	log.Printf("Generated user ID: %s", userID)
-
-	// Hash password
-	hashedPassword, err := utilities.HashPassword("secret")
-	if err != nil {
-		return fmt.Errorf("failed to hash password: %w", err)
-	}
-
-	// Prepare user data
-	adminUser := models.Member{
-		ID:             userID,
-		FirstName:      adminData.FirstName,
-		LastName:       adminData.LastName,
-		Phone:          adminData.Phone,
-		Email:          adminData.Email,
-		HashedPassword: hashedPassword,
-	}
-
-	if err := db.FirstOrCreate(&adminUser).Error; err != nil {
-		log.Printf("Error creating user: %v", err)
+	var count int64
+	if err := db.Model(models.Member{}).Where("email = ?", adminData.Email).Count(&count).Error; err != nil {
+		log.Printf("Error counting user: %v", err)
 		return err
 	}
 
+	if condition := count == 0; condition {
+		// Generate a single user ID that will be used consistently
+		userID := uuid.New()
+		log.Printf("Generated user ID: %s", userID)
+
+		// Hash password
+		hashedPassword, err := utilities.HashPassword("secret")
+		if err != nil {
+			return fmt.Errorf("failed to hash password: %w", err)
+		}
+		// Prepare user data
+		adminUser := models.Member{
+			ID:             userID,
+			FirstName:      adminData.FirstName,
+			LastName:       adminData.LastName,
+			Phone:          adminData.Phone,
+			Email:          adminData.Email,
+			HashedPassword: hashedPassword,
+		}
+
+		if err := db.FirstOrCreate(&adminUser).Error; err != nil {
+			log.Printf("Error creating user: %v", err)
+			return err
+		}
+	}
 	return nil
 }
 
