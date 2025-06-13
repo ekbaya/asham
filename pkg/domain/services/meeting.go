@@ -1,6 +1,11 @@
 package services
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
+	"os"
+	"text/template"
 	"time"
 
 	"github.com/ekbaya/asham/pkg/db/repository"
@@ -92,4 +97,84 @@ func (service *MeetingService) UpdateMeetingStatus(meetingID string, status mode
 
 func (service *MeetingService) CheckQuorum(meetingID string) (bool, error) {
 	return service.repo.CheckQuorum(meetingID)
+}
+
+// SendMeetingInvitations sends email invitations to meeting attendees
+func (service *MeetingService) SendMeetingInvitations(meetingID string, emailService *EmailService) error {
+	// Get meeting details
+	meeting, err := service.GetMeetingByID(meetingID)
+	if err != nil {
+		return fmt.Errorf("failed to get meeting: %w", err)
+	}
+
+	// Verify it's an electronic meeting
+	if meeting.Format != models.MeetingFormatElectronic {
+		return errors.New("meeting invitations can only be sent for electronic meetings")
+	}
+
+	// Verify video conference link exists
+	if meeting.VideoConferenceLink == "" {
+		return errors.New("video conference link is required for electronic meetings")
+	}
+
+	if meeting.Attendees == nil || len(*meeting.Attendees) == 0 {
+		return errors.New("no attendees found for the meeting")
+	}
+
+	// Prepare email content
+	meetingDate := meeting.Date.Format("Monday, January 2, 2006")
+	meetingTime := fmt.Sprintf("%s - %s", meeting.StartTime, meeting.EndTime)
+
+	// Read the email template from file
+	tmpl, err := os.ReadFile("templates/meeting_invitation.html")
+	if err != nil {
+		return fmt.Errorf("failed to read email template: %w", err)
+	}
+
+	// Parse the template
+	t, err := template.New("meetingInvitation").Parse(string(tmpl))
+	if err != nil {
+		return fmt.Errorf("failed to parse email template: %w", err)
+	}
+
+	// Prepare template data
+	data := struct {
+		Title               string
+		CommitteeName       string
+		Date                string
+		Time                string
+		Venue               string
+		Format              string
+		Language            string
+		Agenda              string
+		VideoConferenceLink string
+	}{
+		Title:               meeting.Title,
+		CommitteeName:       meeting.CommitteeName,
+		Date:                meetingDate,
+		Time:                meetingTime,
+		Venue:               meeting.Venue,
+		Format:              string(meeting.Format),
+		Language:            meeting.Language,
+		Agenda:              meeting.Agenda,
+		VideoConferenceLink: meeting.VideoConferenceLink,
+	}
+
+	// Execute template with data
+	var body bytes.Buffer
+	if err := t.Execute(&body, data); err != nil {
+		return fmt.Errorf("failed to execute email template: %w", err)
+	}
+
+	// Send emails to all attendees
+	var emails []RecipientEmail
+	for _, attendee := range *meeting.Attendees {
+		emails = append(emails, RecipientEmail{
+			To:    attendee.Email,
+			Title: fmt.Sprintf("Meeting Invitation: %s", meeting.Title),
+			Body:  body.String(),
+		})
+	}
+
+	return emailService.SendCustomEmails(emails)
 }
