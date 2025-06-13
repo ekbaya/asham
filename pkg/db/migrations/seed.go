@@ -470,7 +470,7 @@ func seedRolePermissions(db *gorm.DB, rolePermissions map[string][]string) error
 	for roleName, permissionNames := range rolePermissions {
 		// Find the role
 		var role models.Role
-		if err := db.Where("name = ?", roleName).First(&role).Error; err != nil {
+		if err := db.Where("title = ?", roleName).First(&role).Error; err != nil {
 			log.Printf("Warning: Role %s not found: %v", roleName, err)
 			continue
 		}
@@ -478,7 +478,7 @@ func seedRolePermissions(db *gorm.DB, rolePermissions map[string][]string) error
 		// Process each permission for the role
 		for _, permissionName := range permissionNames {
 			var permission models.Permission
-			if err := db.Where("name = ?", permissionName).First(&permission).Error; err != nil {
+			if err := db.Where("title = ?", permissionName).First(&permission).Error; err != nil {
 				log.Printf("Warning: Permission %s not found: %v", permissionName, err)
 				continue
 			}
