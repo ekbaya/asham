@@ -303,17 +303,17 @@ func SeedDatabase(db *gorm.DB) error {
 		return fmt.Errorf("failed to seed sectors: %w", err)
 	}
 
-	// if err := seedRoles(db, seedData.Roles); err != nil {
-	// 	return fmt.Errorf("failed to seed roles: %w", err)
-	// }
+	if err := seedRoles(db, seedData.Roles); err != nil {
+		return fmt.Errorf("failed to seed roles: %w", err)
+	}
 
-	// if err := seedPermissions(db, seedData.Permissions); err != nil {
-	// 	return fmt.Errorf("failed to seed permissions: %w", err)
-	// }
+	if err := seedPermissions(db, seedData.Permissions); err != nil {
+		return fmt.Errorf("failed to seed permissions: %w", err)
+	}
 
-	// if err := seedRolePermissions(db, seedData.RolePermissions); err != nil {
-	// 	return fmt.Errorf("failed to seed role permissions: %w", err)
-	// }
+	if err := seedRolePermissions(db, seedData.RolePermissions); err != nil {
+		return fmt.Errorf("failed to seed role permissions: %w", err)
+	}
 
 	return nil
 }
