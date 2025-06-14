@@ -93,7 +93,7 @@ func LoadConfig() (*Config, error) {
 		},
 		DOC_TEMPLATE_PATH:    "../templates/project_template.docx",
 		ONEDRIVE_FOLDER_NAME: "ASHAM_ARSO_PLATFORM",
-		SEED_PERMISSIONS:     false,
+		SEED_PERMISSIONS:     true,
 		Environment:          env,
 	}
 
