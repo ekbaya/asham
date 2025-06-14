@@ -1,8 +1,10 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/ekbaya/asham/pkg/config"
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/ekbaya/asham/pkg/domain/services"
 	"github.com/gin-gonic/gin"
@@ -31,14 +33,17 @@ func Authorize(requiredPermissions ...string) gin.HandlerFunc {
 
 func DynamicAuthorize(service *services.PermissionResourceService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// globalConfig := config.GetConfig()
-		// if globalConfig.Environment == "dev" {
-		// 	c.Next()
-		// 	return
-		// }
+		globalConfig := config.GetConfig()
+		fmt.Println("ENV CHECK >>>", globalConfig.Environment)
+
+		if globalConfig.Environment == "dev" {
+			c.Next()
+			return
+		}
 
 		user, exists := c.Get("user")
 		if !exists {
+			fmt.Println("DEBUG >>> User not found in context")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return
 		}
@@ -46,6 +51,7 @@ func DynamicAuthorize(service *services.PermissionResourceService) gin.HandlerFu
 		member := user.(*models.Member)
 
 		permSlug, err := service.GetPermissionSlug(c.Request.Method, c.FullPath())
+		fmt.Printf("PERM SLUG >>> method=%s, path=%s, slug=%s, err=%v\n", c.Request.Method, c.FullPath(), permSlug, err)
 		if err != nil || permSlug == "" {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Permission not mapped"})
 			return
@@ -61,6 +67,7 @@ func DynamicAuthorize(service *services.PermissionResourceService) gin.HandlerFu
 }
 
 func hasPermission(roles []models.Role, required string) bool {
+	fmt.Println("CHECKING PERMISSION >>> Required:", required)
 	permSet := make(map[string]bool)
 	for _, role := range roles {
 		for _, perm := range role.Permissions {
