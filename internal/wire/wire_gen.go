@@ -47,7 +47,7 @@ func InitializeServices(db *gorm.DB) (*services.ServiceContainer, error) {
 	rbacRepository := repository.NewRbacRepository(db)
 	rbacService := services.NewRbacService(rbacRepository)
 	permissionResourceRepository := repository.NewPermissionResourceRepository(db)
-	permissionResourceService := services.NewPermissionResourceService(permissionResourceRepository)
+	permissionResourceService := services.NewPermissionResourceService(permissionResourceRepository, memberService)
 	serviceContainer := services.NewServiceContainer(organizationService, memberService, projectService, documentService, proposalService, acceptanceService, commentService, emailService, nationalConsultationService, ballotingService, meetingService, libraryService, standardService, rbacService, tokenManager, permissionResourceService)
 	return serviceContainer, nil
 }

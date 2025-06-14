@@ -41,14 +41,19 @@ func DynamicAuthorize(service *services.PermissionResourceService) gin.HandlerFu
 			return
 		}
 
-		user, exists := c.Get("user")
+		userID, exists := c.Get("user_id")
 		if !exists {
 			fmt.Println("DEBUG >>> User not found in context")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return
 		}
 
-		member := user.(*models.Member)
+		member, err := service.Account(userID.(string))
+		if err != nil {
+			fmt.Println("DEBUG >>> Failed to get user account:", err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+		}
 
 		permSlug, err := service.GetPermissionSlug(c.Request.Method, c.FullPath())
 		fmt.Printf("PERM SLUG >>> method=%s, path=%s, slug=%s, err=%v\n", c.Request.Method, c.FullPath(), permSlug, err)

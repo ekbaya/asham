@@ -7,11 +7,12 @@ import (
 )
 
 type PermissionResourceService struct {
-	repo *repository.PermissionResourceRepository
+	repo          *repository.PermissionResourceRepository
+	memberService *MemberService
 }
 
-func NewPermissionResourceService(repo *repository.PermissionResourceRepository) *PermissionResourceService {
-	return &PermissionResourceService{repo: repo}
+func NewPermissionResourceService(repo *repository.PermissionResourceRepository, memberService *MemberService) *PermissionResourceService {
+	return &PermissionResourceService{repo: repo, memberService: memberService}
 }
 
 func (service *PermissionResourceService) GetPermissionSlug(method, path string) (string, error) {
@@ -32,4 +33,8 @@ func (service *PermissionResourceService) ListMappings() ([]models.ResourcePermi
 
 func (service *PermissionResourceService) DeleteMapping(id uuid.UUID) error {
 	return service.repo.DeleteMapping(id)
+}
+
+func (service *PermissionResourceService) Account(memberId string) (models.Member, error) {
+	return service.memberService.Account(memberId)
 }
