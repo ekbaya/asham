@@ -19,6 +19,8 @@ type Config struct {
 	EmailConfig          EmailConfig
 	DOC_TEMPLATE_PATH    string
 	ONEDRIVE_FOLDER_NAME string
+	SEED_PERMISSIONS     bool
+	Environment          string
 }
 
 type DatabaseConfig struct {
@@ -58,6 +60,10 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
+	env := os.Getenv("ENVIRONMENT")
+	if env == "" {
+		env = "dev"
+	}
 	config := &Config{
 		Server: ServerConfig{
 			Port: os.Getenv("SERVER_PORT"),
@@ -87,6 +93,8 @@ func LoadConfig() (*Config, error) {
 		},
 		DOC_TEMPLATE_PATH:    "../templates/project_template.docx",
 		ONEDRIVE_FOLDER_NAME: "ASHAM_ARSO_PLATFORM",
+		SEED_PERMISSIONS:     false,
+		Environment:          env,
 	}
 
 	return config, nil

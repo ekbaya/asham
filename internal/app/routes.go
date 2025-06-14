@@ -62,7 +62,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	// RBAC Routes
 	rbac := api.Group("rbac")
-	rbac.Use(middleware.AuthMiddleware())
+	rbac.Use(middleware.AuthMiddleware(), middleware.DynamicAuthorize(services.PermissionResourceService))
 	{
 		rbac.POST("/roles", rbacHandler.CreateRole)
 		rbac.GET("/roles", rbacHandler.ListRoles)
@@ -78,7 +78,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	// Organization Route
 	organization := api.Group("organization")
-	organization.Use(middleware.AuthMiddleware())
+	organization.Use(middleware.AuthMiddleware(), middleware.DynamicAuthorize(services.PermissionResourceService))
 	{
 		organization.POST("/member_states", organizationHandler.CreateMemberState)
 		organization.GET("/member_states", organizationHandler.FetchMemberStates)
@@ -175,7 +175,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	// documents Route
 	document := api.Group("documents")
-	document.Use(middleware.AuthMiddleware())
+	document.Use(middleware.AuthMiddleware(), middleware.DynamicAuthorize(services.PermissionResourceService))
 	{
 		document.POST("/", documentHandler.CreateDocument)
 		document.POST("/upload", documentHandler.UploadDocument)
@@ -203,7 +203,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	// Project Route
 	projects := api.Group("projects")
-	projects.Use(middleware.AuthMiddleware())
+	projects.Use(middleware.AuthMiddleware(), middleware.DynamicAuthorize(services.PermissionResourceService))
 	{
 		// Basic CRUD operations
 		projects.POST("/", projectHandler.CreateProject)
@@ -248,7 +248,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	// Proposal Route
 	proposal := api.Group("proposals")
-	proposal.Use(middleware.AuthMiddleware())
+	proposal.Use(middleware.AuthMiddleware(), middleware.DynamicAuthorize(services.PermissionResourceService))
 	{
 		proposal.POST("/", proposalHandler.CreateProposal)
 		proposal.GET("/:id", proposalHandler.GetProposal)
@@ -267,7 +267,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	// Acceptance Route
 	acceptance := api.Group("acceptance")
-	acceptance.Use(middleware.AuthMiddleware())
+	acceptance.Use(middleware.AuthMiddleware(), middleware.DynamicAuthorize(services.PermissionResourceService))
 	{
 		acceptance.POST("/submission", acceptanceHandler.CreateNSBResponse)
 		acceptance.GET("/submission/:id", acceptanceHandler.GetNSBResponse)
@@ -289,7 +289,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	// Comments and  Observations Route
 	comment := api.Group("comments")
-	comment.Use(middleware.AuthMiddleware())
+	comment.Use(middleware.AuthMiddleware(), middleware.DynamicAuthorize(services.PermissionResourceService))
 	{
 		comment.POST("/", commentHandler.CreateComment)
 		comment.GET("/:id", commentHandler.GetCommentByID)
@@ -309,7 +309,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	// Balloting and  Observations Route
 	balloting := api.Group("balloting")
-	balloting.Use(middleware.AuthMiddleware())
+	balloting.Use(middleware.AuthMiddleware(), middleware.DynamicAuthorize(services.PermissionResourceService))
 	{
 		balloting.POST("/votes", voteHandler.CreateVote)
 		balloting.GET("/votes/:id", voteHandler.GetVoteByID)
@@ -332,7 +332,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 	// Meeting Route
 	meeting := api.Group("meetings")
-	meeting.Use(middleware.AuthMiddleware())
+	meeting.Use(middleware.AuthMiddleware(), middleware.DynamicAuthorize(services.PermissionResourceService))
 	{
 		meeting.POST("/create", meetingHandler.CreateMeeting)
 		meeting.GET("/:id", meetingHandler.GetMeetingByID)

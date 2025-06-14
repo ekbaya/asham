@@ -128,6 +128,10 @@ func GetDefaultSeedData() SeedData {
 		},
 		Roles: []models.Role{
 			{
+				Title:       "ROLE_ADMIN",
+				Description: "Administrator with full access",
+			},
+			{
 				Title:       "TC_SECRETARIAT",
 				Description: "Technical Committee Secretariat",
 			},

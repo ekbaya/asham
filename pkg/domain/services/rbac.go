@@ -72,3 +72,7 @@ func (s *RbacService) RemoveRoleFromMember(memberID, roleID string) error {
 func (s *RbacService) ListRolesForMember(memberID string) ([]models.Role, error) {
 	return s.repo.ListRolesForMember(memberID)
 }
+
+func (s *RbacService) CreateIfNotExists(permission models.Permission) (*models.Permission, error) {
+	return s.repo.CreateIfNotExists(&permission)
+}

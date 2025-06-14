@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 
+	"github.com/ekbaya/asham/pkg/config"
 	"github.com/ekbaya/asham/pkg/domain/models"
 	"github.com/ekbaya/asham/pkg/domain/services"
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,12 @@ func Authorize(requiredPermissions ...string) gin.HandlerFunc {
 
 func DynamicAuthorize(service *services.PermissionResourceService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		globalConfig := config.GetConfig()
+		if globalConfig.Environment == "dev" {
+			c.Next()
+			return
+		}
+
 		user, exists := c.Get("user")
 		if !exists {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})

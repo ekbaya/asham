@@ -49,6 +49,14 @@ func NewApp(cfg *config.Config) (*App, error) {
 		return nil, fmt.Errorf("failed to initialize routes: %w", err)
 	}
 
+	if cfg.SEED_PERMISSIONS {
+		// Auto-register permission mappings
+		err = registerPermissionsAndResources(router, services.RbacService, services.PermissionResourceService)
+		if err != nil {
+			return nil, fmt.Errorf("failed to auto-register permission mappings: %w", err)
+		}
+	}
+
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", cfg.Server.Port),
 		Handler: router,
