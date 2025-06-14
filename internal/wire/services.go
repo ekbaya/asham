@@ -44,6 +44,8 @@ var ServiceSet = wire.NewSet(
 	services.NewRbacService,
 	GetMSAzureConfig,
 	services.NewTokenManager,
+	repository.NewPermissionResourceRepository,
+	services.NewPermissionResourceService,
 )
 
 func GetEmailConfigurations() *services.EmailConfig {
