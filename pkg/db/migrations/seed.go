@@ -519,7 +519,7 @@ func seedRolePermissions(db *gorm.DB, rolePermissions map[string][]string) error
 	// Verify relationships were created successfully
 	for roleName, permissionNames := range rolePermissions {
 		var role models.Role
-		if err := db.Preload("Permissions").Where("name = ?", roleName).First(&role).Error; err != nil {
+		if err := db.Preload("Permissions").Where("title = ?", roleName).First(&role).Error; err != nil {
 			log.Printf("Warning: Could not verify role %s: %v", roleName, err)
 			continue
 		}
