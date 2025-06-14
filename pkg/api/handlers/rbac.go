@@ -145,6 +145,18 @@ func (h *RbacHandler) AssignRoleToMember(c *gin.Context) {
 	utilities.ShowMessage(c, http.StatusOK, "Role assigned to member successfully")
 }
 
+func (h *RbacHandler) AddPermissionToRole(c *gin.Context) {
+	permissionID := c.Param("permission_id")
+	roleID := c.Param("role_id")
+
+	if err := h.rbacService.AddPermissionToRole(roleID, permissionID); err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Permission added  to role successfully")
+}
+
 func (h *RbacHandler) ListMemberRoles(c *gin.Context) {
 	memberID := c.Param("member_id")
 
