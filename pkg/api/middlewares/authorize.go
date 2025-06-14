@@ -67,7 +67,7 @@ func DynamicAuthorize(service *services.PermissionResourceService) gin.HandlerFu
 			return
 		}
 
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("This action is forbidden. Permission: %s is required", permSlug)})
 	}
 }
 
