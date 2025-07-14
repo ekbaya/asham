@@ -47,14 +47,14 @@ func (r *BallotingRepository) CreateVote(vote *models.Vote) error {
 			return err
 		}
 	}
-	isEligible, err := r.IsEligibleToVote(vote.MemberID, vote.ProjectID)
-	if err != nil {
-		return err
-	}
+	// isEligible, err := r.IsEligibleToVote(vote.MemberID, vote.ProjectID)
+	// if err != nil {
+	// 	return err
+	// }
 
-	if !isEligible {
-		return errors.New("member is not eligible to vote")
-	}
+	// if !isEligible {
+	// 	return errors.New("member is not eligible to vote")
+	// }
 	vote.BallotingID = ballot.ID
 	return r.db.Create(vote).Error
 }
