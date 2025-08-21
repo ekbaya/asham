@@ -26,6 +26,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	libraryHandler := handlers.NewLibraryHandler(*services.LibraryService, *services.MemberService)
 	standardHandler := handlers.NewStandardHandler(services.StandardService)
 	rbacHandler := handlers.NewRbacHandler(services.RbacService)
+	notificationHandler := handlers.NewNotificationHandler(*services.NotificationService)
 
 	api := router.Group("/api")
 
@@ -386,6 +387,29 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 		standard.POST("/:id/restore", standardHandler.RestoreVersion)
 		standard.GET("/:id/diff", standardHandler.DiffVersions)
 		standard.GET("/:id/audit-log", standardHandler.GetAuditLogs)
+	}
+
+	// Notification Route
+	notifications := api.Group("notifications")
+	notifications.Use(middleware.AuthMiddleware(), middleware.DynamicAuthorize(services.PermissionResourceService))
+	{
+		// Dashboard and overview
+		notifications.GET("/dashboard", notificationHandler.GetNotificationDashboard)
+		notifications.GET("/", notificationHandler.GetNotifications)
+		notifications.GET("/search", notificationHandler.SearchNotifications)
+		notifications.GET("/history", notificationHandler.GetNotificationHistory)
+
+		// Individual notification actions
+		notifications.PUT("/:id/read", notificationHandler.MarkNotificationAsRead)
+		notifications.PUT("/read-all", notificationHandler.MarkAllNotificationsAsRead)
+		notifications.DELETE("/:id", notificationHandler.DeleteNotification)
+
+		// Preferences
+		notifications.GET("/preferences", notificationHandler.GetNotificationPreferences)
+		notifications.PUT("/preferences", notificationHandler.UpdateNotificationPreferences)
+
+		// Admin announcements (admin only)
+		notifications.POST("/announcements", notificationHandler.SendAdminAnnouncement)
 	}
 
 	return router, nil

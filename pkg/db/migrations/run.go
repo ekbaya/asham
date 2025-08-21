@@ -50,5 +50,9 @@ func RunMigrations(db *gorm.DB) error {
 		&models.StandardVersion{},
 		&models.StandardAuditLog{},
 		&models.ResourcePermission{},
+		&models.Notification{},
+		&models.NotificationTemplate{},
+		&models.NotificationPreference{},
+		&models.NotificationHistory{},
 	)
 }
