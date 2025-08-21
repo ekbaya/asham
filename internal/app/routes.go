@@ -27,6 +27,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	standardHandler := handlers.NewStandardHandler(services.StandardService)
 	rbacHandler := handlers.NewRbacHandler(services.RbacService)
 	notificationHandler := handlers.NewNotificationHandler(*services.NotificationService)
+	reportsHandler := handlers.NewReportsHandler(services.ReportsService)
 
 	api := router.Group("/api")
 
@@ -410,6 +411,34 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 
 		// Admin announcements (admin only)
 		notifications.POST("/announcements", notificationHandler.SendAdminAnnouncement)
+	}
+
+	// Reports API
+	reports := api.Group("/reports")
+	reports.Use(middleware.AuthMiddleware())
+	reports.Use(middleware.DynamicAuthorize(services.PermissionResourceService))
+	{
+		// Report generation
+		reports.POST("/generate", reportsHandler.GenerateReport)
+		reports.GET("/", reportsHandler.ListReports)
+		reports.GET("/:id", reportsHandler.GetReport)
+		reports.DELETE("/:id", reportsHandler.DeleteReport)
+
+		// Report templates
+		templates := reports.Group("/templates")
+		{
+			templates.POST("/", reportsHandler.CreateReportTemplate)
+			templates.GET("/", reportsHandler.ListReportTemplates)
+			templates.DELETE("/:id", reportsHandler.DeleteReportTemplate)
+		}
+
+		// Report schedules
+		schedules := reports.Group("/schedules")
+		{
+			schedules.POST("/", reportsHandler.CreateReportSchedule)
+			schedules.GET("/", reportsHandler.ListReportSchedules)
+			schedules.DELETE("/:id", reportsHandler.DeleteReportSchedule)
+		}
 	}
 
 	return router, nil

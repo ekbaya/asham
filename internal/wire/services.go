@@ -48,6 +48,8 @@ var ServiceSet = wire.NewSet(
 	services.NewPermissionResourceService,
 	repository.NewNotificationRepository,
 	services.NewNotificationService,
+	repository.NewReportsRepository,
+	services.NewReportsService,
 )
 
 func GetEmailConfigurations() *services.EmailConfig {
