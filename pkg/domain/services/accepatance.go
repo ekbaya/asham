@@ -88,7 +88,7 @@ func (service *AcceptanceService) SetAcceptanceApproval(acceptance models.Accept
 			return fmt.Errorf("failed to copy OneDrive file: %w", errr)
 		}
 		project.SharepointDocID = &doc.ID
-		err = service.projectService.UpdateProject(project)
+		err = service.projectService.UpdateProject(project, nil, "", "", "", "")
 		if err != nil {
 			return fmt.Errorf("failed to update project after WD review: %w", err)
 		}

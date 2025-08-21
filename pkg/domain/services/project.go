@@ -12,15 +12,22 @@ import (
 )
 
 type ProjectService struct {
-	repo       *repository.ProjectRepository
-	docService *DocumentService
+	repo            *repository.ProjectRepository
+	docService      *DocumentService
+	auditLogService *AuditLogService
 }
 
-func NewProjectService(repo *repository.ProjectRepository, docService *DocumentService) *ProjectService {
-	return &ProjectService{repo: repo, docService: docService}
+func NewProjectService(repo *repository.ProjectRepository, docService *DocumentService, auditLogService *AuditLogService) *ProjectService {
+	return &ProjectService{
+		repo:            repo,
+		docService:      docService,
+		auditLogService: auditLogService,
+	}
 }
 
-func (service *ProjectService) CreateProject(project *models.Project) error {
+func (service *ProjectService) CreateProject(project *models.Project, userID *string, ipAddress, userAgent, sessionID, requestID string) error {
+	startTime := time.Now()
+	
 	// Generate project ID
 	project.ID = uuid.New()
 	project.CreatedAt = time.Now()
@@ -28,11 +35,29 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 
 	number, err := service.repo.GetNextAvailableNumber()
 	if err != nil {
+		// Log failed action
+		if service.auditLogService != nil {
+			service.auditLogService.LogProjectAction(
+				userID, models.ActionProjectCreate, project.ID.String(), project.Title,
+				map[string]interface{}{"error": "failed to get next available number"},
+				false, err.Error(), time.Since(startTime).Milliseconds(),
+				ipAddress, userAgent, sessionID, requestID,
+			)
+		}
 		return err
 	}
 
 	tc, err := service.repo.GetTCByID(project.TechnicalCommitteeID)
 	if err != nil {
+		// Log failed action
+		if service.auditLogService != nil {
+			service.auditLogService.LogProjectAction(
+				userID, models.ActionProjectCreate, project.ID.String(), project.Title,
+				map[string]interface{}{"error": "failed to get technical committee"},
+				false, err.Error(), time.Since(startTime).Milliseconds(),
+				ipAddress, userAgent, sessionID, requestID,
+			)
+		}
 		return err
 	}
 
@@ -43,6 +68,15 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 
 	stage, err := service.repo.GetStageByNumber(0)
 	if err != nil {
+		// Log failed action
+		if service.auditLogService != nil {
+			service.auditLogService.LogProjectAction(
+				userID, models.ActionProjectCreate, project.ID.String(), project.Title,
+				map[string]interface{}{"error": "failed to get initial stage"},
+				false, err.Error(), time.Since(startTime).Milliseconds(),
+				ipAddress, userAgent, sessionID, requestID,
+			)
+		}
 		return err
 	}
 
@@ -50,7 +84,27 @@ func (service *ProjectService) CreateProject(project *models.Project) error {
 	project.StageID = stage.ID.String()
 
 	// Save project in the repository
-	return service.repo.CreateProject(project)
+	err = service.repo.CreateProject(project)
+	
+	// Log the action
+	if service.auditLogService != nil {
+		metadata := map[string]interface{}{
+			"project_number":     project.Number,
+			"project_reference":  project.Reference,
+			"technical_committee": tc.Code,
+			"initial_stage":      stage.Name,
+		}
+		
+		service.auditLogService.LogProjectAction(
+			userID, models.ActionProjectCreate, project.ID.String(), project.Title,
+			metadata, err == nil, 
+			func() string { if err != nil { return err.Error() } else { return "" } }(),
+			time.Since(startTime).Milliseconds(),
+			ipAddress, userAgent, sessionID, requestID,
+		)
+	}
+	
+	return err
 }
 
 func (service *ProjectService) Exists(projectID string) (bool, error) {
@@ -125,12 +179,67 @@ func (service *ProjectService) GetProjectByID(projectID uuid.UUID) (*models.Proj
 	return service.repo.GetProjectByID(projectID)
 }
 
-func (service *ProjectService) UpdateProject(project *models.Project) error {
-	return service.repo.UpdateProject(project)
+func (service *ProjectService) UpdateProject(project *models.Project, userID *string, ipAddress, userAgent, sessionID, requestID string) error {
+	startTime := time.Now()
+	
+	err := service.repo.UpdateProject(project)
+	
+	// Log the action
+	if service.auditLogService != nil {
+		metadata := map[string]interface{}{
+			"project_number":    project.Number,
+			"project_reference": project.Reference,
+		}
+		
+		service.auditLogService.LogProjectAction(
+			userID, models.ActionProjectUpdate, project.ID.String(), project.Title,
+			metadata, err == nil,
+			func() string { if err != nil { return err.Error() } else { return "" } }(),
+			time.Since(startTime).Milliseconds(),
+			ipAddress, userAgent, sessionID, requestID,
+		)
+	}
+	
+	return err
 }
 
-func (service *ProjectService) DeleteProject(projectID uuid.UUID) error {
-	return service.repo.DeleteProject(projectID)
+func (service *ProjectService) DeleteProject(projectID uuid.UUID, userID *string, ipAddress, userAgent, sessionID, requestID string) error {
+	startTime := time.Now()
+	
+	// Get project data before deletion for audit trail
+	project, err := service.repo.GetProjectByID(projectID)
+	if err != nil {
+		if service.auditLogService != nil {
+			service.auditLogService.LogProjectAction(
+				userID, models.ActionProjectDelete, projectID.String(), "Unknown Project",
+				map[string]interface{}{"error": "failed to get project data before deletion"},
+				false, err.Error(), time.Since(startTime).Milliseconds(),
+				ipAddress, userAgent, sessionID, requestID,
+			)
+		}
+		return err
+	}
+	
+	err = service.repo.DeleteProject(projectID)
+	
+	// Log the action
+	if service.auditLogService != nil {
+		metadata := map[string]interface{}{
+			"project_number":    project.Number,
+			"project_reference": project.Reference,
+			"deleted_project":   project,
+		}
+		
+		service.auditLogService.LogProjectAction(
+			userID, models.ActionProjectDelete, projectID.String(), project.Title,
+			metadata, err == nil,
+			func() string { if err != nil { return err.Error() } else { return "" } }(),
+			time.Since(startTime).Milliseconds(),
+			ipAddress, userAgent, sessionID, requestID,
+		)
+	}
+	
+	return err
 }
 
 func (service *ProjectService) FindProjects(params map[string]interface{}, limit, offset int) ([]models.Project, int64, error) {
@@ -177,7 +286,7 @@ func (service *ProjectService) FetchStages() (*[]models.Stage, error) {
 	return service.repo.FetchStages()
 }
 
-func (service *ProjectService) ReviewWD(secretary, projectID, comment string, status models.WorkingDraftStatus) error {
+func (service *ProjectService) ReviewWD(secretary, projectID, comment string, status models.WorkingDraftStatus, userID *string, ipAddress, userAgent, sessionID, requestID string) error {
 	err := service.repo.ReviewWD(secretary, projectID, comment, status)
 	if err == nil && status == models.ACCEPTED {
 		projectUUID, err := uuid.Parse(projectID)
@@ -195,7 +304,7 @@ func (service *ProjectService) ReviewWD(secretary, projectID, comment string, st
 		}
 
 		project.SharepointDocID = &doc.ID
-		err = service.UpdateProject(project)
+		err = service.UpdateProject(project, userID, ipAddress, userAgent, sessionID, requestID)
 		if err != nil {
 			return fmt.Errorf("failed to update project after WD review: %w", err)
 		}
@@ -208,7 +317,7 @@ func (service *ProjectService) ReviewWD(secretary, projectID, comment string, st
 	return err
 }
 
-func (service *ProjectService) ReviewCD(secretary, projectId string, isConsensusReached bool, action models.ProposalAction, meetingRequired bool) error {
+func (service *ProjectService) ReviewCD(secretary, projectId string, isConsensusReached bool, action models.ProposalAction, meetingRequired bool, userID *string, ipAddress, userAgent, sessionID, requestID string) error {
 	err := service.repo.ReviewCD(secretary, projectId, isConsensusReached, action, meetingRequired)
 	if err == nil && isConsensusReached {
 		projectUUID, err := uuid.Parse(projectId)
@@ -226,7 +335,7 @@ func (service *ProjectService) ReviewCD(secretary, projectId string, isConsensus
 		}
 
 		project.SharepointDocID = &doc.ID
-		err = service.UpdateProject(project)
+		err = service.UpdateProject(project, userID, ipAddress, userAgent, sessionID, requestID)
 		if err != nil {
 			return fmt.Errorf("failed to update project after CD review: %w", err)
 		}
@@ -244,7 +353,7 @@ func (service *ProjectService) ReviewDARS(secretary,
 	wto_notification_notified bool,
 	unresolvedIssues,
 	alternativeDeliverable,
-	status string) error {
+	status string, userID *string, ipAddress, userAgent, sessionID, requestID string) error {
 	if models.DARSStatus(status) == models.DARSRejected &&
 		alternativeDeliverable == "" {
 		return fmt.Errorf("alternative deliverables cannot be empty when status is rejected")
@@ -267,7 +376,7 @@ func (service *ProjectService) ReviewDARS(secretary,
 		}
 
 		project.SharepointDocID = &doc.ID
-		err = service.UpdateProject(project)
+		err = service.UpdateProject(project, userID, ipAddress, userAgent, sessionID, requestID)
 		if err != nil {
 			return fmt.Errorf("failed to update project after DARS review: %w", err)
 		}
@@ -287,7 +396,7 @@ func (service *ProjectService) ApproveFDARS(secretary, projectId string, approve
 	return service.repo.ApproveFDARS(secretary, projectId, approve, action)
 }
 
-func (service *ProjectService) ApproveFDRSForPublication(secretary, projectId string, approve bool, comment string) error {
+func (service *ProjectService) ApproveFDRSForPublication(secretary, projectId string, approve bool, comment string, userID *string, ipAddress, userAgent, sessionID, requestID string) error {
 	err := service.repo.ApproveFDRSForPublication(secretary, projectId, approve, comment)
 	if approve {
 		if err == nil && approve {
@@ -306,7 +415,7 @@ func (service *ProjectService) ApproveFDRSForPublication(secretary, projectId st
 			}
 
 			project.SharepointDocID = &doc.ID
-			err = service.UpdateProject(project)
+			err = service.UpdateProject(project, userID, ipAddress, userAgent, sessionID, requestID)
 			if err != nil {
 				return fmt.Errorf("failed to update project after FDARS review: %w", err)
 			}

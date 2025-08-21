@@ -28,6 +28,7 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 	rbacHandler := handlers.NewRbacHandler(services.RbacService)
 	notificationHandler := handlers.NewNotificationHandler(*services.NotificationService)
 	reportsHandler := handlers.NewReportsHandler(services.ReportsService)
+	auditLogHandler := handlers.NewAuditLogHandler(services.AuditLogService)
 
 	api := router.Group("/api")
 
@@ -439,6 +440,29 @@ func InitRoutes(services *services.ServiceContainer) (*gin.Engine, error) {
 			schedules.GET("/", reportsHandler.ListReportSchedules)
 			schedules.DELETE("/:id", reportsHandler.DeleteReportSchedule)
 		}
+	}
+
+	// Audit Logs API
+	auditLogs := api.Group("/audit-logs")
+	auditLogs.Use(middleware.AuthMiddleware())
+	auditLogs.Use(middleware.DynamicAuthorize(services.PermissionResourceService))
+	{
+		// Audit log retrieval
+		auditLogs.GET("/", auditLogHandler.GetAuditLogs)
+		auditLogs.GET("/:id", auditLogHandler.GetAuditLogByID)
+		auditLogs.GET("/search", auditLogHandler.SearchAuditLogs)
+
+		// Resource-specific audit trails
+		auditLogs.GET("/resource/:resourceType/:resourceId", auditLogHandler.GetResourceAuditTrail)
+		auditLogs.GET("/user/:userId", auditLogHandler.GetUserActivity)
+
+		// Reports and analytics
+		auditLogs.GET("/summary", auditLogHandler.GetAuditSummary)
+		auditLogs.GET("/timeline", auditLogHandler.GetActivityTimeline)
+		auditLogs.GET("/compliance", auditLogHandler.GetComplianceReport)
+
+		// Export functionality
+		auditLogs.POST("/export", auditLogHandler.ExportAuditLogs)
 	}
 
 	return router, nil

@@ -20,6 +20,8 @@ var ServiceSet = wire.NewSet(
 	services.NewEmailService,
 	services.NewMemberService,
 	repository.NewProjectRepository,
+	repository.NewAuditLogRepository,
+	services.NewAuditLogService,
 	services.NewProjectService,
 	GetGraphServiceClient,
 	repository.NewDocumentRepository,

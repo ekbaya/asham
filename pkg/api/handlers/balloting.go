@@ -24,6 +24,22 @@ func NewBallotingHandler(ballotingService *services.BallotingService) *Balloting
 	}
 }
 
+// Helper function to extract audit parameters from Gin context
+func (h *BallotingHandler) getAuditParams(c *gin.Context) (string, string, string, string, string) {
+	userID, exists := c.Get("user_id")
+	var userIDStr string
+	if exists {
+		userIDStr = userID.(string)
+	}
+	
+	ipAddress := c.ClientIP()
+	userAgent := c.GetHeader("User-Agent")
+	sessionID := c.GetHeader("X-Session-ID")
+	requestID := c.GetHeader("X-Request-ID")
+	
+	return userIDStr, ipAddress, userAgent, sessionID, requestID
+}
+
 // CreateBalloting handles the creation of a new balloting session
 func (h *BallotingHandler) CreateBalloting(c *gin.Context) {
 	var payload models.Balloting
@@ -38,7 +54,8 @@ func (h *BallotingHandler) CreateBalloting(c *gin.Context) {
 		return
 	}
 
-	err := h.ballotingService.CreateBalloting(&payload)
+	userIDStr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err := h.ballotingService.CreateBalloting(&payload, userIDStr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
@@ -108,7 +125,8 @@ func (h *BallotingHandler) UpdateBalloting(c *gin.Context) {
 	// Ensure ID matches route parameter
 	payload.ID = ballotingID
 
-	err = h.ballotingService.UpdateBalloting(&payload)
+	userIDStr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err = h.ballotingService.UpdateBalloting(&payload, userIDStr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return

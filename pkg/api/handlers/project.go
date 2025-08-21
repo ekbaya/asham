@@ -24,6 +24,23 @@ func NewProjectHandler(projectService services.ProjectService) *ProjectHandler {
 	}
 }
 
+// Helper function to extract audit parameters from Gin context
+func (h *ProjectHandler) getAuditParams(c *gin.Context) (*string, string, string, string, string) {
+	userID, exists := c.Get("user_id")
+	var userIDPtr *string
+	if exists {
+		userIDStr := userID.(string)
+		userIDPtr = &userIDStr
+	}
+	
+	ipAddress := c.ClientIP()
+	userAgent := c.GetHeader("User-Agent")
+	sessionID := c.GetHeader("X-Session-ID")
+	requestID := c.GetHeader("X-Request-ID")
+	
+	return userIDPtr, ipAddress, userAgent, sessionID, requestID
+}
+
 func (h *ProjectHandler) CreateProject(c *gin.Context) {
 	var payload models.Project
 	if err := c.ShouldBindJSON(&payload); err != nil {
@@ -49,7 +66,8 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 	userIDStr := userID.(string)
 	payload.MemberID = userIDStr
 
-	err := h.projectService.CreateProject(&payload)
+	userIDPtr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err := h.projectService.CreateProject(&payload, userIDPtr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
@@ -208,7 +226,8 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 	// Ensure the ID in the URL matches the payload
 	payload.ID = id
 
-	err = h.projectService.UpdateProject(&payload)
+	userIDPtr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err = h.projectService.UpdateProject(&payload, userIDPtr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
@@ -225,7 +244,8 @@ func (h *ProjectHandler) DeleteProject(c *gin.Context) {
 		return
 	}
 
-	err = h.projectService.DeleteProject(id)
+	userIDPtr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err = h.projectService.DeleteProject(id, userIDPtr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
@@ -631,7 +651,8 @@ func (h *ProjectHandler) ReviewWD(c *gin.Context) {
 
 	userIDStr := userID.(string)
 
-	err := h.projectService.ReviewWD(userIDStr, payload.Project, payload.Comment, payload.Status)
+	userIDPtr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err := h.projectService.ReviewWD(userIDStr, payload.Project, payload.Comment, payload.Status, userIDPtr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
@@ -669,7 +690,8 @@ func (h *ProjectHandler) ReviewCD(c *gin.Context) {
 
 	userIDStr := userID.(string)
 
-	err := h.projectService.ReviewCD(userIDStr, payload.Project, payload.IsConsensusReached, payload.Action, payload.MeetingRequired)
+	userIDPtr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err := h.projectService.ReviewCD(userIDStr, payload.Project, payload.IsConsensusReached, payload.Action, payload.MeetingRequired, userIDPtr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
@@ -708,7 +730,8 @@ func (h *ProjectHandler) ReviewDARS(c *gin.Context) {
 
 	userIDStr := userID.(string)
 
-	err := h.projectService.ReviewDARS(userIDStr, payload.Project, payload.WTONotificationNotified, payload.UnresolvedIssues, payload.AlternativeDeliverable, payload.Status)
+	userIDPtr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err := h.projectService.ReviewDARS(userIDStr, payload.Project, payload.WTONotificationNotified, payload.UnresolvedIssues, payload.AlternativeDeliverable, payload.Status, userIDPtr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
@@ -782,7 +805,8 @@ func (h *ProjectHandler) ApproveFDRSForPublication(c *gin.Context) {
 
 	userIDStr := userID.(string)
 
-	err := h.projectService.ApproveFDRSForPublication(userIDStr, payload.Project, payload.Approve, payload.Comment)
+	userIDPtr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err := h.projectService.ApproveFDRSForPublication(userIDStr, payload.Project, payload.Approve, payload.Comment, userIDPtr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return

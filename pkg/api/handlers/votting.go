@@ -24,6 +24,22 @@ func NewVoteHandler(ballotingService *services.BallotingService) *VoteHandler {
 	}
 }
 
+// Helper function to extract audit parameters from Gin context
+func (h *VoteHandler) getAuditParams(c *gin.Context) (string, string, string, string, string) {
+	userID, exists := c.Get("user_id")
+	var userIDStr string
+	if exists {
+		userIDStr = userID.(string)
+	}
+	
+	ipAddress := c.ClientIP()
+	userAgent := c.GetHeader("User-Agent")
+	sessionID := c.GetHeader("X-Session-ID")
+	requestID := c.GetHeader("X-Request-ID")
+	
+	return userIDStr, ipAddress, userAgent, sessionID, requestID
+}
+
 // CreateVote handles the creation of a new vote
 func (h *VoteHandler) CreateVote(c *gin.Context) {
 	var payload models.Vote
@@ -52,7 +68,8 @@ func (h *VoteHandler) CreateVote(c *gin.Context) {
 	// Set creation time
 	payload.CreatedAt = time.Now()
 
-	err := h.ballotingService.CreateVote(&payload)
+	userIDStr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err := h.ballotingService.CreateVote(&payload, userIDStr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
@@ -156,7 +173,8 @@ func (h *VoteHandler) UpdateVote(c *gin.Context) {
 	payload.BallotingID = existingVote.BallotingID
 	payload.CreatedAt = existingVote.CreatedAt
 
-	err = h.ballotingService.UpdateVote(&payload)
+	userIDStr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err = h.ballotingService.UpdateVote(&payload, userIDStr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return

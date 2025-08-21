@@ -28,6 +28,22 @@ func NewDocumentHandler(documentService services.DocumentService) *DocumentHandl
 	}
 }
 
+// Helper function to extract audit parameters from Gin context
+func (h *DocumentHandler) getAuditParams(c *gin.Context) (string, string, string, string, string) {
+	userID, exists := c.Get("user_id")
+	var userIDStr string
+	if exists {
+		userIDStr = userID.(string)
+	}
+	
+	ipAddress := c.ClientIP()
+	userAgent := c.GetHeader("User-Agent")
+	sessionID := c.GetHeader("X-Session-ID")
+	requestID := c.GetHeader("X-Request-ID")
+	
+	return userIDStr, ipAddress, userAgent, sessionID, requestID
+}
+
 func (h *DocumentHandler) UploadDocument(c *gin.Context) {
 	// Parse the multipart form
 	if err := c.Request.ParseMultipartForm(100 << 20); err != nil { // 100 MB max
@@ -170,7 +186,8 @@ func (h *DocumentHandler) CreateDocument(c *gin.Context) {
 	// This we will change to an S3 URL later
 	payload.FileURL = "/assets/documents/" + filename // prepend with slash for URL format
 
-	err = h.documentService.Create(&payload)
+	userIDStr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err = h.documentService.Create(&payload, userIDStr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		os.Remove(filepath)
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
@@ -276,7 +293,8 @@ func (h *DocumentHandler) UpdateDocument(c *gin.Context) {
 	// Set the ID to ensure we update the correct document
 	payload.ID = id
 
-	err = h.documentService.Update(&payload)
+	userIDStr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err = h.documentService.Update(&payload, userIDStr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
@@ -381,7 +399,8 @@ func (h *DocumentHandler) DeleteDocument(c *gin.Context) {
 		return
 	}
 
-	err = h.documentService.Delete(id)
+	userIDStr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err = h.documentService.Delete(id, userIDStr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
 		return
@@ -723,7 +742,8 @@ func (h *DocumentHandler) UploadStandard(c *gin.Context) {
 	// Ensure the file URL is correctly formatted
 	payload.FileURL = "/assets/documents/" + filename
 
-	err = h.documentService.UploadStandard(&payload, &project)
+	userIDStr, ipAddress, userAgent, sessionID, requestID := h.getAuditParams(c)
+	err = h.documentService.UploadStandard(&payload, &project, userIDStr, ipAddress, userAgent, sessionID, requestID)
 	if err != nil {
 		os.Remove(filepath)
 		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())

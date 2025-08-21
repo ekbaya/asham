@@ -29,24 +29,73 @@ type DocumentService struct {
 	projectRepo  *repository.ProjectRepository
 	client       *msgraphsdk.GraphServiceClient
 	tokenManager *TokenManager
+	auditService *AuditLogService
 }
 
-func NewDocumentService(repo *repository.DocumentRepository, projectRepo *repository.ProjectRepository, client *msgraphsdk.GraphServiceClient, tokenManager *TokenManager) *DocumentService {
-	return &DocumentService{repo: repo, projectRepo: projectRepo, client: client, tokenManager: tokenManager}
+func NewDocumentService(repo *repository.DocumentRepository, projectRepo *repository.ProjectRepository, client *msgraphsdk.GraphServiceClient, tokenManager *TokenManager, auditService *AuditLogService) *DocumentService {
+	return &DocumentService{repo: repo, projectRepo: projectRepo, client: client, tokenManager: tokenManager, auditService: auditService}
 }
 
-func (service *DocumentService) Create(doc *models.Document) error {
+func (service *DocumentService) Create(doc *models.Document, userID, ipAddress, userAgent, sessionID, requestID string) error {
+	startTime := time.Now()
 	doc.ID = uuid.New()
 	doc.CreatedAt = time.Now()
-	return service.repo.Create(doc)
+	
+	err := service.repo.Create(doc)
+	
+	// Log the action
+	metadata := map[string]interface{}{
+		"document_title":       doc.Title,
+		"document_reference":   doc.Reference,
+		"document_description": doc.Description,
+		"execution_time_ms":    time.Since(startTime).Milliseconds(),
+	}
+	
+	errorMsg := ""
+	if err != nil {
+		errorMsg = err.Error()
+	}
+	
+	service.auditService.LogDocumentAction(
+		&userID, models.ActionDocumentCreate, doc.ID.String(), doc.Title,
+		metadata, err == nil, errorMsg, time.Since(startTime).Milliseconds(),
+		ipAddress, userAgent, sessionID, requestID,
+	)
+	
+	return err
 }
 
-func (service *DocumentService) UploadStandard(doc *models.Document, project *models.Project) error {
+func (service *DocumentService) UploadStandard(doc *models.Document, project *models.Project, userID, ipAddress, userAgent, sessionID, requestID string) error {
+	startTime := time.Now()
 	doc.ID = uuid.New()
 	doc.CreatedAt = time.Now()
 	project.ID = uuid.New()
 	doc.CreatedAt = time.Now()
-	return service.repo.UploadStandard(doc, project)
+	
+	err := service.repo.UploadStandard(doc, project)
+	
+	// Log the action
+	metadata := map[string]interface{}{
+		"document_title":       doc.Title,
+		"document_reference":   doc.Reference,
+		"document_description": doc.Description,
+		"project_title":        project.Title,
+		"project_number":       project.Number,
+		"execution_time_ms":    time.Since(startTime).Milliseconds(),
+	}
+	
+	errorMsg := ""
+	if err != nil {
+		errorMsg = err.Error()
+	}
+	
+	service.auditService.LogDocumentAction(
+		&userID, models.ActionDocumentUpload, doc.ID.String(), doc.Title,
+		metadata, err == nil, errorMsg, time.Since(startTime).Milliseconds(),
+		ipAddress, userAgent, sessionID, requestID,
+	)
+	
+	return err
 }
 
 func (service *DocumentService) UpdateProjectDoc(project, docType, fileURL, member string) error {
@@ -65,8 +114,31 @@ func (service *DocumentService) GetByTitle(title string) (*models.Document, erro
 	return service.repo.GetByTitle(title)
 }
 
-func (service *DocumentService) Update(doc *models.Document) error {
-	return service.repo.Update(doc)
+func (service *DocumentService) Update(doc *models.Document, userID, ipAddress, userAgent, sessionID, requestID string) error {
+	startTime := time.Now()
+	
+	err := service.repo.Update(doc)
+	
+	// Log the action
+	metadata := map[string]interface{}{
+		"document_title":       doc.Title,
+		"document_reference":   doc.Reference,
+		"document_description": doc.Description,
+		"execution_time_ms":    time.Since(startTime).Milliseconds(),
+	}
+	
+	errorMsg := ""
+	if err != nil {
+		errorMsg = err.Error()
+	}
+	
+	service.auditService.LogDocumentAction(
+		&userID, models.ActionDocumentUpdate, doc.ID.String(), doc.Title,
+		metadata, err == nil, errorMsg, time.Since(startTime).Milliseconds(),
+		ipAddress, userAgent, sessionID, requestID,
+	)
+	
+	return err
 }
 
 func (service *DocumentService) UpdatePartial(id uuid.UUID, updates map[string]interface{}) error {
@@ -77,7 +149,15 @@ func (service *DocumentService) UpdateFileURL(id uuid.UUID, fileURL string) erro
 	return service.repo.UpdateFileURL(id, fileURL)
 }
 
-func (service *DocumentService) Delete(id uuid.UUID) error {
+func (service *DocumentService) Delete(id uuid.UUID, userID, ipAddress, userAgent, sessionID, requestID string) error {
+	startTime := time.Now()
+	
+	// Get document details before deletion for audit log
+	doc, err := service.repo.GetByID(id)
+	if err != nil {
+		return fmt.Errorf("error getting document for deletion: %w", err)
+	}
+	
 	// Check if document is attached to a project e.g wd/cd and set to nil
 	projects, err := service.projectRepo.FindByDocumentID(id)
 	if err != nil {
@@ -106,8 +186,31 @@ func (service *DocumentService) Delete(id uuid.UUID) error {
 			}
 		}
 	}
+	
 	// Now delete the document
-	return service.repo.Delete(id)
+	err = service.repo.Delete(id)
+	
+	// Log the action
+	metadata := map[string]interface{}{
+		"document_title":       doc.Title,
+		"document_reference":   doc.Reference,
+		"document_description": doc.Description,
+		"affected_projects":    len(projects),
+		"execution_time_ms":    time.Since(startTime).Milliseconds(),
+	}
+	
+	errorMsg := ""
+	if err != nil {
+		errorMsg = err.Error()
+	}
+	
+	service.auditService.LogDocumentAction(
+		&userID, models.ActionDocumentDelete, doc.ID.String(), doc.Title,
+		metadata, err == nil, errorMsg, time.Since(startTime).Milliseconds(),
+		ipAddress, userAgent, sessionID, requestID,
+	)
+	
+	return err
 }
 
 func (service *DocumentService) Exists(id uuid.UUID, reference string, title string) (bool, error) {
