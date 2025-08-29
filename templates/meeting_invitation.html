@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Meeting Invitation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .meeting-details {
+            background-color: #ffffff;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .agenda {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .video-link {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .footer {
+            font-size: 12px;
+            color: #6c757d;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Meeting Invitation</h2>
+        <p>You have been invited to attend the following meeting:</p>
+    </div>
+
+    <div class="meeting-details">
+        <h3>{{.Title}}</h3>
+        <p><strong>Committee:</strong> {{.CommitteeName}}</p>
+        <p><strong>Date:</strong> {{.Date}}</p>
+        <p><strong>Time:</strong> {{.Time}}</p>
+        <p><strong>Format:</strong> {{.Format}}</p>
+        <p><strong>Language:</strong> {{.Language}}</p>
+    </div>
+
+    {{if .Agenda}}
+    <div class="agenda">
+        <h4>Agenda</h4>
+        <p>{{.Agenda}}</p>
+    </div>
+    {{end}}
+
+    {{if .VideoConferenceLink}}
+    <div class="video-link">
+        <h4>Video Conference Link</h4>
+        <p>Join the meeting using the following link:</p>
+        <p><a href="{{.VideoConferenceLink}}">{{.VideoConferenceLink}}</a></p>
+    </div>
+    {{end}}
+
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+        <p>If you have any questions, please contact the meeting organizer.</p>
+    </div>
+</body>
+</html> 

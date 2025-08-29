@@ -15,11 +15,13 @@ import (
 
 type MeetingHandler struct {
 	meetingService services.MeetingService
+	emailService   *services.EmailService
 }
 
-func NewMeetingHandler(meetingService services.MeetingService) *MeetingHandler {
+func NewMeetingHandler(meetingService services.MeetingService, emailService *services.EmailService) *MeetingHandler {
 	return &MeetingHandler{
 		meetingService: meetingService,
+		emailService:   emailService,
 	}
 }
 
@@ -377,4 +379,21 @@ func (h *MeetingHandler) CheckQuorum(c *gin.Context) {
 	}
 
 	utilities.Show(c, http.StatusOK, "has_quorum", hasQuorum)
+}
+
+// SendMeetingInvitations sends email invitations to meeting attendees
+func (h *MeetingHandler) SendMeetingInvitations(c *gin.Context) {
+	meetingID := c.Param("id")
+	if meetingID == "" {
+		utilities.ShowMessage(c, http.StatusBadRequest, "Meeting ID is required")
+		return
+	}
+
+	err := h.meetingService.SendMeetingInvitations(meetingID, h.emailService)
+	if err != nil {
+		utilities.ShowMessage(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utilities.ShowMessage(c, http.StatusOK, "Meeting invitations sent successfully")
 }
