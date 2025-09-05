@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/ekbaya/asham/internal/wire"
 	"github.com/ekbaya/asham/pkg/config"
@@ -20,8 +21,14 @@ type App struct {
 }
 
 func NewApp(cfg *config.Config) (*App, error) {
-	// Initialize redis client
-	redis.InitRedis("localhost:6379", "", 0)
+	// Initialize redis client with environment variables
+	redisAddr := fmt.Sprintf("%s:%s", 
+		os.Getenv("REDIS_HOST"), 
+		os.Getenv("REDIS_PORT"))
+	if os.Getenv("REDIS_HOST") == "" {
+		redisAddr = "localhost:6379" // fallback for development
+	}
+	redis.InitRedis(redisAddr, "", 0)
 
 	// Initialize database connection
 	db, err := db.NewPostgresConnection()

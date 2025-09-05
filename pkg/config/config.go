@@ -55,10 +55,8 @@ var (
 
 // LoadConfig loads the configuration from environment variables
 func LoadConfig() (*Config, error) {
-	err := godotenv.Load(".env") // optional, can be skipped in prod
-	if err != nil {
-		return nil, err
-	}
+	// Try to load .env file, but don't fail if it doesn't exist (for production)
+	_ = godotenv.Load(".env") // optional, can be skipped in prod
 
 	env := os.Getenv("ENVIRONMENT")
 	if env == "" {
