@@ -12,14 +12,20 @@ func RunMigrations(db *gorm.DB) error {
 	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error; err != nil {
 		return fmt.Errorf("failed to create uuid-ossp extension: %w", err)
 	}
-	return db.AutoMigrate(
+	
+	// First, create tables without foreign key constraints
+	// We'll use DisableForeignKeyConstraintWhenMigrating
+	originalConfig := db.Config
+	db.Config.DisableForeignKeyConstraintWhenMigrating = true
+	
+	err := db.AutoMigrate(
 		&models.Sector{},
 		&models.Document{},
 		&models.MemberState{},
-		&models.NationalStandardBody{},
 		&models.Permission{},
 		&models.Role{},
 		&models.Member{},
+		&models.NationalStandardBody{},
 		&models.ARSOCouncil{},
 		&models.JointAdvisoryGroup{},
 		&models.StandardsManagementCommittee{},
@@ -55,4 +61,9 @@ func RunMigrations(db *gorm.DB) error {
 		&models.NotificationPreference{},
 		&models.NotificationHistory{},
 	)
+	
+	// Restore original config
+	db.Config = originalConfig
+	
+	return err
 }
