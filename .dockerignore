@@ -1,0 +1,46 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+DEPLOYMENT.md
+README.md
+
+# Environment files
+.env
+.env.*
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+main
+tmp/
+cmd/tmp/
+*.log
+
+# Docker files (except production)
+docker-compose.yml
+docker-compose.override.yml
+
+# Test files
+*_test.go
+testdata/
+
+# Dependencies (will be downloaded during build)
+vendor/
+
+# Collaboration folder (if not needed in production)
+collaboration/
+
+# GitHub workflows
+.github/
